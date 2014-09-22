@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+    <menuitem parent="base.menu_custom" name="Jasper Reports" id="jasper_reports_menu"/>
+	<menuitem
+            parent="jasper_reports_menu"
+            action="action_jasper_create_date_template"
+            id="jasper_create_data_template_menu" sequence="1" />        
+</data>
+</openerp>

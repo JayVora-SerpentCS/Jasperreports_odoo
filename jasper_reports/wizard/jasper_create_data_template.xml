@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_pos_box_out" model="ir.ui.view">
+            <field name="name">Create Data Template</field>
+            <field name="model">jasper.create.data.template</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            	<form string="Create Data Template">
+				    <group colspan="2">
+				        <field name="model"/>
+				        <field name="depth"/>
+				        <field name="data" filename="filename" readonly="1" />
+				        <field name="filename" invisible="1"/>
+				    </group>
+				    <group colspan="4" col="4">
+                        <group col="2" colspan="2"/>
+                        <button name="action_create_xml" string="Create"
+                            colspan="1" type="object" icon="gtk-apply" />
+                        <button icon="gtk-stop" special="cancel"
+                            string="Close" />
+                    </group>
+				</form>
+            </field>
+        </record>
+
+        <record id="action_jasper_create_date_template" model="ir.actions.act_window">
+            <field name="name">Create Data Template</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">jasper.create.data.template</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+    </data>
+</openerp>
