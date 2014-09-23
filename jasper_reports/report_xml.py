@@ -83,10 +83,8 @@ class report_xml(osv.Model):
     }
 
     def create(self, cr, uid, vals, context=None):
-        print "cncnc",context
         if context and context.get('jasper_report'):
             vals['model'] = self.pool.get('ir.model').browse(cr, uid, vals['jasper_model_id'], context).model
-            print vals
             vals['type'] = 'ir.actions.report.xml'
             vals['report_type'] = 'pdf'
             vals['jasper_report'] = True
