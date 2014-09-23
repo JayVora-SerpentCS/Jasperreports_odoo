@@ -4,7 +4,6 @@
 		<record id="act_report_xml_view" model="ir.ui.view">
 			<field name="name">ir.actions.report.xml.jasper</field>
 			<field name="model">ir.actions.report.xml</field>
-			<field name="type">form</field>
 			<field name="inherit_id" ref="base.act_report_xml_view" />
 			<field name="arch" type="xml">
 				<field name="report_name" position="after">
@@ -18,19 +17,17 @@
 		<record id="act_report_jasper_file_form" model="ir.ui.view">
 			<field name="name">ir.actions.report.jasper.file.form</field>
 			<field name="model">ir.actions.report.xml.file</field>
-			<field name="type">form</field>
 			<field name="arch" type="xml">
 				<form string="Jasper Reports File">
-					<field name="file" filename="filename" colspan="4" />
-					<field name="filename" colspan="4" />
-					<field name="default" colspan="4" />
+					<field name="file" filename="filename" />
+					<field name="filename" />
+					<field name="default" />
 				</form>
 			</field>
 		</record>
 		<record id="act_report_jasper_file_tree" model="ir.ui.view">
 			<field name="name">ir.actions.report.jasper.file.tree</field>
 			<field name="model">ir.actions.report.xml.file</field>
-			<field name="type">tree</field>
 			<field name="arch" type="xml">
 				<tree string="Jasper Reports File">
 					<field name="filename" />
@@ -57,7 +54,13 @@
 					</group>
 					<group colspan="4">
 						<separator string="Files" colspan="4" />
-						<field name="jasper_file_ids" colspan="4" nolabel="1" />
+						<field name="jasper_file_ids" colspan="4" nolabel="1" widget="one2many_list">
+							<form string="Jasper Reports File">
+								<field name="file" filename="filename" string="File"/>
+								<field name="filename" />
+								<field name="default" />
+							</form>
+						</field>
 						<separator string="Groups" colspan="4" />
 						<field name="groups_id" colspan="4" nolabel="1" />
 					</group>

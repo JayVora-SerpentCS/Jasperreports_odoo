@@ -51,10 +51,10 @@ dst_chars = unicode(dst_chars, 'iso-8859-1')
 class report_xml_file(osv.Model):
     _name = 'ir.actions.report.xml.file'
     _columns = {
-        'file': fields.binary('File', required=True, filters="*.jrxml,*.properties,*.ttf", help=''),
-        'filename': fields.char('File Name', size=256, required=False, help=''),
-        'report_id': fields.many2one('ir.actions.report.xml', 'Report', required=True, ondelete='cascade', help=''),
-        'default': fields.boolean('Default', help=''),
+        'file': fields.binary('File', required=True, filters="*.jrxml,*.properties,*.ttf",),
+        'filename': fields.char('File Name', size=256),
+        'report_id': fields.many2one('ir.actions.report.xml', 'Report', ondelete='cascade'),
+        'default': fields.boolean('Default'),
     }
     def create(self, cr, uid, vals, context=None):
         result = super(report_xml_file, self).create(cr, uid, vals, context)
@@ -137,7 +137,7 @@ class report_xml(osv.Model):
                             valuesId = valuesId[0]
 
             if not has_default:
-                raise osv.except_osv(_('Error'), _('No report has been marked as default.'))
+                raise osv.except_osv(_('Error'), _('No report has been marked as default! You need atleast one jrxml report!'))
 
             # Ensure the report is registered so it can be used immediately
             jasper_report.register_jasper_report(report.report_name, report.model)
