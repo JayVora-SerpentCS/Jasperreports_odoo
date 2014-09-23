@@ -8,32 +8,7 @@
 	</background>
 	<title>
 		<band height="76">
-			<textField isBlankWhenNull="true">
-				<reportElement x="0" y="1" width="481" height="24"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="16" isBold="true"/>
-				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$P{TITLE}]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="0" y="25" width="481" height="24"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="12" isBold="false"/>
-				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$P{SUBTITLE}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="0" y="49" width="555" height="24"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="10" isBold="false"/>
-				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$P{COMMENT}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="455" y="0" width="100" height="20"/>
-				<textElement/>
-				<textFieldExpression class="java.util.Date"><![CDATA[new Date()]]></textFieldExpression>
-			</textField>
+			
 		</band>
 	</title>
 	<pageHeader>

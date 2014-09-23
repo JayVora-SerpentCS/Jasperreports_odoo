@@ -34,7 +34,7 @@ import base64
 import openerp
 from openerp import release
 from openerp import pooler
-from openerp.osv import osv,fields
+from openerp.osv import osv, fields
 from openerp.tools.translate import _
 
 class create_data_template(osv.osv_memory):
@@ -46,8 +46,8 @@ class create_data_template(osv.osv_memory):
         for data in  self.read(cr, uid, ids, context=context):
             model = self.pool.get('ir.model').browse(cr, uid, data['model'][0], context=context)
             xml = self.pool.get('ir.actions.report.xml').create_xml(cr, uid, model.model, data['depth'], context)
-            self.write(cr,uid,ids,{
-                'data' : base64.encodestring( xml ),
+            self.write(cr, uid, ids, {
+                'data' : base64.encodestring(xml),
                 'filename': 'template.xml'
             })
         return {

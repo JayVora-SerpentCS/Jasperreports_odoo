@@ -82,6 +82,7 @@ class BrowseDataGenerator(AbstractDataGenerator):
 
     def valueInAllLanguages(self, model, id, field):
         context = copy.copy(self.context)
+        model = self.pool.get(model)
         values = {}
         for language in self.languages():
             if language == 'en_US':
@@ -109,17 +110,17 @@ class BrowseDataGenerator(AbstractDataGenerator):
             else:
                 currentPath = root
             if root == 'Attachments':
-                ids = self.pool.get('ir.attachment').search(self.cr, self.uid, [('res_model','=',record._table_name),('res_id','=',record.id)])
+                ids = self.pool.get('ir.attachment').search(self.cr, self.uid, [('res_model','=',record._name),('res_id','=',record.id)])
                 value = self.pool.get('ir.attachment').browse(self.cr, self.uid, ids, self.context)
             elif root == 'User':
                 value = self.pool.get('res.users').browse(self.cr, self.uid, [self.uid], self.context)
             else:
                 if root == 'id':
-                    value = record._id
-                elif record.__hasattr__(root):
-                    value = record.__getattr__(root)
+                    value = record.id
+                elif hasattr(record, root):
+                    value = getattr(record, root)
                 else:
-                    self.warning("Field '%s' does not exist in model '%s'." % (root, record._table._name))
+                    self.warning("Field '%s' does not exist in model '%s'." % (root, record._name))
                     continue
 
                 if isinstance(value, orm.browse_record):
@@ -196,18 +197,18 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
             fieldNode = self.document.createElement( root )
             recordNode.appendChild( fieldNode )
             if root == 'Attachments':
-                ids = self.pool.get('ir.attachment').search(self.cr, self.uid, [('res_model','=',record._table_name),('res_id','=',record.id)])
+                ids = self.pool.get('ir.attachment').search(self.cr, self.uid, [('res_model','=',record._name),('res_id','=',record.id)])
                 value = self.pool.get('ir.attachment').browse(self.cr, self.uid, ids)
             elif root == 'User':
                 value = self.pool.get('res.users').browse(self.cr, self.uid, self.uid, self.context)
             else:
                 if root == 'id':
-                    value = record._id
-                elif record.__hasattr__(root):
-                    value = record.__getattr__(root)
+                    value = record.id
+                elif hasattr(record, root):
+                    value = getattr(record, root)
                 else:
                     value = None
-                    self.warning("Field '%s' does not exist in model '%s'." % (root, record._table._name))
+                    self.warning("Field '%s' does not exist in model '%s'." % (root, record._name))
 
             # Check if it's a many2one
             if isinstance(value, orm.browse_record):
@@ -227,10 +228,10 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                     self.generateXmlRecord(value[0], records, fieldNode, currentPath, fields2)
                 continue
 
-            if field in record._table._columns:
-                field_type = record._table._columns[field]._type
-            elif field in record._table._inherit_fields:
-                field_type = record._table._inherit_fields[field][2]._type
+            if field in record._columns:
+                field_type = record._columns[field]._type
+            elif field in record._inherit_fields:
+                field_type = record._inherit_fields[field][2]._type
 
             # The rest of field types must be converted into str
             if field == 'id':
@@ -324,7 +325,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             else:
                 currentPath = root
             if root == 'Attachments':
-                ids = self.pool.get('ir.attachment').search(self.cr, self.uid, [('res_model','=',record._table_name),('res_id','=',record.id)])
+                ids = self.pool.get('ir.attachment').search(self.cr, self.uid, [('res_model','=',record._name),('res_id','=',record.id)])
                 value = self.pool.get('ir.attachment').browse(self.cr, self.uid, ids)
             elif root == 'User':
                 value = self.pool.get('res.users').browse(self.cr, self.uid, self.uid, self.context)
@@ -341,12 +342,12 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 continue
             else:
                 if root == 'id':
-                    value = record._id
-                elif record.__hasattr__(root):
-                    value = record.__getattr__(root)
+                    value = record.id
+                elif hasattr(record, root):
+                    value = getattr(record, root)
                 else:
                     value = None
-                    self.warning("Field '%s' (path: %s) does not exist in model '%s'." % (root, currentPath, record._table._name))
+                    self.warning("Field '%s' (path: %s) does not exist in model '%s'." % (root, currentPath, record._name))
 
 
             # Check if it's a many2one
@@ -380,12 +381,12 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             # Show all translations for a field
             type = self.report.fields()[currentPath]['type']
             if type == 'java.lang.Object':
-                value = self.valueInAllLanguages(record._table, record.id, root)
+                value = self.valueInAllLanguages(record._name, record.id, root)
 
-            if field in record._table._columns:
-                field_type = record._table._columns[field]._type
-            elif field in record._table._inherit_fields:
-                field_type = record._table._inherit_fields[field][2]._type
+            if field in record._columns:
+                field_type = record._columns[field]._type
+            elif field in record._inherit_fields:
+                field_type = record._inherit_fields[field][2]._type
 
             # The rest of field types must be converted into str
             if field == 'id':
