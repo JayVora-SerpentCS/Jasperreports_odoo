@@ -45,10 +45,10 @@
             <field name="arch" type="xml">
                 <form string="Jasper Reports">
                     <group colspan="4" col='4'>
-                    <field name="name" select="1"/>
-                    <field name="jasper_model_id" required="True" select="1"/>
-                    <field name="report_name" select="1"/>
-            		<field name="jasper_output" required="True" select="1"/>
+                    <field name="name"/>
+                    <field name="jasper_model_id" required="True" />
+                    <field name="report_name" string="Report Name"/>
+            		<field name="jasper_output" required="True" />
             		</group>
             		<group colspan="4" col='4'>
                     <field name="attachment"/>
