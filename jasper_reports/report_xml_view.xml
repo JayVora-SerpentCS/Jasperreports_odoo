@@ -41,23 +41,25 @@
         <record id="act_report_jasper_form" model="ir.ui.view">
             <field name="name">ir.actions.report.jasper.form</field>
             <field name="model">ir.actions.report.xml</field>
-            <field name="type">form</field>
-        <field name="priority">20</field>
+        	<field name="priority">20</field>
             <field name="arch" type="xml">
                 <form string="Jasper Reports">
+                    <group colspan="4">
                     <field name="name" select="1"/>
                     <field name="jasper_model_id" required="True" select="1"/>
                     <field name="report_name" select="1"/>
-            <field name="jasper_output" required="True" select="1"/>
+            		<field name="jasper_output" required="True" select="1"/>
                     <field name="attachment"/>
                     <field name="attachment_use"/>
-            <separator string="Files" colspan="4"/>
-            <field name="jasper_file_ids" colspan="4" nolabel="1" />
-            <separator string="Groups" colspan="4"/>
-                    <field name="groups_id" colspan="4" nolabel="1" />
+		            <separator string="Files" colspan="4"/>
+		            	<field name="jasper_file_ids" colspan="4" nolabel="1" />
+		            <separator string="Groups" colspan="4"/>
+                    	<field name="groups_id" colspan="4" nolabel="1" />
+		            </group>
                 </form>
             </field>
         </record>
+
         <record id="act_report_jasper_tree" model="ir.ui.view">
             <field name="name">ir.actions.report.jasper.tree</field>
             <field name="model">ir.actions.report.xml</field>

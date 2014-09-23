@@ -79,7 +79,6 @@ report_xml_file()
 # Inherit ir.actions.report.xml and add an action to be able to store .jrxml and .properties
 # files attached to the report so they can be used as reports in the application.
 class report_xml(osv.osv):
-    _name = 'ir.actions.report.xml'
     _inherit = 'ir.actions.report.xml'
     _columns = {
         'jasper_output': fields.selection([('html','HTML'),('csv','CSV'),('xls','XLS'),('rtf','RTF'),('odt','ODT'),('ods','ODS'),('txt','Text'),('pdf','PDF')], 'Jasper Output'),

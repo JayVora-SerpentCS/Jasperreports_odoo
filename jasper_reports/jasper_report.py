@@ -29,21 +29,14 @@
 #
 ##############################################################################
 
-try:
-    import release
-    import report
-    import pooler
-    from osv import orm, osv, fields
-    import tools
-    import netsvc
-except ImportError:
-    import openerp
-    from openerp import release
-    from openerp import report
-    from openerp import pooler
-    from openerp.osv import orm, osv, fields
-    from openerp import tools
-    from openerp import netsvc
+
+import openerp
+from openerp import release
+from openerp import report
+from openerp import pooler
+from openerp.osv import orm, osv, fields
+from openerp import tools
+from openerp import netsvc
 
 import os
 import tempfile
@@ -313,11 +306,11 @@ def register_jasper_report(report_name, model_name):
     # Register only if it didn't exist another "jasper_report" with the same name
     # given that developers might prefer/need to register the reports themselves.
     # For example, if they need their own parser.
-    if name in netsvc.Service._services:
-        if isinstance(netsvc.Service._services[name], report_jasper):
+    if name in openerp.report.interface.report_int._reports:
+        if isinstance(openerp.report.interface.report_int._reports[name], report_jasper):
             return
-        del netsvc.Service._services[name]
-    report_jasper( name, model_name )
+        del openerp.report.interface.report_int._reports[name]
+    report_jasper(name, model_name)
 
 class ir_actions_report_xml(osv.osv):
     _inherit = 'ir.actions.report.xml'
