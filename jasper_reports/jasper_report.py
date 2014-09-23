@@ -247,7 +247,6 @@ class report_jasper(report.interface.report_int):
         self.parser = parser
 
     def create(self, cr, uid, ids, data, context):
-        print "calll"
         name = self.name
         if self.parser:
             d = self.parser(cr, uid, ids, data, context)
@@ -278,10 +277,10 @@ if release.major_version == '5.0':
         # Register only if it didn't exist another "jasper_report" with the same name
         # given that developers might prefer/need to register the reports themselves.
         # For example, if they need their own parser.
-        if netsvc.service_exist(name):
-            if isinstance(netsvc.SERVICES[name], report_jasper):
-                return
-            del netsvc.SERVICES[name]
+        if name in openerp.report.interface.report_int._reports:
+            if isinstance(openerp.report.interface.report_int._reports[name], report_jasper):
+                return openerp.report.interface.report_int._reports[name]
+            del openerp.report.interface.report_int._reports[name]
         report_jasper(name, model)
 
 
