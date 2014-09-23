@@ -31,17 +31,11 @@
 
 import base64
 
-try:
-    import release
-    import pooler
-    from osv import osv,fields
-    from tools.translate import _
-except ImportError:
-    import openerp
-    from openerp import release
-    from openerp import pooler
-    from openerp.osv import osv,fields
-    from openerp.tools.translate import _
+import openerp
+from openerp import release
+from openerp import pooler
+from openerp.osv import osv,fields
+from openerp.tools.translate import _
 
 class create_data_template(osv.osv_memory):
     _name = 'jasper.create.data.template'
@@ -76,4 +70,3 @@ class create_data_template(osv.osv_memory):
     _defaults = {
         'depth': 1
     }
-create_data_template()
