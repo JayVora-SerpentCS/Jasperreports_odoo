@@ -100,6 +100,7 @@ class report_xml(osv.Model):
         return super(report_xml, self).write(cr, uid, ids, vals, context)
 
     def update(self, cr, uid, ids, context={}):
+        pool_values = self.pool.get('ir.values')
         for report in self.browse(cr, uid, ids):
             has_default = False
             # Browse attachments and store .jrxml and .properties into jasper_reports/custom_reports
@@ -130,9 +131,9 @@ class report_xml(osv.Model):
                             'value': 'ir.actions.report.xml,%s' % report.id
                         }
                         if not valuesId:
-                            valuesId = self.pool.get('ir.values').create(cr, uid, data, context=context)
+                            valuesId = pool_values.create(cr, uid, data, context=context)
                         else:
-                            self.pool.get('ir.values').write(cr, uid, valuesId, data, context=context)
+                            pool_values.write(cr, uid, valuesId, data, context=context)
                             valuesId = valuesId[0]
 
             if not has_default:
@@ -222,6 +223,7 @@ class report_xml(osv.Model):
                 self.generate_xml(cr, uid, context, pool, newName, fieldNode, document, depth - 1, False)
                 continue
 
+            value = field
             if fieldType == 'float':
                 value = '12345.67'
             elif fieldType == 'integer':
@@ -232,8 +234,6 @@ class report_xml(osv.Model):
                 value = '12:34:56'
             elif fieldType == 'datetime':
                 value = '2009-12-31 12:34:56'
-            else:
-                value = field
 
             valueNode = document.createTextNode(value)
             fieldNode.appendChild(valueNode)
