@@ -81,7 +81,6 @@ class JasperHandler(BaseHTTPRequestHandler):
         password = arguments.get('password', tools.config.get('jasper_password', 'a') )
         depth = int( arguments.get('depth', tools.config.get('jasper_depth', 3) ) )
         language = arguments.get('language', tools.config.get('jasper_language', 'en'))
-        print "werrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrremodel, database, user, depth, language",model, database, user, depth, language
         # Check if data is in cache already
         key = '%s|%s|%s|%s|%s' % (model, database, user, depth, language)
         if key in self.cache:

@@ -199,10 +199,11 @@ class Report:
         return 'jdbc:postgresql://%s:%s/%s' % (host, port, dbname)
 
     def userName(self):
-        return tools.config['db_user'] or self.systemUserName()
+        return tools.config['db_user'] or self.pool['ir.config_parameter'].get_param(self.cr, self.uid, 'db_user') or self.systemUserName()
 
     def password(self):
-        return tools.config['db_password'] or ''
+        
+        return tools.config['db_password'] or self.pool['ir.config_parameter'].get_param(self.cr, self.uid, 'db_password') or ''
 
     def executeReport(self, dataFile, outputFile, subreportDataFiles):
         locale = self.context.get('lang', 'en_US')
@@ -304,7 +305,6 @@ if release.major_version == '5.0':
 
 def register_jasper_report(report_name, model_name):
     name = 'report.%s' % report_name
-    print "openerp.report.interface.report_int._reports",openerp.report.interface.report_int._reports
     # Register only if it didn't exist another "jasper_report" with the same name
     # given that developers might prefer/need to register the reports themselves.
     # For example, if they need their own parser.
@@ -331,7 +331,6 @@ class ir_actions_report_xml(osv.osv):
             return super(ir_actions_report_xml, self)._lookup_report(cr, name)
         #Calling Jasper
         new_report = register_jasper_report(name, record['model'])
-        print "new_report",new_report
         return new_report
 
 # vim:noexpandtab:smartindent:tabstop=8:softtabstop=8:shiftwidth=8:

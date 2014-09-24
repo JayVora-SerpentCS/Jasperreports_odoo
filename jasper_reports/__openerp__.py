@@ -43,15 +43,15 @@
     ],
     "depends" : ["base"],
     "category" : "Generic Modules/Jasper Reports",
-    "init_xml" : [],
     "demo_xml" : [
         'jasper_demo.xml'
     ],
-    "update_xml" : [
+    "data" : [
         'wizard/jasper_create_data_template.xml',
         'jasper_wizard.xml',
         'report_xml_view.xml',
         'security/ir.model.access.csv',
+        'data/jasper_data.xml'
     ],
     "active": False,
     "installable": True,
