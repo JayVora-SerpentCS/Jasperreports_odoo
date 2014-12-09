@@ -382,7 +382,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
 
             # Show all translations for a field
             type = self.report.fields()[currentPath]['type']
-            if type == 'java.lang.Object':
+            if type == 'java.lang.Object' and record.id:
                 value = self.valueInAllLanguages(record._name, record.id, root)
 
             if field in record._columns:
