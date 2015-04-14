@@ -127,7 +127,7 @@ class BrowseDataGenerator(AbstractDataGenerator):
                     relations2 = [ f.partition('/')[2] for f in relations if f.partition('/')[0] == root and f.partition('/')[2] ]
                     return self.generateIds( value, relations2, currentPath, currentRecords )
 
-                if not isinstance(value, list):
+                if not isinstance(value, orm.browse_record_list):
                     self.warning("Field '%s' in model '%s' is not a relation." % (root, self.model))
                     return currentRecords
 
