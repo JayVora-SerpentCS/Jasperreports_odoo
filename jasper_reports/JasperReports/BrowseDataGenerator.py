@@ -119,6 +119,8 @@ class BrowseDataGenerator(AbstractDataGenerator):
                     value = record.id
                 elif hasattr(record, root):
                     value = getattr(record, root)
+                    if isinstance(value, orm.Model):
+                        value = [x for x in value]
                 else:
                     self.warning("Field '%s' does not exist in model '%s'." % (root, record._name))
                     continue
@@ -380,7 +382,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
 
             # Show all translations for a field
             type = self.report.fields()[currentPath]['type']
-            if type == 'java.lang.Object':
+            if type == 'java.lang.Object' and record.id:
                 value = self.valueInAllLanguages(record._name, record.id, root)
 
             if field in record._columns:
