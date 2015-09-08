@@ -77,9 +77,11 @@ class report_xml(osv.Model):
         'jasper_file_ids': fields.one2many('ir.actions.report.xml.file', 'report_id', 'Files', help=''),
         'jasper_model_id': fields.many2one('ir.model', 'Model', help=''),  # We use jas-er_model
         'jasper_report': fields.boolean('Is Jasper Report?'),
+        'copies': fields.integer('Copies', help="Copies apply for Jasper Report only"),
     }
     _defaults = {
         'jasper_output': lambda self, cr, uid, context: context and context.get('jasper_report') and 'pdf' or False,
+        'copies': 1
     }
 
     def create(self, cr, uid, vals, context=None):
