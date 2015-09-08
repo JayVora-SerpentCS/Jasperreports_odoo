@@ -28,7 +28,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 ##############################################################################
-
+import cStringIO
 
 import openerp
 from openerp import release
@@ -83,7 +83,9 @@ class Report:
         # not removed, we end up with two records named 'purchase.order' so we need to destinguish
         # between the two by searching '.jrxml' in report_rml.
         ids = self.pool.get('ir.actions.report.xml').search(self.cr, self.uid, [('report_name', '=', self.name[7:]), ('report_rml', 'ilike', '.jrxml')], context=self.context)
-        data = self.pool.get('ir.actions.report.xml').read(self.cr, self.uid, ids[0], ['report_rml', 'jasper_output'])
+        data = self.pool.get('ir.actions.report.xml').read(self.cr, self.uid, ids[0], ['report_rml', 'jasper_output', 'copies'])
+        copies = data['copies'] or 1
+        results = []
         if data['jasper_output']:
             self.outputFormat = data['jasper_output']
         self.reportPath = data['report_rml']
@@ -147,16 +149,19 @@ class Report:
 
 
         # Call the external java application that will generate the PDF file in outputFile
-        pages = self.executeReport(dataFile, outputFile, subreportDataFiles)
-        elapsed = (time.time() - start) / 60
-        logger.info("ELAPSED: %f" % elapsed)
-
-        # Read data from the generated file and return it
-        f = open(outputFile, 'rb')
-        try:
-            data = f.read()
-        finally:
-            f.close()
+        copy = 1
+        while copy <= copies:
+            pages = self.executeReport(dataFile, outputFile, subreportDataFiles, copy)
+            elapsed = (time.time() - start) / 60
+            logger.info("ELAPSED: %f" % elapsed)
+            # Read data from the generated file and return it
+            f = open(outputFile, 'rb')
+            try:
+                data = f.read()
+            finally:
+                f.close()
+            results.append(data)
+            copy += 1
 
         # Remove all temporary files created during the report
         if tools.config['jasperunlink']:
@@ -167,10 +172,28 @@ class Report:
                     logger.warning("Could not remove file '%s'." % file)
         self.temporaryFiles = []
 
-        if self.context.get('return_pages'):
-            return (data, self.outputFormat, pages)
+        # Connect multple files together (works only for PDF)
+        if len(results) > 1:
+            if self.outputFormat=='pdf':
+                from pyPdf import PdfFileWriter, PdfFileReader
+                output = PdfFileWriter()
+                for r in results:
+                    reader = PdfFileReader(cStringIO.StringIO(r))
+                    for page in range(reader.getNumPages()):
+                        output.addPage(reader.getPage(page))
+                s = cStringIO.StringIO()
+                output.write(s)  
+                if self.context.get('return_pages'):
+                    return ( s.getvalue() , self.outputFormat, pages )
+                else:
+                    return ( s.getvalue() , self.outputFormat )
+            else:   
+                raise osv.except_osv(_('User Error!'), _('Multiple Jasper Files works only with PDF'))
         else:
-            return (data, self.outputFormat)
+            if self.context.get('return_pages'):
+                return (data, self.outputFormat, pages)
+            else:
+                return (data, self.outputFormat)
 
     def path(self):
         return os.path.abspath(os.path.dirname(__file__))
@@ -205,7 +228,7 @@ class Report:
         
         return tools.config['db_password'] or self.pool['ir.config_parameter'].get_param(self.cr, self.uid, 'db_password') or ''
 
-    def executeReport(self, dataFile, outputFile, subreportDataFiles):
+    def executeReport(self, dataFile, outputFile, subreportDataFiles, copy):
         locale = self.context.get('lang', 'en_US')
 
         connectionParameters = {
@@ -221,6 +244,7 @@ class Report:
             'STANDARD_DIR': self.report.standardDirectory(),
             'REPORT_LOCALE': locale,
             'IDS': self.ids,
+            'COPY': copy,
         }
         if 'parameters' in self.data:
             parameters.update(self.data['parameters'])

@@ -8,6 +8,7 @@
 			<field name="arch" type="xml">
 				<field name="report_name" position="after">
 					<field name="jasper_output" />
+					<field name="copies" />
 					<button string="Update from attachments" name="update" type="object"
 						colspan="2" />
 				</field>
@@ -47,6 +48,7 @@
 						<field name="jasper_model_id" required="True" />
 						<field name="report_name" string="Report Name" />
 						<field name="jasper_output" required="True" />
+						<field name="copies" required="True" />
 						<field name="jasper_report" invisible='1'/>
 					</group>
 					<group colspan="4" col='4'>
@@ -79,6 +81,7 @@
 					<field name="jasper_model_id" />
 					<field name="report_name" />
 					<field name="jasper_output" />
+					<field name="copies" />
 					<field name="attachment" />
 				</tree>
 			</field>
