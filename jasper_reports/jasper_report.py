@@ -42,7 +42,13 @@ from openerp import tools
 import os
 import tempfile
 import logging
-from JasperReports import *
+from JasperReports.BrowseDataGenerator import CsvBrowseDataGenerator
+from JasperReports.JasperServer import JasperServer
+from JasperReports.RecordDataGenerator import CsvRecordDataGenerator
+from JasperReports.JasperReport import JasperReport
+
+
+#from JasperReports import *
 
 # Determines the port where the JasperServer process should listen
 # with its XML-RPC server for incomming calls

@@ -44,9 +44,7 @@ import tempfile
 import codecs
 import logging
 
-# from . import JasperReport
-from . import AbstractDataGenerator
-
+from AbstractDataGenerator import AbstractDataGenerator
 
 class BrowseDataGenerator(AbstractDataGenerator):
     def __init__(self, report, model, pool, cr, uid, ids, context):
@@ -90,7 +88,9 @@ class BrowseDataGenerator(AbstractDataGenerator):
                                context=context)
             values[language] = value[0][field] or ''
 
-            if model._columns[field]._type == 'selection' and model._columns[field].selection:
+            if(model._columns[field]._type == 'selection' and
+               model._columns[field
+                              ].selection):
                 field_data = model.fields_get(self.cr, self.uid,
                                               allfields=[field],
                                               context=context)
@@ -281,7 +281,7 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                 # Check for field 'id' because we can't find it's
                 # type in _columns
                 value = str(value)
-            elif value == False:
+            elif value is False:
                 value = ''
             elif field_type == 'date':
                 value = '%s 00:00:00' % str(value)
@@ -448,7 +448,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             # for example.In order not to change the way we detect many2one
             # fields, we simply check that the field is in self.report.
             # fields() and that's it.
-            if not currentPath in self.report.fields():
+            if currentPath not in self.report.fields():
                 continue
 
             # Show all translations for a field
