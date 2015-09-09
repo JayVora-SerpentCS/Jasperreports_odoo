@@ -31,9 +31,9 @@
 #
 ##############################################################################
 
-from jasper_report import *
-from report_xml import *
-import wizard
+from . import jasper_report
+from . import report_xml
+from . import wizard
 
 try:
     import release

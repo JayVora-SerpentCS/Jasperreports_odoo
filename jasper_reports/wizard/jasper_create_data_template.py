@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
-#                         http://www.NaN-tic.com
+#Copyright (c) 2012 Omar Castiñeira Saavedra <omar@pexego.es>
+#                         Pexego Sistemas Informáticos http://www.pexego.es
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
 # Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
@@ -32,12 +32,7 @@
 ##############################################################################
 
 import base64
-
-import openerp
-from openerp import release
-from openerp import pooler
-from openerp.osv import osv, fields
-from openerp import models, fields, api, _
+from openerp import models, fields, api
 
 
 class create_data_template(models.TransientModel):

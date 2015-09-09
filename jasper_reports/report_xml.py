@@ -34,12 +34,9 @@
 import os
 import base64
 import openerp
-from openerp import release
 from openerp import report
-#from openerp.osv import orm, osv, fields
-from openerp.osv import orm, osv
+from openerp.osv import orm
 from . import jasper_report
-#from openerp.tools.translate import _
 from openerp.exceptions import except_orm
 from openerp import models, fields, api, _
 import unicodedata

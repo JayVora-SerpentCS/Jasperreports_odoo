@@ -3,8 +3,8 @@
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
 #                         http://www.NaN-tic.com
-# Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
-#                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
+# Copyright (c) 2012 Omar Castiñeira Saavedra <omar@pexego.es>
+#                         Pexego Sistemas Informáticos http://www.pexego.es
 # Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
@@ -46,20 +46,14 @@ class JasperHandler(BaseHTTPRequestHandler):
 
     def __init__(self, request, client_address, server):
         pass
-        #print "REQUEST: ", dir(request)
-        #print "DIR SELF: ", dir(self)
-
-    #def __getattr__(self, name):
-        #print "NAME: ", name
-        #return JasperHandler.__getattr__(self, name)
 
     def do_OPTIONS(self):
         pass
 
     def parse_request(self, *args, **kwargs):
-        #self.headers = Message()
-        #self.request_version = 'HTTP/1.1'
-        #self.command = 'OPTIONS'
+        # self.headers = Message()
+        # self.request_version = 'HTTP/1.1'
+        # self.command = 'OPTIONS'
 
         path = self.raw_requestline.replace('GET', '').strip().split(' ')[0]
         try:

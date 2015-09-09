@@ -32,7 +32,7 @@
 ##############################################################################
 
 {
-    "name": "Jasper Reports SerpentCS",
+    "name": "Jasper Reports",
     "version": "1.1.1",
     "description": '''
     This module integrates Jasper Reports with OpenERP. V6 and v7 compatible"
@@ -40,17 +40,13 @@
     Serpent Consulting Services Pvt. Ltd. has migrated it to v8. ''',
     "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd.",
     "website": "http://www.nan-tic.com, http://www.serpentcs.com",
-    'images': [
-               'images/jasper_reports-hover.png',
+    'images': ['images/jasper_reports-hover.png',
                'images/jasper_reports.png'
                ],
     "depends": ["base"],
     "category": "Generic Modules/Jasper Reports",
-    "demo": [
-                 'jasper_demo.xml'
-                 ],
-    "data": [
-             'wizard/jasper_create_data_template.xml',
+    "demo": ['jasper_demo.xml'],
+    "data": ['wizard/jasper_create_data_template.xml',
              'jasper_wizard.xml',
              'report_xml_view.xml',
              'security/ir.model.access.csv',

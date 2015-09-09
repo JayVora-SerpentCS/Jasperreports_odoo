@@ -36,12 +36,9 @@ from lxml import etree
 import re
 
 try:
-    import release
     from tools.safe_eval import safe_eval
     import tools
 except ImportError:
-    import openerp
-    from openerp import release
     from openerp.tools.safe_eval import safe_eval
     from openerp import tools
 
@@ -156,7 +153,8 @@ class JasperReport:
                 self._language = langTags[0].get('language').lower()
 
         # Relations
-        relationTags = doc.xpath('/jr:jasperReport/jr:property[@name="OPENERP_RELATIONS"]', namespaces=nss)
+        ex_path = '/jr:jasperReport/jr:property[@name="OPENERP_RELATIONS"]'
+        relationTags = doc.xpath(ex_path, namespaces=nss)
         if relationTags and 'value' in relationTags[0].keys():
             relation = relationTags[0].get('value').strip()
             if relation.startswith('['):
@@ -168,17 +166,21 @@ class JasperReport:
             self._relations = [self._pathPrefix[:-1]]
 
         # Repeat field
-        copiesFieldTags = doc.xpath('/jr:jasperReport/jr:property[@name="OPENERP_COPIES_FIELD"]', namespaces=nss)
+        path1 = '/jr:jasperReport/jr:property[@name="OPENERP_COPIES_FIELD"]'
+        copiesFieldTags = doc.xpath(path1, namespaces=nss)
         if copiesFieldTags and 'value' in copiesFieldTags[0].keys():
-            self._copiesField = self._pathPrefix + copiesFieldTags[0].get('value')
+            self._copiesField = (self._pathPrefix + copiesFieldTags[0].get
+                                 ('value'))
 
         # Repeat
-        copiesTags = doc.xpath('/jr:jasperReport/jr:property[@name="OPENERP_COPIES"]', namespaces=nss)
+        path2 = '/jr:jasperReport/jr:property[@name="OPENERP_COPIES"]'
+        copiesTags = doc.xpath(path2, namespaces=nss)
         if copiesTags and 'value' in copiesTags[0].keys():
             self._copies = int(copiesTags[0].get('value'))
 
         self._isHeader = False
-        headerTags = doc.xpath('/jr:jasperReport/jr:property[@name="OPENERP_HEADER"]', namespaces=nss)
+        path3 = '/jr:jasperReport/jr:property[@name="OPENERP_HEADER"]'
+        headerTags = doc.xpath(path3, namespaces=nss)
         if headerTags and 'value' in headerTags[0].keys():
             self._isHeader = True
 
@@ -187,13 +189,17 @@ class JasperReport:
 
         # Subreports
         # Here we expect the following structure in the .jrxml file:
-        #<subreport>
-        #  <dataSourceExpression><![CDATA[$P{REPORT_DATA_SOURCE}]]></dataSourceExpression>
-        #  <subreportExpression class="java.lang.String"><![CDATA[$P{STANDARD_DIR} + "report_header.jasper"]]></subreportExpression>
-        #</subreport>
+        # <subreport>
+        #  <dataSourceExpression><![CDATA[$P{REPORT_DATA_SOURCE}]]>
+        # </dataSourceExpression>
+        # <subreportExpression class="java.lang.String">
+        # <![CDATA[$P{STANDARD_DIR} + "report_header.jasper"]]>
+        # </subreportExpression>
+        # </subreport>
         subreportTags = doc.xpath('//jr:subreport', namespaces=nss)
         for tag in subreportTags:
-            dataSourceExpression = tag.findtext('{%s}dataSourceExpression' % ns, '')
+            text1 = '{%s}dataSourceExpression'
+            dataSourceExpression = tag.findtext(text1 % ns, '')
             if not dataSourceExpression:
                 continue
             dataSourceExpression = dataSourceExpression.strip()
@@ -204,34 +210,40 @@ class JasperReport:
             if dataSourceExpression == 'REPORT_DATA_SOURCE':
                 continue
 
-            subreportExpression = tag.findtext('{%s}subreportExpression' % ns, '')
+            subreportExpression = tag.findtext('{%s}subreportExpression' % ns,
+                                               '')
             if not subreportExpression:
                 continue
             subreportExpression = subreportExpression.strip()
-            subreportExpression = subreportExpression.replace('$P{STANDARD_DIR}', '"%s"' % self.standardDirectory())
-            subreportExpression = subreportExpression.replace('$P{SUBREPORT_DIR}', '"%s"' % self.subreportDirectory())
+            subreportExpression = (subreportExpression.replace
+                                   ('$P{STANDARD_DIR}',
+                                    '"%s"' % self.standardDirectory()))
+            subreportExpression = (subreportExpression.replace
+                                   ('$P{SUBREPORT_DIR}',
+                                    '"%s"' % self.subreportDirectory()))
             try:
                 subreportExpression = safe_eval(subreportExpression, {})
             except:
-                print "COULD NOT EVALUATE EXPRESSION: '%s'" % subreportExpression
-                # If we're not able to evaluate the expression go to next subreport
                 continue
             if subreportExpression.endswith('.jasper'):
                 subreportExpression = subreportExpression[:-6] + 'jrxml'
 
             # Model
             model = ''
-            modelTags = tag.xpath('//jr:reportElement/jr:property[@name="OPENERP_MODEL"]', namespaces=nss)
+            path4 = '//jr:reportElement/jr:property[@name="OPENERP_MODEL"]'
+            modelTags = tag.xpath(path4, namespaces=nss)
             if modelTags and 'value' in modelTags[0].keys():
                 model = modelTags[0].get('value')
 
             pathPrefix = ''
-            pathPrefixTags = tag.xpath('//jr:reportElement/jr:property[@name="OPENERP_PATH_PREFIX"]', namespaces=nss)
+            pat = '//jr:reportElement/jr:property[@name="OPENERP_PATH_PREFIX"]'
+            pathPrefixTags = tag.xpath(pat, namespaces=nss)
             if pathPrefixTags and 'value' in pathPrefixTags[0].keys():
                 pathPrefix = pathPrefixTags[0].get('value')
 
             isHeader = False
-            headerTags = tag.xpath('//jr:reportElement/jr:property[@name="OPENERP_HEADER"]', namespaces=nss)
+            path5 = '//jr:reportElement/jr:property[@name="OPENERP_HEADER"]'
+            headerTags = tag.xpath(path5, namespaces=nss)
             if headerTags and 'value' in headerTags[0].keys():
                 isHeader = True
 
@@ -255,18 +267,19 @@ class JasperReport:
             for subsubInfo in subreport.subreports():
                 subsubInfo['depth'] += 1
                 # Note hat 'parameter' (the one used to pass report's
-                #  DataSource) must be the same in all reports
+                # DataSource) must be the same in all reports
                 self._subreports.append(subsubInfo)
 
         # Dataset
         # Here we expect the following structure in the .jrxml file:
-        #<datasetRun>
+        # <datasetRun>
         #  <dataSourceExpression><![CDATA[$P{REPORT_DATA_SOURCE}]]>
         # </dataSourceExpression>
-        #</datasetRun>
+        # </datasetRun>
         datasetTags = doc.xpath('//jr:datasetRun', namespaces=nss)
         for tag in datasetTags:
-            dataSourceExpression = tag.findtext('{%s}dataSourceExpression' % ns, '')
+            path7 = '{%s}dataSourceExpression'
+            dataSourceExpression = tag.findtext(path7 % ns, '')
             if not dataSourceExpression:
                 continue
             dataSourceExpression = dataSourceExpression.strip()
@@ -282,7 +295,9 @@ class JasperReport:
 
             # Relations
             relations = []
-            relationTags = tag.xpath('../../jr:reportElement/jr:property[@name="OPENERP_RELATIONS"]', namespaces=nss)
+            path8 = '../../jr:reportElement/jr:property \
+            [@name="OPENERP_RELATIONS"]'
+            relationTags = tag.xpath(path8, namespaces=nss)
             if relationTags and 'value' in relationTags[0].keys():
                 relation = relationTags[0].get('value').strip()
                 if relation.startswith('['):
@@ -295,29 +310,41 @@ class JasperReport:
 
             # Repeat field
             copiesField = None
-            copiesFieldTags = tag.xpath('../../jr:reportElement/jr:property[@name="OPENERP_COPIES_FIELD"]', namespaces=nss)
+            path9 = '../../jr:reportElement/jr:property \
+            [@name="OPENERP_COPIES_FIELD"]'
+            copiesFieldTags = tag.xpath(path9, namespaces=nss)
             if copiesFieldTags and 'value' in copiesFieldTags[0].keys():
-                copiesField = self._pathPrefix + copiesFieldTags[0].get('value')
+                copiesField = self._pathPrefix + copiesFieldTags[0
+                                                                 ].get('value'
+                                                                       )
 
             # Repeat
             copies = None
-            copiesTags = tag.xpath('../../jr:reportElement/jr:property[@name="OPENERP_COPIES"]', namespaces=nss)
+            path11 = '../../jr:reportElement/jr:property \
+            [@name="OPENERP_COPIES"]'
+            copiesTags = tag.xpath(path11, namespaces=nss)
             if copiesTags and 'value' in copiesTags[0].keys():
                 copies = int(copiesTags[0].get('value'))
 
             # Model
             model = ''
-            modelTags = tag.xpath('../../jr:reportElement/jr:property[@name="OPENERP_MODEL"]', namespaces=nss)
+            path12 = '../../jr:reportElement/jr:property \
+            [@name="OPENERP_MODEL"]'
+            modelTags = tag.xpath(path12, namespaces=nss)
             if modelTags and 'value' in modelTags[0].keys():
                 model = modelTags[0].get('value')
 
             pathPrefix = ''
-            pathPrefixTags = tag.xpath('../../jr:reportElement/jr:property[@name="OPENERP_PATH_PREFIX"]', namespaces=nss)
+            path13 = '../../jr:reportElement/jr:property \
+            [@name="OPENERP_PATH_PREFIX"]'
+            pathPrefixTags = tag.xpath(path13, namespaces=nss)
             if pathPrefixTags and 'value' in pathPrefixTags[0].keys():
                 pathPrefix = pathPrefixTags[0].get('value')
 
-            # We need to find the appropriate subDataset definition for this dataset run.
-            subDataset = doc.xpath('//jr:subDataset[@name="%s"]' % subDatasetName, namespaces=nss)[0]
+            # We need to find the appropriate subDataset definition
+            # for this dataset run.
+            path14 = '//jr:subDataset[@name="%s"]'
+            subDataset = doc.xpath(path14 % subDatasetName, namespaces=nss)[0]
             fieldTags = subDataset.xpath('jr:field', namespaces=nss)
             fields, fieldNames = self.extractFields(fieldTags, ns)
 

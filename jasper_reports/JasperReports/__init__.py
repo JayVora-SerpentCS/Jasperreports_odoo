@@ -3,8 +3,6 @@
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
 #                         http://www.NaN-tic.com
-# Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
-#                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
 # Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
@@ -30,12 +28,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 ##############################################################################
-
-#from . import AbstractDataGenerator
-#from . import BrowseDataGenerator
-#from . import RecordDataGenerator
-#from . import JasperReport
-#from . import JasperServer
 
 from AbstractDataGenerator import *
 from BrowseDataGenerator import *

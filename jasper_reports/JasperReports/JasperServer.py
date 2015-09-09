@@ -38,16 +38,8 @@ import socket
 import subprocess
 import xmlrpclib
 import logging
-
-try:
-    import release
-    from osv import osv
-    from tools.translate import _
-except ImportError:
-    import openerp
-    from openerp import release
-    from openerp.osv import osv
-    from openerp.tools.translate import _
+from openerp.exceptions import except_orm
+from openerp.tools.translate import _
 
 
 class JasperServer:
@@ -111,14 +103,14 @@ class JasperServer:
             self.start()
             for x in xrange(40):
                 time.sleep(1)
-                try:
+                try: 
                     return self.proxy.Report.execute(*args)
                 except (xmlrpclib.ProtocolError, socket.error), e:
                     self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
                     pass
                 except xmlrpclib.Fault, e:
-                    raise osv.except_osv(_('Report Error'), e.faultString)
+                    raise except_orm(_('Report Error'), e.faultString)
         except xmlrpclib.Fault, e:
-            raise osv.except_osv(_('Report Error'), e.faultString)
+            raise except_orm(_('Report Error'), e.faultString)
 
 # vim:noexpandtab:smartindent:tabstop=8:softtabstop=8:shiftwidth=8:

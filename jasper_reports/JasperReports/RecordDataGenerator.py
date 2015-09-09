@@ -3,8 +3,6 @@
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
 #                         http://www.NaN-tic.com
-# Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
-#                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
 # Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
@@ -35,8 +33,8 @@ import csv
 from xml.dom.minidom import getDOMImplementation
 import codecs
 
-from JasperReport import *
-from AbstractDataGenerator import *
+from . import JasperReport
+from . import AbstractDataGenerator
 
 
 class CsvRecordDataGenerator(AbstractDataGenerator):
@@ -65,12 +63,12 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
                 row = {}
                 for field in record:
                     if field not in self.report.fields():
-                        if not field in error_reported_fields:
+                        if field not in error_reported_fields:
                             print "FIELD '%s' NOT FOUND IN REPORT." % field
                             error_reported_fields.append(field)
                         continue
                     value = record.get(field, False)
-                    if value == False:
+                    if value is False:
                         value = ''
                     elif isinstance(value, unicode):
                         value = value.encode('utf-8')
@@ -100,7 +98,7 @@ class XmlRecordDataGenerator(AbstractDataGenerator):
                 fieldNode = self.document.createElement(field)
                 recordNode.appendChild(fieldNode)
                 # The rest of field types must be converted into str
-                if value == False:
+                if value is False:
                     value = ''
                 elif isinstance(value, str):
                     value = unicode(value, 'utf-8')
