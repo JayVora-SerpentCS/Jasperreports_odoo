@@ -29,8 +29,8 @@
 #
 ##############################################################################
 
-import AbstractDataGenerator
-import BrowseDataGenerator
-import RecordDataGenerator
-import JasperReport
-import JasperServer
+from . import AbstractDataGenerator
+from . import BrowseDataGenerator
+from . import RecordDataGenerator
+from . import JasperReport
+from . import JasperServer

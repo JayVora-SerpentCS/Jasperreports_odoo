@@ -39,12 +39,11 @@ import copy
 import base64
 from xml.dom.minidom import getDOMImplementation
 from openerp.osv import orm
-
 import tempfile
 import codecs
 import logging
+from . AbstractDataGenerator import AbstractDataGenerator
 
-from AbstractDataGenerator import AbstractDataGenerator
 
 class BrowseDataGenerator(AbstractDataGenerator):
     def __init__(self, report, model, pool, cr, uid, ids, context):

@@ -32,8 +32,7 @@
 import csv
 from xml.dom.minidom import getDOMImplementation
 import codecs
- 
-from AbstractDataGenerator import AbstractDataGenerator
+from . AbstractDataGenerator import AbstractDataGenerator
 
 
 class CsvRecordDataGenerator(AbstractDataGenerator):
