@@ -5,6 +5,8 @@
 #                         http://www.NaN-tic.com
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
+# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+#                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
 # programmers who take the whole responsability of assessing all potential
@@ -47,17 +49,18 @@ except ImportError:
     from openerp.osv import osv
     from openerp.tools.translate import _
 
+
 class JasperServer:
     def __init__(self, port=8090):
         self.port = port
         self.pidfile = None
         url = 'http://localhost:%d' % port
-        self.proxy = xmlrpclib.ServerProxy( url, allow_none = True )
+        self.proxy = xmlrpclib.ServerProxy(url, allow_none=True)
         self.logger = logging.getLogger(__name__)
 
     def error(self, message):
         if self.logger:
-            self.logger.error("%s" % message )
+            self.logger.error("%s" % message)
         else:
             print 'JasperReports: %s' % message
 
@@ -69,23 +72,32 @@ class JasperServer:
 
     def start(self):
         env = {}
-        env.update( os.environ )
+        env.update(os.environ)
         if os.name == 'nt':
-            sep = ';'
+            a = ';'
         else:
-            sep = ':'
-        libs = os.path.join( self.path(), '..', 'java', 'lib', '*.jar' )
-        env['CLASSPATH'] = os.path.join( self.path(), '..', 'java' + sep ) + sep.join( glob.glob( libs ) ) + sep + os.path.join( self.path(), '..', 'custom_reports' )
-        cwd = os.path.join( self.path(), '..', 'java' )
+            a = ':'
+        libs = os.path.join(self.path(), '..', 'java', 'lib', '*.jar')
+        env['CLASSPATH'
+            ] = os.path.join(self.path(), '..', 'java' + a
+                             ) + a.join(glob.glob(libs)
+                                        ) + a + os.path.join(self.path(),
+                                                             '..',
+                                                             'custom_reports')
+        cwd = os.path.join(self.path(), '..', 'java')
 
-        # Set headless = True because otherwise, java may use existing X session and if session is
-        # closed JasperServer would start throwing exceptions. So we better avoid using the session at all.
-        command = ['java', '-Djava.awt.headless=true', 'com.nantic.jasperreports.JasperServer', unicode(self.port)]
+        # Set headless = True because otherwise, java may use
+        # existing X session and if session is closed JasperServer
+        # would start throwing exceptions. So we better avoid
+        # using the session at all.
+        command = ['java', '-Djava.awt.headless=true',
+                   'com.nantic.jasperreports.JasperServer',
+                   unicode(self.port)]
         process = subprocess.Popen(command, env=env, cwd=cwd)
         if self.pidfile:
-            f = open( self.pidfile, 'w')
+            f = open(self.pidfile, 'w')
             try:
-                f.write( str( process.pid ) )
+                f.write(str(process.pid))
             finally:
                 f.close()
 
@@ -94,16 +106,15 @@ class JasperServer:
         Render report and return the number of pages generated.
         """
         try:
-            return self.proxy.Report.execute( *args )
+            return self.proxy.Report.execute(*args)
         except (xmlrpclib.ProtocolError, socket.error), e:
-            #self.info("First try did not work: %s / %s" % (str(e), str(e.args)) )
             self.start()
             for x in xrange(40):
                 time.sleep(1)
                 try:
-                    return self.proxy.Report.execute( *args )
+                    return self.proxy.Report.execute(*args)
                 except (xmlrpclib.ProtocolError, socket.error), e:
-                    self.error("EXCEPTION: %s %s" % ( str(e), str(e.args) ))
+                    self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
                     pass
                 except xmlrpclib.Fault, e:
                     raise osv.except_osv(_('Report Error'), e.faultString)

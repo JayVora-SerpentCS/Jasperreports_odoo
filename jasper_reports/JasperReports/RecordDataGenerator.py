@@ -1,7 +1,12 @@
+# -*- encoding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
 #                         http://www.NaN-tic.com
+# Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
+#                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
+# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+#                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
 # programmers who take the whole responsability of assessing all potential
@@ -33,32 +38,36 @@ import codecs
 from JasperReport import *
 from AbstractDataGenerator import *
 
+
 class CsvRecordDataGenerator(AbstractDataGenerator):
     def __init__(self, report, records):
         self.report = report
         self.records = records
         self.temporaryFiles = []
 
-    # CSV file generation using a list of dictionaries provided by the parser function.
+    # CSV file generation using a list of dictionaries provided by
+    # the parser function.
     def generate(self, fileName):
-        f = open( fileName, 'wb+' )
+        f = open(fileName, 'wb+')
         try:
             csv.QUOTE_ALL = True
             fieldNames = self.report.fieldNames()
-            # JasperReports CSV reader requires an extra colon at the end of the line.
-            writer = csv.DictWriter( f, fieldNames + [''], delimiter=',', quotechar='"' )
+            # JasperReports CSV reader requires an extra colon
+            # at the end of the line.
+            writer = csv.DictWriter(f, fieldNames + [''], delimiter=',',
+                                    quotechar='"')
             header = {}
             for field in fieldNames + ['']:
-                header[ field ] = field
-            writer.writerow( header )
+                header[field] = field
+            writer.writerow(header)
             error_reported_fields = []
             for record in self.records:
                 row = {}
                 for field in record:
                     if field not in self.report.fields():
                         if not field in error_reported_fields:
-                            print "FIELD '%s' NOT FOUND IN REPORT." % field 
-                            error_reported_fields.append( field )
+                            print "FIELD '%s' NOT FOUND IN REPORT." % field
+                            error_reported_fields.append(field)
                         continue
                     value = record.get(field, False)
                     if value == False:
@@ -70,24 +79,26 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
                     elif not isinstance(value, str):
                         value = str(value)
                     row[self.report.fields()[field]['name']] = value
-                writer.writerow( row )
+                writer.writerow(row)
         finally:
             f.close()
 
 
 class XmlRecordDataGenerator(AbstractDataGenerator):
 
-    # XML file generation using a list of dictionaries provided by the parser function.
+    # XML file generation using a list of dictionaries provided by
+    # the parser function.
     def generate(self, fileName):
-        # Once all records have been calculated, create the XML structure itself
-        self.document = getDOMImplementation().createDocument(None, 'data', None)
+        # Once all records have been calculated, create the XML structure
+        self.document = getDOMImplementation().createDocument(None, 'data',
+                                                              None)
         topNode = self.document.documentElement
         for record in self.data['records']:
             recordNode = self.document.createElement('record')
-            topNode.appendChild( recordNode )
+            topNode.appendChild(recordNode)
             for field, value in record.iteritems():
-                fieldNode = self.document.createElement( field )
-                recordNode.appendChild( fieldNode )
+                fieldNode = self.document.createElement(field)
+                recordNode.appendChild(fieldNode)
                 # The rest of field types must be converted into str
                 if value == False:
                     value = ''
@@ -97,12 +108,12 @@ class XmlRecordDataGenerator(AbstractDataGenerator):
                     value = '%.10f' % value
                 elif not isinstance(value, unicode):
                     value = unicode(value)
-                valueNode = self.document.createTextNode( value )
-                fieldNode.appendChild( valueNode )
+                valueNode = self.document.createTextNode(value)
+                fieldNode.appendChild(valueNode)
         # Once created, the only missing step is to store the XML into a file
-        f = codecs.open( fileName, 'wb+', 'utf-8' )
+        f = codecs.open(fileName, 'wb+', 'utf-8')
         try:
-            topNode.writexml( f )
+            topNode.writexml(f)
         finally:
             f.close()
 

@@ -1,10 +1,12 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2012 Omar Castiñeira Saavedra <omar@pexego.es>
-#                         Pexego Sistemas Informáticos http://www.pexego.es
+# Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
+#                         http://www.NaN-tic.com
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
+# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+#                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
 # programmers who take the whole responsability of assessing all potential
@@ -35,38 +37,35 @@ import openerp
 from openerp import release
 from openerp import pooler
 from openerp.osv import osv, fields
-from openerp.tools.translate import _
+from openerp import models, fields, api, _
 
-class create_data_template(osv.osv_memory):
+
+class create_data_template(models.TransientModel):
     _name = 'jasper.create.data.template'
     _description = 'Create data template'
 
-    def action_create_xml(self, cr, uid, ids, context=None):
-        this = self.browse(cr, uid, ids)[0]
-        for data in  self.read(cr, uid, ids, context=context):
-            model = self.pool.get('ir.model').browse(cr, uid, data['model'][0], context=context)
-            xml = self.pool.get('ir.actions.report.xml').create_xml(cr, uid, model.model, data['depth'], context)
-            self.write(cr, uid, ids, {
-                'data' : base64.encodestring(xml),
-                'filename': 'template.xml'
-            })
+    @api.multi
+    def action_create_xml(self):
+        for rec in self:
+            for data in rec.read([]):
+                model = self.env['ir.model'].browse(data['model'][0])
+                xml = self.env['ir.actions.report.xml'
+                               ].create_xml(model.model, data['depth'])
+                rec.write({
+                    'data': base64.encodestring(xml),
+                    'filename': 'template.xml'
+                })
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'jasper.create.data.template',
             'view_mode': 'form',
             'view_type': 'form',
-            'res_id': this.id,
+            'res_id': rec.id,
             'views': [(False, 'form')],
             'target': 'new',
         }
 
-    _columns = {
-        'model': fields.many2one('ir.model', 'Model', required=True),
-        'depth': fields.integer("Depth", required=True),
-        'filename': fields.char('File Name', size=32),
-        'data': fields.binary('XML')
-    }
-
-    _defaults = {
-        'depth': 1
-    }
+    model = fields.Many2one('ir.model', 'Model', required=True)
+    depth = fields.Integer("Depth", required=True, default=1)
+    filename = fields.Char('File Name', size=32)
+    data = fields.Binary('XML')
