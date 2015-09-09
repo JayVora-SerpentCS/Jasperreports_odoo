@@ -170,9 +170,13 @@ class Report:
                                                        [self.uid],
                                                        self.context)
                 elif self.data.get('data_source', 'model') == 'records':
-                    generator = CsvRecordDataGenerator(subreport, self.data['records'])
+                    generator = CsvRecordDataGenerator(subreport,
+                                                       self.data['records'])
                 else:
-                    generator = CsvBrowseDataGenerator(subreport, self.model, self.pool, self.cr, self.uid, self.ids, self.context)
+                    generator = CsvBrowseDataGenerator(subreport, self.model,
+                                                       self.pool, self.cr,
+                                                       self.uid, self.ids,
+                                                       self.context)
                 generator.generate(subreportDataFile)
 
         # Call the external java application that will generate the
@@ -193,7 +197,7 @@ class Report:
             for file in self.temporaryFiles:
                 try:
                     os.unlink(file)
-                except os.error, e:
+                except os.error:
                     logger.warning("Could not remove file '%s'." % file)
         self.temporaryFiles = []
 
@@ -345,6 +349,7 @@ if release.major_version == '5.0':
         return value
 
     report.interface.register_all = new_register_all
+
 
 def register_jasper_report(report_name, model_name):
     name = 'report.%s' % report_name

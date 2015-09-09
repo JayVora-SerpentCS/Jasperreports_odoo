@@ -33,9 +33,6 @@
 
 import os
 import base64
-import openerp
-from openerp import report
-from openerp.osv import orm
 from . import jasper_report
 from openerp.exceptions import except_orm
 from openerp import models, fields, api, _
@@ -229,7 +226,7 @@ class report_xml(models.Model):
             if not name:
                 # If there's not description in user's language,
                 # use default (english) one.
-                if field  in model._columns.keys():
+                if field in model._columns.keys():
                     name = model._columns[field].string
                 else:
                     name = model._inherit_fields[field][2].string

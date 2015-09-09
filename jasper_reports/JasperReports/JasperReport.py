@@ -109,11 +109,10 @@ class JasperReport:
         # fields and fieldNames
         fields = {}
         fieldNames = []
-        #fieldTags = doc.xpath('/jr:jasperReport/jr:field', namespaces=nss)
+        # fieldTags = doc.xpath('/jr:jasperReport/jr:field', namespaces=nss)
         for tag in fieldTags:
             name = tag.get('name')
             type = tag.get('class')
-            children = tag.getchildren()
             path = tag.findtext('{%s}fieldDescription' % ns, '').strip()
             # Make the path relative if it isn't already
             if path.startswith('/data/record/'):
@@ -126,10 +125,6 @@ class JasperReport:
             for x in path.split('/'):
                 newPath.append(x.split('-')[-1])
             path = '/'.join(newPath)
-            if path in fields:
-                print "WARNING: path '%s': %s, %s" % (path,
-                                                      fields[path]['name'],
-                                                      name)
             fields[path] = {'name': name,
                             'type': type,
                             }
@@ -241,11 +236,11 @@ class JasperReport:
             if pathPrefixTags and 'value' in pathPrefixTags[0].keys():
                 pathPrefix = pathPrefixTags[0].get('value')
 
-            isHeader = False
+            self._isHeader = False
             path5 = '//jr:reportElement/jr:property[@name="OPENERP_HEADER"]'
             headerTags = tag.xpath(path5, namespaces=nss)
             if headerTags and 'value' in headerTags[0].keys():
-                isHeader = True
+                self._isHeader = True
 
             # Add our own pathPrefix to subreport's pathPrefix
             subPrefix = []

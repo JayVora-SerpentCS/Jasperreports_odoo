@@ -80,7 +80,7 @@ class JasperHandler(BaseHTTPRequestHandler):
         password = arguments.get('password',
                                  tools.config.get('jasper_password', 'a'))
         depth = int(arguments.get('depth', tools.config.get('jasper_depth',
-                                                             3)))
+                                                            3)))
         language = arguments.get('language',
                                  tools.config.get('jasper_language', 'en'))
         # Check if data is in cache already

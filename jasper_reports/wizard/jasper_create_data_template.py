@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-#Copyright (c) 2012 Omar Castiñeira Saavedra <omar@pexego.es>
+# Copyright (c) 2012 Omar Castiñeira Saavedra <omar@pexego.es>
 #                         Pexego Sistemas Informáticos http://www.pexego.es
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>

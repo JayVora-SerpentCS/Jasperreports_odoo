@@ -33,7 +33,6 @@ import csv
 from xml.dom.minidom import getDOMImplementation
 import codecs
 
-from . import JasperReport
 from . import AbstractDataGenerator
 
 
@@ -64,7 +63,6 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
                 for field in record:
                     if field not in self.report.fields():
                         if field not in error_reported_fields:
-                            print "FIELD '%s' NOT FOUND IN REPORT." % field
                             error_reported_fields.append(field)
                         continue
                     value = record.get(field, False)

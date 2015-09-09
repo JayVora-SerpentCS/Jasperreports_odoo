@@ -38,9 +38,9 @@ from . import wizard
 try:
     import release
     if release.major_version != '5.0':
-        from http_server import *
+        from . import http_server
 except ImportError:
     import openerp
     from openerp import release
     if release.major_version != '5.0':
-        from http_server import *
+        from . import http_server

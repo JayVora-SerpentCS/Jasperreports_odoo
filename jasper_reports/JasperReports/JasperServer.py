@@ -53,8 +53,6 @@ class JasperServer:
     def error(self, message):
         if self.logger:
             self.logger.error("%s" % message)
-        else:
-            print 'JasperReports: %s' % message
 
     def path(self):
         return os.path.abspath(os.path.dirname(__file__))
@@ -103,7 +101,7 @@ class JasperServer:
             self.start()
             for x in xrange(40):
                 time.sleep(1)
-                try: 
+                try:
                     return self.proxy.Report.execute(*args)
                 except (xmlrpclib.ProtocolError, socket.error), e:
                     self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
