@@ -53,7 +53,8 @@ class BrowseDataGenerator(AbstractDataGenerator):
         self.cr = cr
         self.uid = uid
         self.ids = ids
-        self.context = context
+        # self.context = context
+        self._context = context
         self._languages = []
         self.imageFiles = {}
         self.temporaryFiles = []
@@ -66,17 +67,17 @@ class BrowseDataGenerator(AbstractDataGenerator):
     def languages(self):
         if self._languages:
             return self._languages
-        ids = self.pool.get('res.lang'
-                            ).search(self.cr, self.uid,
-                                     [('translatable', '=', '1')])
-        self._languages = self.pool.get('res.lang').read(self.cr, self.uid,
-                                                         ids, ['code'])
+        ids = self.env['res.lang'
+                       ].search(self.cr, self.uid,
+                                [('translatable', '=', '1')])
+        self._languages = self.env['res.lang'].read(self.cr, self.uid,
+                                                    ids, ['code'])
         self._languages = [x['code'] for x in self._languages]
         return self._languages
 
     def valueInAllLanguages(self, model, id, field):
-        context = copy.copy(self.context)
-        model = self.pool.get(model)
+        context = copy.copy(self._context)
+        model = self.env[model]
         values = {}
         for language in self.languages():
             if language == 'en_US':
@@ -113,19 +114,18 @@ class BrowseDataGenerator(AbstractDataGenerator):
             else:
                 currentPath = root
             if root == 'Attachments':
-                ids = self.pool.get('ir.attachment'
-                                    ).search(self.cr,
-                                             self.uid,
-                                             [('res_model', '=',
-                                               record._name),
-                                              ('res_id', '=', record.id)])
-                value = self.pool.get('ir.attachment'
-                                      ).browse(self.cr, self.uid, ids,
-                                               self.context)
+                ids = self.env['ir.attachment'
+                               ].search(self.cr,
+                                        self.uid,
+                                        [('res_model', '=', record._name),
+                                         ('res_id', '=', record.id)])
+                value = self.env['ir.attachment'
+                                 ].browse(self.cr, self.uid, ids,
+                                          self._context)
             elif root == 'User':
-                value = self.pool.get('res.users'
-                                      ).browse(self.cr, self.uid,
-                                               [self.uid], self.context)
+                value = self.env['res.users'
+                                 ].browse(self.cr, self.uid,
+                                          [self.uid], self._context)
             else:
                 if root == 'id':
                     value = record.id
@@ -182,8 +182,8 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
         # The following loop generates one entry to allRecords list
         # for each record that will be created. If there are any relations
         # it acts like a LEFT JOIN against the main model/table.
-        for record in self.pool.get(self.model).browse(self.cr, self.uid,
-                                                       self.ids, self.context):
+        for record in self.env[self.model].browse(self.cr, self.uid,
+                                                  self.ids, self._context):
             newRecords = self.generateIds(record, relations, '',
                                           [{'root': record}])
             copies = 1
@@ -225,17 +225,17 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
             fieldNode = self.document.createElement(root)
             recordNode.appendChild(fieldNode)
             if root == 'Attachments':
-                ids = self.pool.get('ir.attachment'
-                                    ).search(self.cr, self.uid,
-                                             [('res_model', '=',
-                                               record._name),
-                                              ('res_id', '=', record.id)])
-                value = self.pool.get('ir.attachment'
-                                      ).browse(self.cr, self.uid, ids)
+                ids = self.env['ir.attachment'
+                               ].search(self.cr, self.uid,
+                                        [('res_model', '=',
+                                          record._name),
+                                         ('res_id', '=', record.id)])
+                value = self.env['ir.attachment'
+                                 ].browse(self.cr, self.uid, ids)
             elif root == 'User':
-                value = self.pool.get('res.users'
-                                      ).browse(self.cr, self.uid, self.uid,
-                                               self.context)
+                value = self.env['res.users'
+                                 ].browse(self.cr, self.uid, self.uid,
+                                               self._context)
             else:
                 if root == 'id':
                     value = record.id
@@ -324,7 +324,8 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
         sequence = 0
         copiesField = self.report.copiesField()
         for record in self.pool.get(self.model).browse(self.cr, self.uid,
-                                                       self.ids, self.context):
+                                                       self.ids,
+                                                       self._context):
             newRecords = self.generateIds(record, relations, '',
                                           [{'root': record}])
             copies = reportCopies
@@ -380,17 +381,16 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             else:
                 currentPath = root
             if root == 'Attachments':
-                ids = self.pool.get('ir.attachment'
-                                    ).search(self.cr, self.uid,
-                                             [('res_model', '=',
-                                               record._name),
-                                              ('res_id', '=', record.id)])
-                value = self.pool.get('ir.attachment'
-                                      ).browse(self.cr, self.uid, ids)
+                ids = self.env['ir.attachment'
+                               ].search(self.cr, self.uid,
+                                        [('res_model', '=', record._name),
+                                         ('res_id', '=', record.id)])
+                value = self.env['ir.attachment'
+                                 ].browse(self.cr, self.uid, ids)
             elif root == 'User':
                 value = self.pool.get('res.users').browse(self.cr, self.uid,
                                                           self.uid,
-                                                          self.context)
+                                                          self._context)
             elif root == 'Special':
                 fields2 = [f.partition('/')[2] for f in fields
                            if f.partition('/')[0] == root]

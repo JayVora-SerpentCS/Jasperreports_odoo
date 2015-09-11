@@ -33,15 +33,10 @@
 
 
 import openerp
-from openerp import release
-from openerp import report
-from openerp import pooler
-from openerp import models
-from openerp import tools
-
-import os
 import tempfile
 import logging
+import os
+from openerp import release, tools, report, pooler, models
 from . JasperReports.BrowseDataGenerator import CsvBrowseDataGenerator
 from . JasperReports.JasperServer import JasperServer
 from . JasperReports.RecordDataGenerator import CsvRecordDataGenerator
@@ -100,15 +95,6 @@ class Report:
         data = self.pool.get('ir.actions.report.xml'
                              ).read(self.cr, self.uid, ids[0],
                                     ['report_rml', 'jasper_output'])
-#        ids = self.env['ir.actions.report.xml'
-#                       ].search(self.cr, self.uid,
-#                                [('report_name', '=', self.name[7:]),
-#                                 ('report_rml', 'ilike', '.jrxml')],
-#                                self.context)
-#        data = self.env['ir.actions.report.xml'
-#                        ].read(self.cr, self.uid, ids[0],
-#                               ['report_rml', 'jasper_output'])
-
         if data['jasper_output']:
             self.outputFormat = data['jasper_output']
         self.reportPath = data['report_rml']

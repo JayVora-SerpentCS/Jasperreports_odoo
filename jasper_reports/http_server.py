@@ -89,8 +89,8 @@ class JasperHandler(BaseHTTPRequestHandler):
             return self.cache[key]
 
         context = {
-            'lang': language,
-        }
+                   'lang': language,
+                   }
 
         uid = netsvc.dispatch_rpc('common', 'login', (database, user,
                                                       password))

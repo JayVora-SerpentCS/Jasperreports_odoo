@@ -22,5 +22,30 @@
 			<field name="key2" eval="'client_print_multi'" />
 			<field name="value_unpickle" eval="'ir.actions.report.xml, ' +str(res_users_jaspertest)" />
 		</record>
+
+
+    <!-- Report for Sale Order -->
+    <record id="sale_order_jaspertest" model="ir.actions.report.xml">
+        <field name="string">Jasper Sale</field>
+        <field name="auto">True</field>
+        <field name="model">sale.order</field>
+        <field name="jasper_model_id" ref="sale.model_sale_order"/>
+        <field name="name">Jasper Sale</field>
+        <field name="report_name">sale.order.jaspertest</field>
+        <field name="rml">jasper_reports/custom_reports/sale_order_report.jrxml</field>
+        <field name="report_rml">jasper_reports/custom_reports/sale_order_report.jrxml</field>
+        <field name="menu">True</field>
+        <field name="header">False</field>
+        <field name="jasper_report">True</field>
+        <field name="jasper_output">pdf</field>
+    </record>
+    
+    <record id="sale_order_jaspertest_values" model="ir.values">
+            <field name="name">Jasper Sale</field>
+            <field name="model">sale.order</field>
+            <field name="key2" eval="'client_print_multi'" />
+            <field name="value_unpickle" eval="'ir.actions.report.xml, ' +str(sale_order_jaspertest)" />
+        </record>
+
 </data>
 </openerp>
