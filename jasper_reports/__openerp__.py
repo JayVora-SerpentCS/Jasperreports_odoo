@@ -50,7 +50,7 @@
              'jasper_wizard.xml',
              'report_xml_view.xml',
              'security/ir.model.access.csv',
-             'data/jasper_data.xml'
+             'data/jasper_data.xml',
              ],
     "active": False,
     "installable": True,
