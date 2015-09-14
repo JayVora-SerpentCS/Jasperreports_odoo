@@ -37,7 +37,7 @@ from openerp import models, fields, api
 
 class create_data_template(models.TransientModel):
     _name = 'jasper.create.data.template'
-    _description = 'Create data template'
+    _description = 'create data template'
 
     @api.multi
     def action_create_xml(self):
