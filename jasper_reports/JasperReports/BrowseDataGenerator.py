@@ -235,7 +235,7 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
             elif root == 'User':
                 value = self.env['res.users'
                                  ].browse(self.cr, self.uid, self.uid,
-                                               self._context)
+                                          self._context)
             else:
                 if root == 'id':
                     value = record.id
