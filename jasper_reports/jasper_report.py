@@ -5,6 +5,8 @@
 #                         http://www.NaN-tic.com
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
+# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+#                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
 # programmers who take the whole responsability of assessing all potential
@@ -31,27 +33,26 @@
 
 
 import openerp
-from openerp import release
-from openerp import report
-from openerp import pooler
-from openerp.osv import orm, osv, fields
-from openerp import tools
-from openerp import netsvc
-
-import os
 import tempfile
 import logging
+import os
+from openerp import release, tools, report, pooler, models
+from . JasperReports.BrowseDataGenerator import CsvBrowseDataGenerator
+from . JasperReports.JasperServer import JasperServer
+from . JasperReports.RecordDataGenerator import CsvRecordDataGenerator
+from . JasperReports.JasperReport import JasperReport
 
-from JasperReports import *
-
-# Determines the port where the JasperServer process should listen with its XML-RPC server for incomming calls
+# Determines the port where the JasperServer process should listen
+# with its XML-RPC server for incomming calls
 tools.config['jasperport'] = tools.config.get('jasperport', 8090)
 
-# Determines the file name where the process ID of the JasperServer process should be stored
+# Determines the file name where the process ID of the
+# JasperServer process should be stored
 tools.config['jasperpid'] = tools.config.get('jasperpid', 'openerp-jasper.pid')
 
 # Determines if temporary files will be removed
 tools.config['jasperunlink'] = tools.config.get('jasperunlink', True)
+
 
 class Report:
     def __init__(self, name, cr, uid, ids, data, context):
@@ -60,7 +61,9 @@ class Report:
         self.uid = uid
         self.ids = ids
         self.data = data
-        self.model = self.data.get('model', False) or context.get('active_model', False)
+        self.model = self.data.get('model',
+                                   False) or context.get('active_model',
+                                                         False)
         self.context = context or {}
         self.pool = pooler.get_pool(self.cr.dbname)
         self.reportPath = None
@@ -70,20 +73,28 @@ class Report:
 
     def execute(self):
         """
-        If self.context contains "return_pages = True" it will return the number of pages
-        of the generated report.
+        If self.context contains "return_pages = True" it will return
+        the number of pages of the generated report.
         """
         logger = logging.getLogger(__name__)
 
         # * Get report path *
-        # Not only do we search the report by name but also ensure that 'report_rml' field
-        # has the '.jrxml' postfix. This is needed because adding reports using the <report/>
-        # tag, doesn't remove the old report record if the id already existed (ie. we're trying
-        # to override the 'purchase.order' report in a new module). As the previous record is
-        # not removed, we end up with two records named 'purchase.order' so we need to destinguish
+        # Not only do we search the report by name but also ensure that
+        # 'report_rml' field has the '.jrxml' postfix. This is needed because
+        # adding reports using the <report/> tag, doesn't remove the old
+        # report record if the id already existed (ie. we're trying to
+        # override the 'purchase.order' report in a new module).
+        # As the previous record is not removed, we end up with two records
+        # named 'purchase.order' so we need to destinguish
         # between the two by searching '.jrxml' in report_rml.
-        ids = self.pool.get('ir.actions.report.xml').search(self.cr, self.uid, [('report_name', '=', self.name[7:]), ('report_rml', 'ilike', '.jrxml')], context=self.context)
-        data = self.pool.get('ir.actions.report.xml').read(self.cr, self.uid, ids[0], ['report_rml', 'jasper_output'])
+        ids = self.pool.get('ir.actions.report.xml'
+                            ).search(self.cr, self.uid,
+                                     [('report_name', '=', self.name[7:]),
+                                      ('report_rml', 'ilike', '.jrxml')],
+                                     context=self.context)
+        data = self.pool.get('ir.actions.report.xml'
+                             ).read(self.cr, self.uid, ids[0],
+                                    ['report_rml', 'jasper_output'])
         if data['jasper_output']:
             self.outputFormat = data['jasper_output']
         self.reportPath = data['report_rml']
@@ -110,9 +121,13 @@ class Report:
         # If the language used is xpath create the xmlFile in dataFile.
         if self.report.language() == 'xpath':
             if self.data.get('data_source', 'model') == 'records':
-                generator = CsvRecordDataGenerator(self.report, self.data['records'])
+                generator = CsvRecordDataGenerator(self.report,
+                                                   self.data['records'])
             else:
-                generator = CsvBrowseDataGenerator(self.report, self.model, self.pool, self.cr, self.uid, self.ids, self.context)
+                generator = CsvBrowseDataGenerator(self.report, self.model,
+                                                   self.pool, self.cr,
+                                                   self.uid, self.ids,
+                                                   self.context)
             generator.generate(dataFile)
             self.temporaryFiles += generator.temporaryFiles
 
@@ -138,15 +153,23 @@ class Report:
                 self.temporaryFiles.append(subreportDataFile)
 
                 if subreport.isHeader():
-                    generator = CsvBrowseDataGenerator(subreport, 'res.users', self.pool, self.cr, self.uid, [self.uid], self.context)
+                    generator = CsvBrowseDataGenerator(subreport,
+                                                       'res.users', self.pool,
+                                                       self.cr, self.uid,
+                                                       [self.uid],
+                                                       self.context)
                 elif self.data.get('data_source', 'model') == 'records':
-                    generator = CsvRecordDataGenerator(subreport, self.data['records'])
+                    generator = CsvRecordDataGenerator(subreport,
+                                                       self.data['records'])
                 else:
-                    generator = CsvBrowseDataGenerator(subreport, self.model, self.pool, self.cr, self.uid, self.ids, self.context)
+                    generator = CsvBrowseDataGenerator(subreport, self.model,
+                                                       self.pool, self.cr,
+                                                       self.uid, self.ids,
+                                                       self.context)
                 generator.generate(subreportDataFile)
 
-
-        # Call the external java application that will generate the PDF file in outputFile
+        # Call the external java application that will generate the
+        # PDF file in outputFile
         pages = self.executeReport(dataFile, outputFile, subreportDataFiles)
         elapsed = (time.time() - start) / 60
         logger.info("ELAPSED: %f" % elapsed)
@@ -163,7 +186,7 @@ class Report:
             for file in self.temporaryFiles:
                 try:
                     os.unlink(file)
-                except os.error, e:
+                except os.error:
                     logger.warning("Could not remove file '%s'." % file)
         self.temporaryFiles = []
 
@@ -199,11 +222,18 @@ class Report:
         return 'jdbc:postgresql://%s:%s/%s' % (host, port, dbname)
 
     def userName(self):
-        return tools.config['db_user'] or self.pool['ir.config_parameter'].get_param(self.cr, self.uid, 'db_user') or self.systemUserName()
+        return tools.config['db_user'
+                            ]or self.pool['ir.config_parameter'
+                                          ].get_param(self.cr, self.uid,
+                                                      'db_user'
+                                                      )or self.systemUserName()
 
     def password(self):
-        
-        return tools.config['db_password'] or self.pool['ir.config_parameter'].get_param(self.cr, self.uid, 'db_password') or ''
+
+        return tools.config['db_password'
+                            ] or self.pool['ir.config_parameter'
+                                           ].get_param(self.cr, self.uid,
+                                                       'db_password') or ''
 
     def executeReport(self, dataFile, outputFile, subreportDataFiles):
         locale = self.context.get('lang', 'en_US')
@@ -227,7 +257,8 @@ class Report:
 
         server = JasperServer(int(tools.config['jasperport']))
         server.setPidFile(tools.config['jasperpid'])
-        return server.execute(connectionParameters, self.reportPath, outputFile, parameters)
+        return server.execute(connectionParameters, self.reportPath,
+                              outputFile, parameters)
 
 
 class report_jasper(report.interface.report_int):
@@ -242,7 +273,7 @@ class report_jasper(report.interface.report_int):
         else:
             if name in openerp.report.interface.report_int._reports:
                 del openerp.report.interface.report_int._reports[name]
-#             openerp.report.interface.report_int._reports[name] = 
+#             openerp.report.interface.report_int._reports[name] =
         super(report_jasper, self).__init__(name)
         self.model = model
         self.parser = parser
@@ -253,18 +284,18 @@ class report_jasper(report.interface.report_int):
             d = self.parser(cr, uid, ids, data, context)
             ids = d.get('ids', ids)
             name = d.get('name', self.name)
-            # Use model defined in report_jasper definition. Necesary for menu entries.
+            # Use model defined in report_jasper definition.
+            # Necesary for menu entries.
             data['model'] = d.get('model', self.model)
             data['records'] = d.get('records', [])
             # data_source can be 'model' or 'records' and lets parser to return
-            # an empty 'records' parameter while still executing using 'records'
+            # an empty 'records' parameter while still executing using
+            # 'records'
             data['data_source'] = d.get('data_source', 'model')
             data['parameters'] = d.get('parameters', {})
         r = Report(name, cr, uid, ids, data, context)
         # return ( r.execute(), 'pdf' )
         return r.execute()
-
-
 
 if release.major_version == '5.0':
     # Version 5.0 specific code
@@ -275,26 +306,31 @@ if release.major_version == '5.0':
 
     def register_jasper_report(name, model):
         name = 'report.%s' % name
-        # Register only if it didn't exist another "jasper_report" with the same name
-        # given that developers might prefer/need to register the reports themselves.
+        # Register only if it didn't exist another "jasper_report" with
+        # the same name given that developers might prefer/need
+        # to register the reports themselves.
         # For example, if they need their own parser.
         if name in openerp.report.interface.report_int._reports:
-            if isinstance(openerp.report.interface.report_int._reports[name], report_jasper):
+            if isinstance(openerp.report.interface.report_int._reports[name],
+                          report_jasper):
                 return openerp.report.interface.report_int._reports[name]
             del openerp.report.interface.report_int._reports[name]
         report_jasper(name, model)
-
 
     # This hack allows automatic registration of jrxml files without
     # the need for developers to register them programatically.
 
     old_register_all = report.interface.register_all
+
     def new_register_all(db):
         value = old_register_all(db)
 
         cr = db.cursor()
-        # Originally we had auto=true in the SQL filter but we will register all reports.
-        cr.execute("SELECT * FROM ir_act_report_xml WHERE report_rml ilike '%.jrxml' ORDER BY id")
+        # Originally we had auto=true in the SQL filter but we will
+        # register all reports.
+        query = "SELECT * FROM ir_act_report_xml WHERE \
+        report_rml ilike '%.jrxml' ORDER BY id"
+        cr.execute(query)
         records = cr.dictfetchall()
         cr.close()
         for record in records:
@@ -303,33 +339,39 @@ if release.major_version == '5.0':
 
     report.interface.register_all = new_register_all
 
+
 def register_jasper_report(report_name, model_name):
     name = 'report.%s' % report_name
-    # Register only if it didn't exist another "jasper_report" with the same name
-    # given that developers might prefer/need to register the reports themselves.
+    # Register only if it didn't exist another "jasper_report"
+    # with the same name given that developers might prefer/need
+    # to register the reports themselves.
     # For example, if they need their own parser.
     if name in openerp.report.interface.report_int._reports:
-        if isinstance(openerp.report.interface.report_int._reports[name], report_jasper):
+        if isinstance(openerp.report.interface.report_int._reports[name],
+                      report_jasper):
             return openerp.report.interface.report_int._reports[name]
         del openerp.report.interface.report_int._reports[name]
     return report_jasper(name, model_name)
 
-class ir_actions_report_xml(osv.osv):
+
+class ir_actions_report_xml(models.Model):
     _inherit = 'ir.actions.report.xml'
 
     def _lookup_report(self, cr, name):
         """
         Look up a report definition.
         """
-        opj = os.path.join
-        # First lookup in the deprecated place, because if the report definition
-        # has not been updated, it is more likely the correct definition is there.
+        # First lookup in the deprecated place, because if the report
+        # definition has not been updated, it is more likely
+        # the correct definition is there.
         # Only reports with custom parser sepcified in Python are still there.
-        cr.execute("SELECT * FROM ir_act_report_xml WHERE jasper_report='t' and report_name=%s limit 1", (name,))
+        query = "SELECT * FROM ir_act_report_xml WHERE \
+        jasper_report='t' and report_name=%s limit 1"
+        cr.execute(query, (name,))
         record = cr.dictfetchone()
         if not record:
             return super(ir_actions_report_xml, self)._lookup_report(cr, name)
-        #Calling Jasper
+        # Calling Jasper
         new_report = register_jasper_report(name, record['model'])
         return new_report
 

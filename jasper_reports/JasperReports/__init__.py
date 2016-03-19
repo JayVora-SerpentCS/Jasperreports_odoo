@@ -1,7 +1,10 @@
+# -*- encoding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
 #                         http://www.NaN-tic.com
+# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+#                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
 # programmers who take the whole responsability of assessing all potential
@@ -26,8 +29,8 @@
 #
 ##############################################################################
 
-from AbstractDataGenerator import *
-from BrowseDataGenerator import *
-from RecordDataGenerator import *
-from JasperReport import *
-from JasperServer import *
+from . import AbstractDataGenerator
+from . import BrowseDataGenerator
+from . import RecordDataGenerator
+from . import JasperReport
+from . import JasperServer

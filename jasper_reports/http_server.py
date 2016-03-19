@@ -1,10 +1,12 @@
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
 #                         http://www.NaN-tic.com
 # Copyright (c) 2012 Omar Castiñeira Saavedra <omar@pexego.es>
 #                         Pexego Sistemas Informáticos http://www.pexego.es
+# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+#                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
 # programmers who take the whole responsability of assessing all potential
@@ -33,65 +35,68 @@ from BaseHTTPServer import BaseHTTPRequestHandler
 from openerp import netsvc
 from openerp import tools
 
+
 class Message:
     def __init__(self):
         self.status = False
+
 
 class JasperHandler(BaseHTTPRequestHandler):
     cache = {}
 
     def __init__(self, request, client_address, server):
         pass
-        #print "REQUEST: ", dir(request)
-        #print "DIR SELF: ", dir(self)
-
-    #def __getattr__(self, name):
-        #print "NAME: ", name
-        #return JasperHandler.__getattr__(self, name)
 
     def do_OPTIONS(self):
         pass
 
     def parse_request(self, *args, **kwargs):
-        #self.headers = Message()
-        #self.request_version = 'HTTP/1.1'
-        #self.command = 'OPTIONS'
+        # self.headers = Message()
+        # self.request_version = 'HTTP/1.1'
+        # self.command = 'OPTIONS'
 
-        path = self.raw_requestline.replace('GET','').strip().split(' ')[0]
+        path = self.raw_requestline.replace('GET', '').strip().split(' ')[0]
         try:
             result = self.execute(path)
         except Exception, e:
             result = '<error><exception>%s</exception></error>' % (e.args, )
-        self.wfile.write( result )
+        self.wfile.write(result)
         return True
 
     def execute(self, path):
-        #print "PATH: ", path
         path = path.strip('/')
         path = path.split('?')
         model = path[0]
         arguments = {}
         for argument in path[-1].split('&'):
             argument = argument.split('=')
-            arguments[ argument[0] ] = argument[-1]
+            arguments[argument[0]] = argument[-1]
 
         use_cache = tools.config.get('jasper_cache', True)
-        database = arguments.get('database', tools.config.get('jasper_database', 'stable8') )
-        user = arguments.get('user', tools.config.get('jasper_user', 'admin') )
-        password = arguments.get('password', tools.config.get('jasper_password', 'a') )
-        depth = int( arguments.get('depth', tools.config.get('jasper_depth', 3) ) )
-        language = arguments.get('language', tools.config.get('jasper_language', 'en'))
+        database = arguments.get('database',
+                                 tools.config.get('jasper_database',
+                                                  'stable8'))
+        user = arguments.get('user', tools.config.get('jasper_user', 'admin'))
+        password = arguments.get('password',
+                                 tools.config.get('jasper_password', 'a'))
+        depth = int(arguments.get('depth', tools.config.get('jasper_depth',
+                                                            3)))
+        language = arguments.get('language',
+                                 tools.config.get('jasper_language', 'en'))
         # Check if data is in cache already
         key = '%s|%s|%s|%s|%s' % (model, database, user, depth, language)
         if key in self.cache:
             return self.cache[key]
 
-        context = {
-            'lang': language,
-        }
+        context = {'lang': language}
 
-        uid = netsvc.dispatch_rpc('common', 'login', (database, user, password))
-        result = netsvc.dispatch_rpc('object', 'execute', (database, uid, password, 'ir.actions.report.xml', 'create_xml', model, depth, context))
+        uid = netsvc.dispatch_rpc('common', 'login', (database, user,
+                                                      password))
+        result = netsvc.dispatch_rpc('object',
+                                     'execute',
+                                     (database, uid, password,
+                                      'ir.actions.report.xml',
+                                      'create_xml', model, depth, context))
 
         if use_cache:
             self.cache[key] = result
