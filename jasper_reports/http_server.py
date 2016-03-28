@@ -30,7 +30,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 ##############################################################################
-####from openerp.service.websrv_lib import reg_http_service
+# from openerp.service.websrv_lib import reg_http_service
 from BaseHTTPServer import BaseHTTPRequestHandler
 from openerp import netsvc
 from openerp import tools
@@ -103,4 +103,4 @@ class JasperHandler(BaseHTTPRequestHandler):
 
         return result
 
-####reg_http_service('/jasper/', JasperHandler)
+# reg_http_service('/jasper/', JasperHandler)

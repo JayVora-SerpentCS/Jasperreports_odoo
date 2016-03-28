@@ -257,6 +257,14 @@ class Report:
 
         server = JasperServer(int(tools.config['jasperport']))
         server.setPidFile(tools.config['jasperpid'])
+#        java path for jasper server
+        company_rec = self.pool['res.users'].browse(self.cr,self.uid,self.uid).company_id
+        java_path = ''
+        if company_rec and company_rec.id:
+            java_path = company_rec.java_path
+            server.set_java_path(java_path)
+        server.set_java_path(java_path)
+
         return server.execute(connectionParameters, self.reportPath,
                               outputFile, parameters)
 

@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
-#                         http://www.NaN-tic.com
+# Copyright (c) 2012 Omar Castiñeira Saavedra <omar@pexego.es>
+#                         Pexego Sistemas Informáticos http://www.pexego.es
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
 # Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
@@ -31,29 +31,11 @@
 #
 ##############################################################################
 
-{
-    "name": "Jasper Reports",
-    "version": "1.1.1",
-    "description": '''
-    This module integrates Jasper Reports with OpenERP. V6 and v7 compatible"
-    version was made by NaN-tic.
-    Serpent Consulting Services Pvt. Ltd. has migrated it to v8. ''',
-    "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd.",
-    "website": "http://www.nan-tic.com, http://www.serpentcs.com",
-    'images': ['images/jasper_reports-hover.png',
-               'images/jasper_reports.png'
-               ],
-    "depends": ["sale"],
-    "category": "Generic Modules/Jasper Reports",
-    "demo": ['jasper_demo.xml'],
-    "data": ['res_company_view.xml',
-             'wizard/jasper_create_data_template.xml',
-             'jasper_wizard.xml',
-             'report_xml_view.xml',
-             'security/ir.model.access.csv',
-             'data/jasper_data.xml',
-             ],
-    "active": False,
-    "installable": True,
-    'application': True,
-}
+from openerp import models, fields
+
+
+class res_company(models.Model):
+
+    _inherit = 'res.company'
+
+    java_path = fields.Char('Java Path', help="Your java path which was downloaded from http://www.serpentcs.com/")

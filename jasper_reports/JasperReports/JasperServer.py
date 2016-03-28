@@ -30,7 +30,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 ##############################################################################
-
 import os
 import glob
 import time
@@ -40,12 +39,14 @@ import xmlrpclib
 import logging
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
-
+from openerp import models, fields, _
+import openerp.pooler as pooler
 
 class JasperServer:
     def __init__(self, port=8090):
         self.port = port
         self.pidfile = None
+        self.javapath = None
         url = 'http://localhost:%d' % port
         self.proxy = xmlrpclib.ServerProxy(url, allow_none=True)
         self.logger = logging.getLogger(__name__)
@@ -60,22 +61,34 @@ class JasperServer:
     def setPidFile(self, pidfile):
         self.pidfile = pidfile
 
+    def set_java_path(self, javapath):
+        self.javapath = javapath
+
     def start(self):
+        java_path = self.javapath
+        if java_path == False:
+            raise except_orm(_('Java Path Not Found !'),_('Please add java path into the jasper configuration page under the company form view'))
+        else :
+            libraries = str(java_path) + '/lib'
+            if os.path.exists(str(libraries)):
+                java_path = java_path
+            else:
+                raise except_orm(_('libraries Not Found !'),_('There is No libraries found in Java'))
         env = {}
         env.update(os.environ)
         if os.name == 'nt':
             a = ';'
         else:
             a = ':'
-        libs = os.path.join(self.path(), '..', 'java', 'lib', '*.jar')
+        libs = os.path.join(java_path, 'lib', '*.jar')
         env['CLASSPATH'
-            ] = os.path.join(self.path(), '..', 'java' + a
+            ] = os.path.join(java_path + a
                              ) + a.join(glob.glob(libs)
                                         ) + a + os.path.join(self.path(),
                                                              '..',
                                                              'custom_reports')
-        cwd = os.path.join(self.path(), '..', 'java')
 
+        cwd = os.path.join(java_path)
         # Set headless = True because otherwise, java may use
         # existing X session and if session is closed JasperServer
         # would start throwing exceptions. So we better avoid
