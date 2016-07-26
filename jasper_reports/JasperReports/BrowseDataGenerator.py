@@ -165,8 +165,8 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
         for record in self.pool.get(self.model).browse(self.cr, self.uid, self.ids, self.context):
             newRecords = self.generateIds( record, relations, '', [ { 'root': record } ] )
             copies = 1
-            if self.report.copiesField() and record.__hasattr__(self.report.copiesField()):
-                copies = int( record.__getattr__(self.report.copiesField()) )
+            if self.report.copiesField() and hasattr(record, self.report.copiesField()):
+                copies = int(getattr(record, self.report.copiesField()))
             for new in newRecords:
                 for x in xrange(copies):
                     self.allRecords.append( new )
@@ -283,8 +283,8 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
         for record in self.pool.get(self.model).browse(self.cr, self.uid, self.ids, self.context):
             newRecords = self.generateIds( record, relations, '', [ { 'root': record } ] )
             copies = reportCopies
-            if copiesField and record.__hasattr__(copiesField):
-                copies = copies * int( record.__getattr__(copiesField) )
+            if copiesField and hasattr(record, copiesField):
+                copies = copies * int(getattr(record, copiesField))
             sequence += 1
             subsequence = 0
             for new in newRecords:
