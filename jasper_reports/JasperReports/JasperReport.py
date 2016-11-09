@@ -46,7 +46,7 @@ except ImportError:
 dataSourceExpressionRegExp = re.compile( r"""\$P\{(\w+)\}""" )
 
 class JasperReport:
-    def __init__(self, fileName='', pathPrefix=''):
+    def __init__(self, fileName='', pathPrefix='', depth=0):
         self._reportPath = fileName
         self._pathPrefix = pathPrefix.strip()
         if self._pathPrefix and self._pathPrefix[-1] != '/':
@@ -61,6 +61,7 @@ class JasperReport:
         self._copies = 1
         self._copiesField = False
         self._isHeader = False
+        self.depth = depth
         if fileName:
             self.extractProperties()
 
@@ -239,20 +240,22 @@ class JasperReport:
                 subPrefix.append( pathPrefix )
             subPrefix = '/'.join( subPrefix )
 
-            subreport = JasperReport( subreportExpression, subPrefix )
-            self._subreports.append({
-                'parameter': dataSourceExpression,
-                'filename': subreportExpression,
-                'model': model,
-                'pathPrefix': pathPrefix,
-                'report': subreport,
-                'depth': 1,
-            })
-            for subsubInfo in subreport.subreports():
-                subsubInfo['depth'] += 1
-                # Note hat 'parameter' (the one used to pass report's DataSource) must be
-                # the same in all reports
-                self._subreports.append( subsubInfo )
+            # Recursive subreport: max depth = 8 levels
+            if not (subreportExpression == self._reportPath and self.depth > 7):
+                subreport = JasperReport( subreportExpression, subPrefix, self.depth+1 )
+                self._subreports.append({
+                    'parameter': dataSourceExpression,
+                    'filename': subreportExpression,
+                    'model': model,
+                    'pathPrefix': pathPrefix,
+                    'report': subreport,
+                    'depth': 1,
+                })
+                for subsubInfo in subreport.subreports():
+                    subsubInfo['depth'] += 1
+                    # Note hat 'parameter' (the one used to pass report's DataSource) must be
+                    # the same in all reports
+                    self._subreports.append( subsubInfo )
 
         # Dataset
         # Here we expect the following structure in the .jrxml file:
