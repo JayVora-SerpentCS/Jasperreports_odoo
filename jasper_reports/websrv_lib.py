@@ -21,7 +21,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 ###############################################################################
 
 
@@ -32,23 +32,24 @@
 """
 
 import logging
-import SocketServer
-from BaseHTTPServer import *
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 
 _logger = logging.getLogger(__name__)
 
+
 class AuthRequiredExc(Exception):
-    def __init__(self,atype,realm):
+    def __init__(self, atype, realm):
         Exception.__init__(self)
         self.atype = atype
         self.realm = realm
 
+
 class AuthRejectedExc(Exception):
     pass
 
+
 class AuthProvider:
-    def __init__(self,realm):
+    def __init__(self, realm):
         self.realm = realm
 
     def authenticate(self, user, passwd, client_address):
@@ -57,15 +58,16 @@ class AuthProvider:
     def log(self, msg):
         print msg
 
-    def checkRequest(self,handler,path = '/'):
+    def checkRequest(self, handler, path='/'):
         """ Check if we are allowed to process that request
         """
         pass
 
+
 class HTTPHandler(SimpleHTTPRequestHandler):
-    def __init__(self,request, client_address, server):
-        SimpleHTTPRequestHandler.__init__(self,request,client_address,server)
-        # print "Handler for %s inited" % str(client_address)
+    def __init__(self, request, client_address, server):
+        SimpleHTTPRequestHandler.__init__(self, request, client_address,
+                                          server)
         self.protocol_version = 'HTTP/1.1'
         self.connection = dummyconn()
 
@@ -82,6 +84,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
 # A list of HTTPDir.
 handlers = []
+
 
 class HTTPDir:
     """ A dispatcher class, like a virtual folder in httpd
@@ -105,6 +108,7 @@ class HTTPDir:
             handler.auth_provider = self.auth_provider()
         return handler
 
+
 def reg_http_service(path, handler, auth_provider=None, secure_only=False):
     """ Register a HTTP handler at a given path.
 
@@ -123,6 +127,7 @@ def reg_http_service(path, handler, auth_provider=None, secure_only=False):
         # we are inserting.
     handlers.insert(lastpos, service)
 
+
 def list_http_services(protocol=None):
     global handlers
     ret = []
@@ -132,6 +137,7 @@ def list_http_services(protocol=None):
     
     return ret
 
+
 def find_http_service(path, secure=False):
     global handlers
     for vdir in handlers:
@@ -140,6 +146,7 @@ def find_http_service(path, secure=False):
             continue
         return vdir
     return None
+
 
 class noconnection(object):
     """ a class to use instead of the real connection
@@ -160,17 +167,20 @@ class noconnection(object):
             raise AttributeError("No-connection class cannot tell real socket")
         return self.__hidden_socket.getsockname()
 
+
 class dummyconn:
     def shutdown(self, tru):
         pass
 
+
 def _quote_html(html):
     return html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
+
 class FixSendError:
-    #error_message_format = """ """
+
     def send_error(self, code, message=None):
-        #overriden from BaseHTTPRequestHandler, we also send the content-length
+
         try:
             short, long = self.responses[code]
         except KeyError:
@@ -179,9 +189,11 @@ class FixSendError:
             message = short
         explain = long
         _logger.error("code %d, message %s", code, message)
-        # using _quote_html to prevent Cross Site Scripting attacks (see bug #1100201)
-        content = (self.error_message_format %
-                   {'code': code, 'message': _quote_html(message), 'explain': explain})
+        content = (self.error_message_format % {
+            'code': code,
+            'message': _quote_html(message),
+            'explain': explain
+        })
         self.send_response(code, message)
         self.send_header("Content-Type", self.error_content_type)
         self.send_header('Connection', 'close')
@@ -193,7 +205,9 @@ class FixSendError:
         if self.command != 'HEAD' and code >= 200 and code not in (204, 304):
             self.wfile.write(content)
 
+
 class HttpOptions:
+
     _HTTP_OPTIONS = {'Allow': ['OPTIONS' ] }
 
     def do_OPTIONS(self):
@@ -230,6 +244,3 @@ class HttpOptions:
 
         """
         return opts
-
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
