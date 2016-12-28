@@ -46,10 +46,10 @@ from . AbstractDataGenerator import AbstractDataGenerator
 
 
 class BrowseDataGenerator(AbstractDataGenerator):
-    def __init__(self, report, model, pool, cr, uid, ids, context):
+    def __init__(self, report, model, env, cr, uid, ids, context):
         self.report = report
         self.model = model
-        self.pool = pool
+        self.env = env
         self.cr = cr
         self.uid = uid
         self.ids = ids
@@ -323,9 +323,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
         reportCopies = self.report.copies() or 1
         sequence = 0
         copiesField = self.report.copiesField()
-        for record in self.pool.get(self.model).browse(self.cr, self.uid,
-                                                       self.ids,
-                                                       self._context):
+        for record in self.env[self.model].browse(self.ids):
             newRecords = self.generateIds(record, relations, '',
                                           [{'root': record}])
             copies = reportCopies
@@ -381,16 +379,11 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             else:
                 currentPath = root
             if root == 'Attachments':
-                ids = self.env['ir.attachment'
-                               ].search(self.cr, self.uid,
-                                        [('res_model', '=', record._name),
-                                         ('res_id', '=', record.id)])
-                value = self.env['ir.attachment'
-                                 ].browse(self.cr, self.uid, ids)
+                ids = self.env['ir.attachment'].search([('res_model', '=', record._name), ('res_id', '=', record.id)])
+                value = self.env['ir.attachment'].browse(ids)
             elif root == 'User':
-                value = self.pool.get('res.users').browse(self.cr, self.uid,
-                                                          self.uid,
-                                                          self._context)
+                value = self.env['res.users'].browse(self.uid)
+
             elif root == 'Special':
                 fields2 = [f.partition('/')[2] for f in fields
                            if f.partition('/')[0] == root]
