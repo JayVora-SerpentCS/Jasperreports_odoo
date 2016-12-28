@@ -31,6 +31,7 @@
 
 
 class AbstractDataGenerator:
+
     # Simple function all DataGenerators should implement
-    def generate(self, fileName):
+    def generate(self, filename):
         pass

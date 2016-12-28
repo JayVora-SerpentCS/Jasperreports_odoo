@@ -38,14 +38,17 @@ import csv
 import copy
 import base64
 from xml.dom.minidom import getDOMImplementation
-from openerp.osv import orm
 import tempfile
 import codecs
 import logging
-from . AbstractDataGenerator import AbstractDataGenerator
+
+from odoo.osv import orm
+
+from . abstract_data_generator import AbstractDataGenerator
 
 
 class BrowseDataGenerator(AbstractDataGenerator):
+
     def __init__(self, report, model, env, cr, uid, ids, context):
         self.report = report
         self.model = model
@@ -67,30 +70,34 @@ class BrowseDataGenerator(AbstractDataGenerator):
     def languages(self):
         if self._languages:
             return self._languages
-        ids = self.env['res.lang'
-                       ].search(self.cr, self.uid,
-                                [('translatable', '=', '1')])
-        self._languages = self.env['res.lang'].read(self.cr, self.uid,
-                                                    ids, ['code'])
-        self._languages = [x['code'] for x in self._languages]
+        # ids = self.env['res.lang'
+        #                ].search(self.cr, self.uid,
+        #                         [('translatable', '=', '1')])
+        # self._languages = self.env['res.lang'].read(self.cr, self.uid,
+        #                                             ids, ['code'])
+        # self._languages = [x['code'] for x in self._languages]
+        languages = self.env['res.lang'].search([('translatable', '=', '1')])
+        self._languages = languages.mapped('code')
         return self._languages
 
-    def valueInAllLanguages(self, model, id, field):
+    def value_in_all_languages(self, model, id, field):
         context = copy.copy(self._context)
         model = self.env[model]
         values = {}
+
         for language in self.languages():
             if language == 'en_US':
                 context['lang'] = False
             else:
                 context['lang'] = language
-            value = model.read(self.cr, self.uid, [id], [field],
-                               context=context)
-            values[language] = value[0][field] or ''
 
-            if(model._columns[field]._type == 'selection' and
-               model._columns[field
-                              ].selection):
+            # value = model.read(self.cr, self.uid, [id], [field],
+            #                    context=context)
+            # values[language] = value[0][field] or ''
+            values[language] = model.browser(id).mapped(field)
+
+            if model._columns[field]._type == 'selection' and model._columns[field].selection:
+
                 field_data = model.fields_get(self.cr, self.uid,
                                               allfields=[field],
                                               context=context)
@@ -446,7 +453,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             # Show all translations for a field
             type = self.report.fields()[currentPath]['type']
             if type == 'java.lang.Object':
-                value = self.valueInAllLanguages(record._name, record.id, root)
+                value = self.value_in_all_languages(record._name, record.id, root)
 
             if field in record._columns:
                 field_type = record._columns[field]._type
