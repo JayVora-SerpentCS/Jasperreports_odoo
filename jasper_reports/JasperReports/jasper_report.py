@@ -121,7 +121,8 @@ class JasperReport:
 
         # Language
         # is XPath.
-        lang_tags = doc.xpath('/jr:jasperReport/jr:queryString', namespaces=nss)
+        lang_tags = doc.xpath('/jr:jasperReport/jr:queryString',
+                              namespaces=nss)
         if lang_tags:
             if lang_tags[0].get('language'):
                 self.language = lang_tags[0].get('language').lower()
@@ -193,7 +194,7 @@ class JasperReport:
                 continue
 
             subreport_expression = tag.findtext('{%s}subreportExpression' % ns,
-                                               '')
+                                                '')
             if not subreport_expression:
                 continue
             subreport_expression = subreport_expression.strip()
@@ -336,7 +337,8 @@ class JasperReport:
             # We need to find the appropriate subDataset definition
             # for this dataset run.
             path14 = '//jr:subDataset[@name="%s"]'
-            sub_dataset = doc.xpath(path14 % sub_dataset_name, namespaces=nss)[0]
+            sub_dataset = doc.xpath(path14 % sub_dataset_name,
+                                    namespaces=nss)[0]
             field_tags = sub_dataset.xpath('jr:field', namespaces=nss)
             fields, field_names = self.extract_fields(field_tags, ns)
 
