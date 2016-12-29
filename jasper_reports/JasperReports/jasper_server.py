@@ -38,11 +38,13 @@ import socket
 import subprocess
 import xmlrpclib
 import logging
-from openerp.exceptions import except_orm
-from openerp.tools.translate import _
+
+from odoo.exceptions import UserError
+from odoo.tools.translate import _
 
 
 class JasperServer:
+
     def __init__(self, port=8090):
         self.port = port
         self.pidfile = None
@@ -57,9 +59,6 @@ class JasperServer:
     def path(self):
         return os.path.abspath(os.path.dirname(__file__))
 
-    def setPidFile(self, pidfile):
-        self.pidfile = pidfile
-
     def start(self):
         env = {}
         env.update(os.environ)
@@ -68,12 +67,10 @@ class JasperServer:
         else:
             a = ':'
         libs = os.path.join(self.path(), '..', 'java', 'lib', '*.jar')
-        env['CLASSPATH'
-            ] = os.path.join(self.path(), '..', 'java' + a
-                             ) + a.join(glob.glob(libs)
-                                        ) + a + os.path.join(self.path(),
-                                                             '..',
-                                                             'custom_reports')
+        env['CLASSPATH'] = os.path.join(self.path(), '..', 'java' + a) + \
+            a.join(glob.glob(libs)) + a + os.path.join(self.path(),
+                                                       '..', 'custom_reports')
+
         cwd = os.path.join(self.path(), '..', 'java')
 
         # Set headless = True because otherwise, java may use
@@ -84,12 +81,10 @@ class JasperServer:
                    'com.nantic.jasperreports.JasperServer',
                    unicode(self.port)]
         process = subprocess.Popen(command, env=env, cwd=cwd)
+
         if self.pidfile:
-            f = open(self.pidfile, 'w')
-            try:
+            with open(self.pidfile, 'w') as f:
                 f.write(str(process.pid))
-            finally:
-                f.close()
 
     def execute(self, *args):
         """
@@ -107,8 +102,6 @@ class JasperServer:
                     self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
                     pass
                 except xmlrpclib.Fault, e:
-                    raise except_orm(_('Report Error'), e.faultString)
+                    raise UserError(_('Report Error'), e.faultString)
         except xmlrpclib.Fault, e:
-            raise except_orm(_('Report Error'), e.faultString)
-
-# vim:noexpandtab:smartindent:tabstop=8:softtabstop=8:shiftwidth=8:
+            raise UserError(_('Report Error'), e.faultString)

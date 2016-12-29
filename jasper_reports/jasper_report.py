@@ -31,7 +31,6 @@
 #
 ##############################################################################
 
-
 import tempfile
 import logging
 import os
@@ -123,7 +122,7 @@ class Report:
         start = time.time()
 
         # If the language used is xpath create the xmlFile in dataFile.
-        if self.report.language() == 'xpath':
+        if self.report.language == 'xpath':
             if self.data.get('data_source', 'model') == 'records':
                 generator = CsvRecordDataGenerator(self.report,
                                                    self.data['records'])
@@ -137,7 +136,7 @@ class Report:
 
         sub_report_data_files = []
 
-        for sub_report_info in self.report.subreports():
+        for sub_report_info in self.report.subreports:
             sub_report = sub_report_info['report']
 
             if sub_report.language() == 'xpath':
@@ -258,7 +257,7 @@ class Report:
             'subreports': sub_report_data_files,
         }
         parameters = {
-            'STANDARD_DIR': self.report.standardDirectory(),
+            'STANDARD_DIR': self.report.standard_directory(),
             'REPORT_LOCALE': locale,
             'IDS': self.ids,
         }
@@ -266,7 +265,7 @@ class Report:
             parameters.update(self.data['parameters'])
 
         server = JasperServer(int(tools.config['jasperport']))
-        server.setPidFile(tools.config['jasperpid'])
+        server.pidfile = tools.config['jasperpid']
         return server.execute(connection_parameters, self.report_path,
                               output_file, parameters)
 
@@ -379,6 +378,7 @@ def register_jasper_report(report_name, model_name):
 
 
 class IrActionsReportXML(models.Model):
+
     _inherit = 'ir.actions.report.xml'
 
     def _lookup_report(self, name):
