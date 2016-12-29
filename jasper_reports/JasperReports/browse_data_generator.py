@@ -59,8 +59,8 @@ class BrowseDataGenerator(AbstractDataGenerator):
         # self.context = context
         self._context = context
         self._languages = []
-        self.imageFiles = {}
-        self.temporaryFiles = []
+        self.image_files = {}
+        self.temporary_files = []
         self.logger = logging.getLogger(__name__)
 
     def warning(self, message):
@@ -96,102 +96,105 @@ class BrowseDataGenerator(AbstractDataGenerator):
             # values[language] = value[0][field] or ''
             values[language] = model.browser(id).mapped(field)
 
-            if model._columns[field]._type == 'selection' and model._columns[field].selection:
+            if model._fields[field]._type == 'selection' and \
+                    model._fields[field].selection:
 
                 field_data = model.fields_get(self.cr, self.uid,
                                               allfields=[field],
                                               context=context)
-                values[language
-                       ] = dict(field_data[field]['selection'
-                                                  ]).get(values[language
-                                                                ],
-                                                         values[language])
+                values[language] = dict(field_data[field]['selection']).get(
+                    values[language], values[language])
 
         result = []
         for key, value in values.iteritems():
             result.append('%s~%s' % (key, value))
         return '|'.join(result)
 
-    def generateIds(self, record, relations, path, currentRecords):
+    def generate_ids(self, record, relations, path, current_records):
+
         unrepeated = set([field.partition('/')[0] for field in relations])
+
         for relation in unrepeated:
+
             root = relation.partition('/')[0]
             if path:
-                currentPath = '%s/%s' % (path, root)
+                current_path = '%s/%s' % (path, root)
             else:
-                currentPath = root
+                current_path = root
+
             if root == 'Attachments':
-                ids = self.env['ir.attachment'
-                               ].search(self.cr,
-                                        self.uid,
-                                        [('res_model', '=', record._name),
-                                         ('res_id', '=', record.id)])
-                value = self.env['ir.attachment'
-                                 ].browse(self.cr, self.uid, ids,
-                                          self._context)
+                ids = self.env['ir.attachment'].search([
+                    ('res_model', '=', record._name),
+                    ('res_id', '=', record.id)])
+
+                value = self.env['ir.attachment'].browse(ids)
+
             elif root == 'User':
-                value = self.env['res.users'
-                                 ].browse(self.cr, self.uid,
-                                          [self.uid], self._context)
+                value = self.env['res.users'].browse([self.uid])
             else:
                 if root == 'id':
                     value = record.id
                 elif hasattr(record, root):
                     value = getattr(record, root)
                 else:
-                    warng = "Field '%s' does not exist in model '%s'."
-                    self.warning(warng % (root, record._name))
+                    warning = "Field '%s' does not exist in model '%s'."
+                    self.warning(warning % (root, record._name))
                     continue
 
                 if isinstance(value, orm.browse_record):
                     relations2 = [f.partition('/')[2] for f in relations
                                   if f.partition('/')[0] == root and
                                   f.partition('/')[2]]
-                    return self.generateIds(value, relations2, currentPath,
-                                            currentRecords)
+                    return self.generate_ids(value, relations2, current_path,
+                                             current_records)
 
                 if not isinstance(value, orm.browse_record_list):
                     wrng2 = "Field '%s' in model '%s' is not a relation."
                     self.warning(wrng2 % (root, self.model))
-                    return currentRecords
+                    return current_records
 
             # Only join if there are any records because it's a LEFT JOIN
             # If we wanted an INNER JOIN we wouldn't check for "value" and
-            # return an empty currentRecords
+            # return an empty current_records
             if value:
                 # Only
-                newRecords = []
+                new_records = []
                 for v in value:
-                    currentNewRecords = []
-                    for id in currentRecords:
-                        new = id.copy()
-                        new[currentPath] = v
-                        currentNewRecords.append(new)
+                    current_new_records = []
+
+                    for rec_id in current_records:
+
+                        new = rec_id.copy()
+                        new[current_path] = v
+                        current_new_records.append(new)
+
                     relations2 = [f.partition('/')[2] for f in relations
                                   if f.partition('/')[0] == root and
                                   f.partition('/')[2]]
-                    newRecords += self.generateIds(v, relations2, currentPath,
-                                                   currentNewRecords)
+                    new_records += self.generate_ids(v, relations2,
+                                                     current_path,
+                                                     current_new_records)
 
-                currentRecords = newRecords
-        return currentRecords
+                current_records = new_records
+        return current_records
 
 
 class XmlBrowseDataGenerator(BrowseDataGenerator):
+
     # XML file generation works as follows:
     # By default (if no OPENERP_RELATIONS property exists in the report)
     # a record will be created for each model id we've been asked to show.
     # If there are any elements in the OPENERP_RELATIONS list,
     # they will imply a LEFT JOIN like behaviour on the rows to be shown.
-    def generate(self, fileName):
-        self.allRecords = []
+    def generate(self, file_name):
+        self.all_records = []
         relations = self.report.relations()
-        # The following loop generates one entry to allRecords list
+        # The following loop generates one entry to all_records list
         # for each record that will be created. If there are any relations
         # it acts like a LEFT JOIN against the main model/table.
         for record in self.env[self.model].browse(self.cr, self.uid,
                                                   self.ids, self._context):
-            newRecords = self.generateIds(record, relations, '',
+            newRecords = self.generate_ids(record, relations, '',
                                           [{'root': record}])
             copies = 1
             if(self.report.copiesField() and record.__hasattr__
@@ -199,21 +202,21 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                 copies = int(record.__getattr__(self.report.copiesField()))
             for new in newRecords:
                 for x in xrange(copies):
-                    self.allRecords.append(new)
+                    self.all_records.append(new)
 
         # Once all records have been calculated, create the
         # XML structure itself
         self.document = getDOMImplementation().createDocument(None, 'data',
                                                               None)
         topNode = self.document.documentElement
-        for records in self.allRecords:
+        for records in self.all_records:
             recordNode = self.document.createElement('record')
             topNode.appendChild(recordNode)
             self.generateXmlRecord(records['root'], records, recordNode, '',
                                    self.report.fields())
 
         # Once created, the only missing step is to store the XML into a file
-        f = codecs.open(fileName, 'wb+', 'utf-8')
+        f = codecs.open(file_name, 'wb+', 'utf-8')
         try:
             topNode.writexml(f)
         finally:
@@ -226,9 +229,9 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
         for field in unrepeated:
             root = field.partition('/')[0]
             if path:
-                currentPath = '%s/%s' % (path, root)
+                current_path = '%s/%s' % (path, root)
             else:
-                currentPath = root
+                current_path = root
             fieldNode = self.document.createElement(root)
             recordNode.appendChild(fieldNode)
             if root == 'Attachments':
@@ -257,7 +260,7 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
             if isinstance(value, orm.browse_record):
                 fields2 = [f.partition('/')[2] for f in fields
                            if f.partition('/')[0] == root]
-                self.generateXmlRecord(value, records, fieldNode, currentPath,
+                self.generateXmlRecord(value, records, fieldNode, current_path,
                                        fields2)
                 continue
 
@@ -267,14 +270,14 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                     continue
                 fields2 = [f.partition('/')[2] for f in fields
                            if f.partition('/')[0] == root]
-                if currentPath in records:
-                    self.generateXmlRecord(records[currentPath], records,
-                                           fieldNode, currentPath, fields2)
+                if current_path in records:
+                    self.generateXmlRecord(records[current_path], records,
+                                           fieldNode, current_path, fields2)
                 else:
                     # If the field is not marked to be iterated use
                     # the first record only
                     self.generateXmlRecord(value[0], records, fieldNode,
-                                           currentPath, fields2)
+                                           current_path, fields2)
                 continue
 
             if field in record._columns:
@@ -293,17 +296,17 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                 value = '%s 00:00:00' % str(value)
             elif field_type == 'binary':
                 imageId = (record.id, field)
-                if imageId in self.imageFiles:
-                    fileName = self.imageFiles[imageId]
+                if imageId in self.image_files:
+                    file_name = self.image_files[imageId]
                 else:
-                    fd, fileName = tempfile.mkstemp()
+                    fd, file_name = tempfile.mkstemp()
                     try:
                         os.write(fd, base64.decodestring(value))
                     finally:
                         os.close(fd)
-                    self.temporaryFiles.append(fileName)
-                    self.imageFiles[imageId] = fileName
-                value = fileName
+                    self.temporary_files.append(file_name)
+                    self.image_files[imageId] = file_name
+                value = file_name
             elif isinstance(value, str):
                 value = unicode(value, 'utf-8')
             elif isinstance(value, float):
@@ -321,7 +324,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
     # a record will be created for each model id we've been asked to show.
     # If there are any elements in the OPENERP_RELATIONS list,
     # they will imply a LEFT JOIN like behaviour on the rows to be shown.
-    def generate(self, fileName):
+    def generate(self, file_name):
         self.allRecords = []
         relations = self.report.relations()
         # The following loop generates one entry to allRecords list
@@ -331,7 +334,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
         sequence = 0
         copiesField = self.report.copiesField()
         for record in self.env[self.model].browse(self.ids):
-            newRecords = self.generateIds(record, relations, '',
+            newRecords = self.generate_ids(record, relations, '',
                                           [{'root': record}])
             copies = reportCopies
             if copiesField and record.__hasattr__(copiesField):
@@ -346,7 +349,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                     new['copy'] = x
                     self.allRecords.append(new.copy())
 
-        f = open(fileName, 'wb+')
+        f = open(file_name, 'wb+')
         try:
             csv.QUOTE_ALL = True
             # JasperReports CSV reader requires an extra colon at the
@@ -379,23 +382,27 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
         # One field (many2one, many2many or one2many) can appear several times
         # Process each "root" field only once by using a set.
         unrepeated = set([field.partition('/')[0] for field in fields])
+
         for field in unrepeated:
             root = field.partition('/')[0]
             if path:
-                currentPath = '%s/%s' % (path, root)
+                current_path = '%s/%s' % (path, root)
             else:
-                currentPath = root
+                current_path = root
+
             if root == 'Attachments':
                 ids = self.env['ir.attachment'].search([('res_model', '=', record._name), ('res_id', '=', record.id)])
                 value = self.env['ir.attachment'].browse(ids)
+
             elif root == 'User':
                 value = self.env['res.users'].browse(self.uid)
 
             elif root == 'Special':
                 fields2 = [f.partition('/')[2] for f in fields
                            if f.partition('/')[0] == root]
+
                 for f in fields2:
-                    p = '%s/%s' % (currentPath, f)
+                    p = '%s/%s' % (current_path, f)
                     if f == 'sequence':
                         row[self.report.fields()[p]['name']] = sequence
                     elif f == 'subsequence':
@@ -403,6 +410,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                     elif f == 'copy':
                         row[self.report.fields()[p]['name']] = copy
                 continue
+
             else:
                 if root == 'id':
                     value = record.id
@@ -412,13 +420,13 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                     value = None
                     wrng6 = "Field '%s' (path: %s) does not \
                     exist in model '%s'."
-                    self.warning(wrng6 % (root, currentPath, record._name))
+                    self.warning(wrng6 % (root, current_path, record._name))
 
             # Check if it's a many2one
             if isinstance(value, orm.browse_record):
                 fields2 = [f.partition('/')[2] for f in fields
                            if f.partition('/')[0] == root]
-                self.generateCsvRecord(value, records, row, currentPath,
+                self.generateCsvRecord(value, records, row, current_path,
                                        fields2, sequence, subsequence, copy)
                 continue
 
@@ -428,15 +436,15 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                     continue
                 fields2 = [f.partition('/')[2] for f in fields
                            if f.partition('/')[0] == root]
-                if currentPath in records:
-                    self.generateCsvRecord(records[currentPath], records, row,
-                                           currentPath, fields2, sequence,
+                if current_path in records:
+                    self.generateCsvRecord(records[current_path], records, row,
+                                           current_path, fields2, sequence,
                                            subsequence, copy)
                 else:
                     # If the field is not marked to be iterated
                     # use the first record only
                     self.generateCsvRecord(value[0], records, row,
-                                           currentPath, fields2, sequence,
+                                           current_path, fields2, sequence,
                                            subsequence, copy)
                 continue
 
@@ -447,18 +455,19 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             # for example.In order not to change the way we detect many2one
             # fields, we simply check that the field is in self.report.
             # fields() and that's it.
-            if currentPath not in self.report.fields():
+            if current_path not in self.report.fields():
                 continue
 
             # Show all translations for a field
-            type = self.report.fields()[currentPath]['type']
+            type = self.report.fields()[current_path]['type']
             if type == 'java.lang.Object':
-                value = self.value_in_all_languages(record._name, record.id, root)
+                value = self.value_in_all_languages(record._name, record.id,
+                                                    root)
 
-            if field in record._columns:
-                field_type = record._columns[field]._type
-            elif field in record._inherit_fields:
-                field_type = record._inherit_fields[field][2]._type
+            if field in record._fields:
+                field_type = record._fields[field]._type
+            # elif field in record._inherit_fields:
+            #     field_type = record._inherit_fields[field][2]._type
 
             # The rest of field types must be converted into str
             if field == 'id':
@@ -470,24 +479,24 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             elif field_type == 'date':
                 value = '%s 00:00:00' % str(value)
             elif field_type == 'binary':
-                imageId = (record.id, field)
-                if imageId in self.imageFiles:
-                    fileName = self.imageFiles[imageId]
+
+                image_id = (record.id, field)
+
+                if image_id in self.image_files:
+                    file_name = self.image_files[image_id]
                 else:
-                    fd, fileName = tempfile.mkstemp()
+                    fd, file_name = tempfile.mkstemp()
                     try:
                         os.write(fd, base64.decodestring(value))
                     finally:
                         os.close(fd)
-                    self.temporaryFiles.append(fileName)
-                    self.imageFiles[imageId] = fileName
-                value = fileName
+                    self.temporary_files.append(file_name)
+                    self.image_files[image_id] = file_name
+                value = file_name
             elif isinstance(value, unicode):
                 value = value.encode('utf-8')
             elif isinstance(value, float):
                 value = '%.10f' % value
             elif not isinstance(value, str):
                 value = str(value)
-            row[self.report.fields()[currentPath]['name']] = value
-
-# vim:noexpandtab:smartindent:tabstop=8:softtabstop=8:shiftwidth=8:
+            row[self.report.fields()[current_path]['name']] = value
