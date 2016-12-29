@@ -84,7 +84,6 @@ class JasperReport:
         # fields and fieldNames
         fields = {}
         field_names = []
-        # field_tags = doc.xpath('/jr:jasperReport/jr:field', namespaces=nss)
         for tag in field_tags:
             name = tag.get('name')
             type = tag.get('class')
@@ -98,8 +97,6 @@ class JasperReport:
             # We need to consider the fact that the name in user's language
             # might not exist, hence the easiest thing to do is split and [-1]
             new_path = [x.split('-')[-1] for x in path.split('/')]
-            # for x in path.split('/'):
-            #     new_path.append(x.split('-')[-1])
 
             path = '/'.join(new_path)
             fields[path] = {

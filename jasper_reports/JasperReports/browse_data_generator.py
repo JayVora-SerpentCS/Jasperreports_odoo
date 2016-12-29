@@ -181,6 +181,12 @@ class BrowseDataGenerator(AbstractDataGenerator):
 
 class XmlBrowseDataGenerator(BrowseDataGenerator):
 
+    def __init__(self, report, model, env, cr, uid, ids, context):
+        super(XmlBrowseDataGenerator, self).__init__(report, model, env, cr,
+                                                     uid, ids, context)
+        self.all_records = []
+        self.document = None
+
     # XML file generation works as follows:
     # By default (if no OPENERP_RELATIONS property exists in the report)
     # a record will be created for each model id we've been asked to show.
@@ -192,15 +198,15 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
         # The following loop generates one entry to all_records list
         # for each record that will be created. If there are any relations
         # it acts like a LEFT JOIN against the main model/table.
-        for record in self.env[self.model].browse(self.cr, self.uid,
-                                                  self.ids, self._context):
-            newRecords = self.generate_ids(record, relations, '',
-                                          [{'root': record}])
+        for record in self.env[self.model].browse(self.ids):
+
+            new_records = self.generate_ids(record, relations, '',
+                                            [{'root': record}])
             copies = 1
-            if(self.report.copiesField() and record.__hasattr__
-               (self.report.copiesField())):
-                copies = int(record.__getattr__(self.report.copiesField()))
-            for new in newRecords:
+            if self.report.copiesField() and \
+                    record.__hasattr__(self.report.copies_field):
+                copies = int(record.__getattr__(self.report.copies_field))
+            for new in new_records:
                 for x in xrange(copies):
                     self.all_records.append(new)
 
@@ -208,44 +214,39 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
         # XML structure itself
         self.document = getDOMImplementation().createDocument(None, 'data',
                                                               None)
-        topNode = self.document.documentElement
+        top_node = self.document.documentElement
         for records in self.all_records:
-            recordNode = self.document.createElement('record')
-            topNode.appendChild(recordNode)
-            self.generateXmlRecord(records['root'], records, recordNode, '',
-                                   self.report.fields())
+            record_node = self.document.createElement('record')
+            top_node.appendChild(record_node)
+            self.generate_xml_record(records['root'], records, record_node, '',
+                                     self.report.fields())
 
         # Once created, the only missing step is to store the XML into a file
-        f = codecs.open(file_name, 'wb+', 'utf-8')
-        try:
-            topNode.writexml(f)
-        finally:
-            f.close()
+        with codecs.open(file_name, 'wb+', 'utf-8') as f:
+            top_node.writexml(f)
 
-    def generateXmlRecord(self, record, records, recordNode, path, fields):
+    def generate_xml_record(self, record, records, record_node, path, fields):
         # One field (many2one, many2many or one2many) can appear several times.
         # Process each "root" field only once by using a set.
         unrepeated = set([field.partition('/')[0] for field in fields])
+
         for field in unrepeated:
             root = field.partition('/')[0]
             if path:
                 current_path = '%s/%s' % (path, root)
             else:
                 current_path = root
-            fieldNode = self.document.createElement(root)
-            recordNode.appendChild(fieldNode)
+            field_node = self.document.createElement(root)
+            record_node.appendChild(field_node)
+
             if root == 'Attachments':
-                ids = self.env['ir.attachment'
-                               ].search(self.cr, self.uid,
-                                        [('res_model', '=',
-                                          record._name),
-                                         ('res_id', '=', record.id)])
-                value = self.env['ir.attachment'
-                                 ].browse(self.cr, self.uid, ids)
+                value = self.env['ir.attachment'].search(
+                    [('res_model', '=', record._name),
+                     ('res_id', '=', record.id)])
+
+                # value = self.env['ir.attachment'].browse(ids)
             elif root == 'User':
-                value = self.env['res.users'
-                                 ].browse(self.cr, self.uid, self.uid,
-                                          self._context)
+                value = self.env.user
             else:
                 if root == 'id':
                     value = record.id
@@ -260,30 +261,29 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
             if isinstance(value, orm.browse_record):
                 fields2 = [f.partition('/')[2] for f in fields
                            if f.partition('/')[0] == root]
-                self.generateXmlRecord(value, records, fieldNode, current_path,
-                                       fields2)
+                self.generate_xml_record(value, records, field_node,
+                                         current_path, fields2)
                 continue
 
             # Check if it's a one2many or many2many
             if isinstance(value, orm.browse_record_list):
                 if not value:
                     continue
+
                 fields2 = [f.partition('/')[2] for f in fields
                            if f.partition('/')[0] == root]
                 if current_path in records:
-                    self.generateXmlRecord(records[current_path], records,
-                                           fieldNode, current_path, fields2)
+                    self.generate_xml_record(records[current_path], records,
+                                             field_node, current_path, fields2)
                 else:
                     # If the field is not marked to be iterated use
                     # the first record only
-                    self.generateXmlRecord(value[0], records, fieldNode,
+                    self.generate_xml_record(value[0], records, field_node,
                                            current_path, fields2)
                 continue
 
-            if field in record._columns:
-                field_type = record._columns[field]._type
-            elif field in record._inherit_fields:
-                field_type = record._inherit_fields[field][2]._type
+            if field in record._fields:
+                field_type = record._fields[field]._type
 
             # The rest of field types must be converted into str
             if field == 'id':
@@ -295,9 +295,9 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
             elif field_type == 'date':
                 value = '%s 00:00:00' % str(value)
             elif field_type == 'binary':
-                imageId = (record.id, field)
-                if imageId in self.image_files:
-                    file_name = self.image_files[imageId]
+                image_id = (record.id, field)
+                if image_id in self.image_files:
+                    file_name = self.image_files[image_id]
                 else:
                     fd, file_name = tempfile.mkstemp()
                     try:
@@ -305,8 +305,9 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                     finally:
                         os.close(fd)
                     self.temporary_files.append(file_name)
-                    self.image_files[imageId] = file_name
+                    self.image_files[image_id] = file_name
                 value = file_name
+
             elif isinstance(value, str):
                 value = unicode(value, 'utf-8')
             elif isinstance(value, float):
@@ -314,19 +315,21 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
             elif not isinstance(value, unicode):
                 value = unicode(value)
 
-            valueNode = self.document.createTextNode(value)
-            fieldNode.appendChild(valueNode)
+            value_node = self.document.createTextNode(value)
+            field_node.appendChild(value_node)
 
 
 class CsvBrowseDataGenerator(BrowseDataGenerator):
+
     # CSV file generation works as follows:
     # By default (if no OPENERP_RELATIONS property exists in the report)
     # a record will be created for each model id we've been asked to show.
     # If there are any elements in the OPENERP_RELATIONS list,
     # they will imply a LEFT JOIN like behaviour on the rows to be shown.
     def generate(self, file_name):
-        self.allRecords = []
+        self.all_records = []
         relations = self.report.relations()
+
         # The following loop generates one entry to allRecords list
         # for each record that will be created. If there are any relations
         # it acts like a LEFT JOIN against the main model/table.
@@ -347,7 +350,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 subsequence += 1
                 for x in xrange(copies):
                     new['copy'] = x
-                    self.allRecords.append(new.copy())
+                    self.all_records.append(new.copy())
 
         f = open(file_name, 'wb+')
         try:
@@ -366,7 +369,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             writer.writerow(header)
             # Once all records have been calculated,
             # create the CSV structure itself
-            for records in self.allRecords:
+            for records in self.all_records:
                 row = {}
                 self.generateCsvRecord(records['root'], records, row, '',
                                        self.report.fields(),
@@ -466,8 +469,6 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
 
             if field in record._fields:
                 field_type = record._fields[field]._type
-            # elif field in record._inherit_fields:
-            #     field_type = record._inherit_fields[field][2]._type
 
             # The rest of field types must be converted into str
             if field == 'id':

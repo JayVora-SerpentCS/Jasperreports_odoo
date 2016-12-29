@@ -30,11 +30,11 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 ##############################################################################
-# from openerp.service.websrv_lib import reg_http_service
+
 from BaseHTTPServer import BaseHTTPRequestHandler
 from odoo import netsvc
 from odoo import tools
-from websrv_lib import reg_http_service
+from .websrv_lib import reg_http_service
 
 
 class Message:
