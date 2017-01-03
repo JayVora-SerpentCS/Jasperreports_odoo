@@ -40,7 +40,7 @@ try:
     if release.major_version != '5.0':
         from . import http_server
 except ImportError:
-    import openerp
-    from openerp import release
+    import odoo
+    from odoo import release
     if release.major_version != '5.0':
         from . import http_server

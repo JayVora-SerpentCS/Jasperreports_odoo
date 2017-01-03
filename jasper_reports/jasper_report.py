@@ -93,7 +93,7 @@ class Report:
         rep_xml_set = self.env['ir.actions.report.xml'].search(
             [('report_name', '=', self.name[7:]),
              ('report_rml', 'ilike', '.jrxml')])
-        # data = rep_xml_set[0].read(['report_rml', 'jasper_output'])
+
         data = rep_xml_set[0]
 
         if data['jasper_output']:
@@ -185,11 +185,8 @@ class Report:
         logger.info("ELAPSED: %f" % elapsed)
 
         # Read data from the generated file and return it
-        f = open(output_file, 'rb')
-        try:
+        with open(output_file, 'rb') as f:
             data = f.read()
-        finally:
-            f.close()
 
         # Remove all temporary files created during the report
         if tools.config['jasperunlink']:
@@ -265,10 +262,18 @@ class Report:
             parameters.update(self.data['parameters'])
 
         server = JasperServer(int(tools.config['jasperport']))
+        server.setPidFile(tools.config['jasperpid'])
+#        java path for jasper server
+        company_rec = self.env['res.users'].browse(self.uid).company_id
+        java_path = ''
+        if company_rec and company_rec.id:
+            java_path = company_rec.java_path
+            server.javapath = java_path
+        server.javapath = java_path
+
         server.pidfile = tools.config['jasperpid']
         return server.execute(connection_parameters, self.report_path,
                               output_file, parameters)
-
 
 class ReportJasper(report.interface.report_int):
 
@@ -333,7 +338,6 @@ if release.major_version == '5.0':
             del odoo.report.interface.report_int._reports[name]
 
         ReportJasper(name, model)
-
 
     # This hack allows automatic registration of jrxml files without
     # the need for developers to register them programatically.

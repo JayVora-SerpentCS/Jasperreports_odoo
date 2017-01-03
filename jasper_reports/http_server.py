@@ -34,7 +34,7 @@
 from BaseHTTPServer import BaseHTTPRequestHandler
 from odoo import netsvc
 from odoo import tools
-from .websrv_lib import reg_http_service
+from websrv_lib import reg_http_service
 
 
 class Message:
@@ -52,10 +52,6 @@ class JasperHandler(BaseHTTPRequestHandler):
         pass
 
     def parse_request(self, *args, **kwargs):
-        # self.headers = Message()
-        # self.request_version = 'HTTP/1.1'
-        # self.command = 'OPTIONS'
-
         path = self.raw_requestline.replace('GET', '').strip().split(' ')[0]
         try:
             result = self.execute(path)

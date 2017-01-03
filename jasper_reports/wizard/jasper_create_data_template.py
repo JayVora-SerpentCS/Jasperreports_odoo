@@ -36,6 +36,10 @@ from odoo import api, fields, models
 
 
 class CreateDataTemplate(models.TransientModel):
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     _name = 'jasper.create.data.template'
     _description = 'create data template'
 

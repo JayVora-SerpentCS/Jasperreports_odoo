@@ -56,7 +56,6 @@ class BrowseDataGenerator(AbstractDataGenerator):
         self.cr = cr
         self.uid = uid
         self.ids = ids
-        # self.context = context
         self._context = context
         self._languages = []
         self.image_files = {}
@@ -70,12 +69,6 @@ class BrowseDataGenerator(AbstractDataGenerator):
     def languages(self):
         if self._languages:
             return self._languages
-        # ids = self.env['res.lang'
-        #                ].search(self.cr, self.uid,
-        #                         [('translatable', '=', '1')])
-        # self._languages = self.env['res.lang'].read(self.cr, self.uid,
-        #                                             ids, ['code'])
-        # self._languages = [x['code'] for x in self._languages]
         languages = self.env['res.lang'].search([('translatable', '=', '1')])
         self._languages = languages.mapped('code')
         return self._languages
@@ -91,9 +84,6 @@ class BrowseDataGenerator(AbstractDataGenerator):
             else:
                 context['lang'] = language
 
-            # value = model.read(self.cr, self.uid, [id], [field],
-            #                    context=context)
-            # values[language] = value[0][field] or ''
             values[language] = model.browser(id).mapped(field)
 
             if model._fields[field]._type == 'selection' and \
@@ -244,7 +234,6 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                     [('res_model', '=', record._name),
                      ('res_id', '=', record.id)])
 
-                # value = self.env['ir.attachment'].browse(ids)
             elif root == 'User':
                 value = self.env.user
             else:

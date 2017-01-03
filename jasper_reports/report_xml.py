@@ -36,7 +36,7 @@ import base64
 import unicodedata
 from xml.dom.minidom import getDOMImplementation
 
-from odoo.exceptions import except_orm
+from odoo.exceptions import UserError
 from odoo import api, fields, models, _
 
 from . import jasper_report
@@ -48,6 +48,7 @@ dst_chars = unicode(dst_chars, 'iso-8859-1')
 
 
 class ReportXmlFile(models.Model):
+
     _name = 'ir.actions.report.xml.file'
 
     file = fields.Binary('File', required=True,
@@ -143,7 +144,7 @@ class ReportXml(models.Model):
                 if '.jrxml' in file_name and attachment.default:
 
                     if has_default:
-                        raise except_orm(_('Error'),
+                        raise UserError(_('Error'),
                                          _('There is more than one \
                                          report marked as default'))
                     has_default = True
@@ -169,7 +170,7 @@ class ReportXml(models.Model):
                             values_id = values_id[0]
 
             if not has_default:
-                raise except_orm(_('Error'),
+                raise UserError(_('Error'),
                                  _('No report has been marked as default! \
                                  You need atleast one jrxml report!'))
 
