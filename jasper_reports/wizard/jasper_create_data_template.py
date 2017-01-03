@@ -32,21 +32,11 @@
 ##############################################################################
 
 import base64
-<<<<<<< HEAD
 from odoo import api, fields, models
 
 
 class CreateDataTemplate(models.TransientModel):
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
-=======
-from openerp import models, fields, api
-
-
-class create_data_template(models.TransientModel):
->>>>>>> upstream/10.0
     _name = 'jasper.create.data.template'
     _description = 'create data template'
 

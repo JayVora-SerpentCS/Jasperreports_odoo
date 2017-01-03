@@ -267,15 +267,11 @@ class Report:
         server.setPidFile(tools.config['jasperpid'])
 #        java path for jasper server
         company_rec = self.env['res.users'].browse(self.uid).company_id
-        java_path = ''
-        if company_rec and company_rec.id:
-            java_path = company_rec.java_path
-            server.javapath = java_path
-        server.javapath = java_path
-
+        server.javapath = company_rec and company_rec.java_path or ''
         server.pidfile = tools.config['jasperpid']
         return server.execute(connection_parameters, self.report_path,
                               output_file, parameters)
+
 
 class ReportJasper(report.interface.report_int):
 

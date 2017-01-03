@@ -31,13 +31,9 @@
 
 import csv
 import codecs
-<<<<<<< HEAD:jasper_reports/JasperReports/record_data_generator.py
 from xml.dom.minidom import getDOMImplementation
 
 from .abstract_data_generator import AbstractDataGenerator
-=======
-from . AbstractDataGenerator import AbstractDataGenerator
->>>>>>> upstream/10.0:jasper_reports/JasperReports/RecordDataGenerator.py
 
 
 class CsvRecordDataGenerator(AbstractDataGenerator):
@@ -49,7 +45,6 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
 
     # CSV file generation using a list of dictionaries provided by
     # the parser function.
-<<<<<<< HEAD:jasper_reports/JasperReports/record_data_generator.py
     def generate(self, file_name):
 
         with open(file_name, 'wb+') as f:
@@ -64,20 +59,6 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
             for field in field_names + ['']:
                 header[field] = field
 
-=======
-    def generate(self, fileName):
-        f = open(fileName, 'wb+')
-        try:
-            csv.QUOTE_ALL = True
-            fieldNames = self.report.fieldNames()
-            # JasperReports CSV reader requires an extra colon
-            # at the end of the line.
-            writer = csv.DictWriter(f, fieldNames + [''], delimiter=',',
-                                    quotechar='"')
-            header = {}
-            for field in fieldNames + ['']:
-                header[field] = field
->>>>>>> upstream/10.0:jasper_reports/JasperReports/RecordDataGenerator.py
             writer.writerow(header)
             error_reported_fields = []
 
@@ -85,20 +66,12 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
 
                 row = {}
                 for field in record:
-<<<<<<< HEAD:jasper_reports/JasperReports/record_data_generator.py
                     if field not in self.report.fields:
-=======
-                    if field not in self.report.fields():
->>>>>>> upstream/10.0:jasper_reports/JasperReports/RecordDataGenerator.py
                         if field not in error_reported_fields:
                             error_reported_fields.append(field)
                         continue
 
                     value = record.get(field, False)
-<<<<<<< HEAD:jasper_reports/JasperReports/record_data_generator.py
-
-=======
->>>>>>> upstream/10.0:jasper_reports/JasperReports/RecordDataGenerator.py
                     if value is False:
                         value = ''
                     elif isinstance(value, unicode):
@@ -107,21 +80,13 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
                         value = '%.10f' % value
                     elif not isinstance(value, str):
                         value = str(value)
-<<<<<<< HEAD:jasper_reports/JasperReports/record_data_generator.py
                     row[self.report.fields[field]['name']] = value
 
                 writer.writerow(row)
-=======
-                    row[self.report.fields()[field]['name']] = value
-                writer.writerow(row)
-        finally:
-            f.close()
->>>>>>> upstream/10.0:jasper_reports/JasperReports/RecordDataGenerator.py
 
 
 class XmlRecordDataGenerator(AbstractDataGenerator):
 
-<<<<<<< HEAD:jasper_reports/JasperReports/record_data_generator.py
     def __init__(self):
         super(XmlRecordDataGenerator, self).__init__()
         self.document = None
@@ -142,21 +107,6 @@ class XmlRecordDataGenerator(AbstractDataGenerator):
             for field, value in record.iteritems():
                 field_node = self.document.createElement(field)
                 record_node.appendChild(field_node)
-=======
-    # XML file generation using a list of dictionaries provided by
-    # the parser function.
-    def generate(self, fileName):
-        # Once all records have been calculated, create the XML structure
-        self.document = getDOMImplementation().createDocument(None, 'data',
-                                                              None)
-        topNode = self.document.documentElement
-        for record in self.data['records']:
-            recordNode = self.document.createElement('record')
-            topNode.appendChild(recordNode)
-            for field, value in record.iteritems():
-                fieldNode = self.document.createElement(field)
-                recordNode.appendChild(fieldNode)
->>>>>>> upstream/10.0:jasper_reports/JasperReports/RecordDataGenerator.py
                 # The rest of field types must be converted into str
                 if value is False:
                     value = ''
@@ -166,17 +116,6 @@ class XmlRecordDataGenerator(AbstractDataGenerator):
                     value = '%.10f' % value
                 elif not isinstance(value, unicode):
                     value = unicode(value)
-<<<<<<< HEAD:jasper_reports/JasperReports/record_data_generator.py
-=======
-                valueNode = self.document.createTextNode(value)
-                fieldNode.appendChild(valueNode)
-        # Once created, the only missing step is to store the XML into a file
-        f = codecs.open(fileName, 'wb+', 'utf-8')
-        try:
-            topNode.writexml(f)
-        finally:
-            f.close()
->>>>>>> upstream/10.0:jasper_reports/JasperReports/RecordDataGenerator.py
 
                 value_node = self.document.createTextNode(value)
                 field_node.appendChild(value_node)
