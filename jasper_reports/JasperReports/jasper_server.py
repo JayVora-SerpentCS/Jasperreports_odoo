@@ -66,7 +66,7 @@ class JasperServer:
                             _('Please add java path into the jasper '
                               'configuration page under the company form '
                               'view'))
-        else :
+        else:
             libraries = str(java_path) + '/lib'
             if os.path.exists(str(libraries)):
                 self.javapath = java_path

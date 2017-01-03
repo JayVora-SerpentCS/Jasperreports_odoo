@@ -46,7 +46,6 @@ DATA_SOURCE_EXPRESSION_REG_EXP = re.compile(r"""\$P\{(\w+)\}""")
 
 
 class JasperReport:
-
     def __init__(self, file_name='', path_prefix=''):
         self.report_path = file_name
         self.path_prefix = path_prefix.strip()
@@ -143,8 +142,8 @@ class JasperReport:
         path1 = '/jr:jasperReport/jr:property[@name="OPENERP_COPIES_FIELD"]'
         copies_field_tags = doc.xpath(path1, namespaces=nss)
         if copies_field_tags and 'value' in copies_field_tags[0].keys():
-            self.copies_field = (self.path_prefix + copies_field_tags[0].get
-                                 ('value'))
+            self.copies_field = (
+                self.path_prefix + copies_field_tags[0].get('value'))
 
         # Repeat
         path2 = '/jr:jasperReport/jr:property[@name="OPENERP_COPIES"]'
@@ -196,11 +195,11 @@ class JasperReport:
                 continue
             subreport_expression = subreport_expression.strip()
             subreport_expression = (subreport_expression.replace
-                                   ('$P{STANDARD_DIR}',
-                                    '"%s"' % self.standard_directory()))
+                                    ('$P{STANDARD_DIR}',
+                                     '"%s"' % self.standard_directory()))
             subreport_expression = (subreport_expression.replace
-                                   ('$P{SUBREPORT_DIR}',
-                                    '"%s"' % self.subreport_directory()))
+                                    ('$P{SUBREPORT_DIR}',
+                                     '"%s"' % self.subreport_directory()))
             try:
                 subreport_expression = safe_eval(subreport_expression, {})
             except Exception:

@@ -48,11 +48,10 @@ dst_chars = unicode(dst_chars, 'iso-8859-1')
 
 
 class ReportXmlFile(models.Model):
-
     _name = 'ir.actions.report.xml.file'
 
     file = fields.Binary('File', required=True,
-                         filters="*.jrxml,*.properties,*.ttf",)
+                         filters="*.jrxml,*.properties,*.ttf", )
     filename = fields.Char('File Name', size=256)
     report_id = fields.Many2one('ir.actions.report.xml', 'Report',
                                 ondelete='cascade')
@@ -70,9 +69,8 @@ class ReportXmlFile(models.Model):
     def write(self, values):
         result = super(ReportXmlFile, self).write(values)
         for attachment in self:
-            ir_actions_report_obj = self.env['ir.actions.report.xml'
-                                             ].browse([attachment.report_id.id
-                                                       ])
+            ir_actions_report_obj = self.env['ir.actions.report.xml'].browse(
+                [attachment.report_id.id])
             ir_actions_report_obj.update()
         return result
 
@@ -82,7 +80,6 @@ class ReportXmlFile(models.Model):
 # used as reports in the application.
 
 class ReportXml(models.Model):
-
     _inherit = 'ir.actions.report.xml'
 
     jasper_output = fields.Selection([('html', 'HTML'), ('csv', 'CSV'),
@@ -112,7 +109,8 @@ class ReportXml(models.Model):
 
             if 'jasper_model_id' in values:
                 values['model'] = \
-                    self.env['ir.model'].browse(values['jasper_model_id']).model
+                    self.env['ir.model'].browse(
+                        values['jasper_model_id']).model
 
             values['type'] = 'ir.actions.report.xml'
             values['report_type'] = 'pdf'
@@ -147,7 +145,7 @@ class ReportXml(models.Model):
 
                     if has_default:
                         raise UserError(_('Error'),
-                                         _('There is more than one \
+                                        _('There is more than one \
                                          report marked as default'))
                     has_default = True
                     # Update path into report_rml field.
@@ -173,7 +171,7 @@ class ReportXml(models.Model):
 
             if not has_default:
                 raise UserError(_('Error'),
-                                 _('No report has been marked as default! \
+                                _('No report has been marked as default! \
                                  You need atleast one jrxml report!'))
 
             # Ensure the report is registered so it can be used immediately
@@ -227,8 +225,6 @@ class ReportXml(models.Model):
         model_fields = pool[model_name]._fields
         keys_list = model_fields.keys()
 
-        # fields += model._inherit_fields.keys()
-
         # Remove duplicates because model may have fields with the
         # same name as it's parent
         keys_list = sorted(keys_list)
@@ -243,10 +239,7 @@ class ReportXml(models.Model):
             if not name:
                 # If there's not description in user's language,
                 # use default (english) one.
-                # if field in keys_list:
                 name = model_fields[field].string
-                # else:
-                #     name = model._inherit_fields[field][2].string
 
             if name:
                 name = self.unaccent(name)
@@ -287,7 +280,7 @@ class ReportXml(models.Model):
         if depth > 1 and model_name != 'Attachments':
             # Create relation with attachments
             field_node = document.createElement('%s-Attachments' % self.
-                                               unaccent(_('Attachments')))
+                                                unaccent(_('Attachments')))
             parent_node.appendChild(field_node)
             self.generate_xml(pool, 'ir.attachment', field_node, document,
                               depth - 1, False)

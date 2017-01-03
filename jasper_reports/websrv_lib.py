@@ -59,7 +59,7 @@ class AuthProvider:
         return False
 
     def log(self, msg):
-        print msg
+        _logger.info(msg)
 
     def check_request(self, handler, path='/'):
         """ Check if we are allowed to process that request

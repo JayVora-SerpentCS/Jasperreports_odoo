@@ -34,7 +34,7 @@
 from BaseHTTPServer import BaseHTTPRequestHandler
 from odoo import netsvc
 from odoo import tools
-from websrv_lib import reg_http_service
+from .websrv_lib import reg_http_service
 
 
 class Message:
@@ -56,7 +56,7 @@ class JasperHandler(BaseHTTPRequestHandler):
         try:
             result = self.execute(path)
         except Exception, e:
-            result = '<error><exception>%s</exception></error>' % (e.args, )
+            result = '<error><exception>%s</exception></error>' % (e.args,)
         self.wfile.write(result)
         return True
 
@@ -99,5 +99,6 @@ class JasperHandler(BaseHTTPRequestHandler):
             self.cache[key] = result
 
         return result
+
 
 reg_http_service('/jasper/', JasperHandler)

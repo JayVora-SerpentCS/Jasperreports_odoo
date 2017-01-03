@@ -58,7 +58,6 @@ tools.config['jasperunlink'] = tools.config.get('jasperunlink', True)
 
 
 class Report:
-
     def __init__(self, name, cr, uid, ids, data, context):
         self.name = name
         self.env = data['env']
@@ -66,8 +65,8 @@ class Report:
         self.uid = uid
         self.ids = ids
         self.data = data
-        self.model = self.data.get('model', False) or \
-            context.get('active_model', False)
+        self.model = self.data.get('model', False) or context.get(
+            'active_model', False)
         self.context = context or {}
         self.report_path = None
         self.report = None
@@ -90,7 +89,7 @@ class Report:
         # As the previous record is not removed, we end up with two records
         # named 'purchase.order' so we need to destinguish
         # between the two by searching '.jrxml' in report_rml.
-        
+
         rep_xml_set = self.env['ir.actions.report.xml'].search(
             [('report_name', '=', self.name[7:]),
              ('report_rml', 'ilike', '.jrxml')])
@@ -234,13 +233,13 @@ class Report:
         return 'jdbc:postgresql://%s:%s/%s' % (host, port, db_name)
 
     def user_name(self):
-        user_name = self.env['ir.config_parameter'].get_param('db_user') or \
-                    self.system_user_name()
+        user_name = self.env['ir.config_parameter'].get_param(
+            'db_user') or self.system_user_name()
         return tools.config['db_user'] or user_name
 
     def password(self):
-        password = self.env['ir.config_parameter'].get_param('db_password') \
-                   or ''
+        password = self.env['ir.config_parameter'].get_param(
+            'db_password') or ''
         return tools.config['db_password'] or password
 
     def execute_report(self, data_file, output_file, sub_report_data_files):
@@ -265,7 +264,7 @@ class Report:
 
         server = JasperServer(int(tools.config['jasperport']))
         server.setPidFile(tools.config['jasperpid'])
-#        java path for jasper server
+        #        java path for jasper server
         company_rec = self.env['res.users'].browse(self.uid).company_id
         server.javapath = company_rec and company_rec.java_path or ''
         server.pidfile = tools.config['jasperpid']
@@ -274,7 +273,6 @@ class Report:
 
 
 class ReportJasper(report.interface.report_int):
-
     def __init__(self, name, model, parser=None):
         # Remove report name from list of services if it already
         # exists to avoid report_int's assert. We want to keep the
@@ -286,7 +284,7 @@ class ReportJasper(report.interface.report_int):
         else:
             if name in odoo.report.interface.report_int._reports:
                 del odoo.report.interface.report_int._reports[name]
-            #             odoo.report.interface.report_int._reports[name] =
+
         super(ReportJasper, self).__init__(name)
         self.model = model
         self.parser = parser
@@ -310,32 +308,12 @@ class ReportJasper(report.interface.report_int):
 
         datas['env'] = api.Environment(cr, uid, context or {})
         r = Report(name, cr, uid, ids, datas, context)
-        # return ( r.execute(), 'pdf' )
         return r.execute()
+
 
 if release.major_version == '5.0':
     # Version 5.0 specific code
-
     # Ugly hack to avoid developers the need to register reports
-    import pooler
-    import report
-
-
-    def register_jasper_report(name, model):
-        name = 'report.%s' % name
-        # Register only if it didn't exist another "jasper_report" with
-        # the same name given that developers might prefer/need
-        # to register the reports themselves.
-        # For example, if they need their own parser.
-
-        if name in odoo.report.interface.report_int._reports:
-            if isinstance(odoo.report.interface.report_int._reports[name],
-                          ReportJasper):
-                return odoo.report.interface.report_int._reports[name]
-
-            del odoo.report.interface.report_int._reports[name]
-
-        ReportJasper(name, model)
 
     # This hack allows automatic registration of jrxml files without
     # the need for developers to register them programatically.
@@ -343,6 +321,7 @@ if release.major_version == '5.0':
     old_register_all = report.interface.register_all
 
     def new_register_all(db):
+
         value = old_register_all(db)
 
         cr = db.cursor()
@@ -356,7 +335,6 @@ if release.major_version == '5.0':
         for record in records:
             register_jasper_report(record['report_name'], record['model'])
         return value
-
 
     report.interface.register_all = new_register_all
 
@@ -379,7 +357,6 @@ def register_jasper_report(report_name, model_name):
 
 
 class IrActionsReportXML(models.Model):
-
     _inherit = 'ir.actions.report.xml'
 
     def _lookup_report(self, name):

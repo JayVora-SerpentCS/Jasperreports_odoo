@@ -44,11 +44,10 @@ import logging
 
 from odoo.osv import orm
 
-from . abstract_data_generator import AbstractDataGenerator
+from .abstract_data_generator import AbstractDataGenerator
 
 
 class BrowseDataGenerator(AbstractDataGenerator):
-
     def __init__(self, report, model, env, cr, uid, ids, context):
         self.report = report
         self.model = model
@@ -88,7 +87,6 @@ class BrowseDataGenerator(AbstractDataGenerator):
 
             if model._fields[field]._type == 'selection' and \
                     model._fields[field].selection:
-
                 field_data = model.fields_get(self.cr, self.uid,
                                               allfields=[field],
                                               context=context)
@@ -153,7 +151,6 @@ class BrowseDataGenerator(AbstractDataGenerator):
                     current_new_records = []
 
                     for rec_id in current_records:
-
                         new = rec_id.copy()
                         new[current_path] = v
                         current_new_records.append(new)
@@ -170,7 +167,6 @@ class BrowseDataGenerator(AbstractDataGenerator):
 
 
 class XmlBrowseDataGenerator(BrowseDataGenerator):
-
     def __init__(self, report, model, env, cr, uid, ids, context):
         super(XmlBrowseDataGenerator, self).__init__(report, model, env, cr,
                                                      uid, ids, context)
@@ -268,7 +264,7 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                     # If the field is not marked to be iterated use
                     # the first record only
                     self.generate_xml_record(value[0], records, field_node,
-                                           current_path, fields2)
+                                             current_path, fields2)
                 continue
 
             if field in record._fields:
@@ -309,7 +305,6 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
 
 
 class CsvBrowseDataGenerator(BrowseDataGenerator):
-
     # CSV file generation works as follows:
     # By default (if no OPENERP_RELATIONS property exists in the report)
     # a record will be created for each model id we've been asked to show.
@@ -327,7 +322,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
         copiesField = self.report.copiesField()
         for record in self.env[self.model].browse(self.ids):
             newRecords = self.generate_ids(record, relations, '',
-                                          [{'root': record}])
+                                           [{'root': record}])
             copies = reportCopies
             if copiesField and record.__hasattr__(copiesField):
                 copies = copies * int(record.__getattr__(copiesField))
@@ -383,7 +378,9 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 current_path = root
 
             if root == 'Attachments':
-                ids = self.env['ir.attachment'].search([('res_model', '=', record._name), ('res_id', '=', record.id)])
+                ids = self.env['ir.attachment'].search(
+                    [('res_model', '=', record._name),
+                     ('res_id', '=', record.id)])
                 value = self.env['ir.attachment'].browse(ids)
 
             elif root == 'User':
