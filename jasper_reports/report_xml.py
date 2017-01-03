@@ -80,7 +80,9 @@ class ReportXmlFile(models.Model):
 # Inherit ir.actions.report.xml and add an action to be able to store
 # .jrxml and .properties files attached to the report so they can be
 # used as reports in the application.
+
 class ReportXml(models.Model):
+
     _inherit = 'ir.actions.report.xml'
 
     jasper_output = fields.Selection([('html', 'HTML'), ('csv', 'CSV'),
@@ -263,7 +265,6 @@ class ReportXml(models.Model):
                     continue
 
                 comodel_name = model_fields[field].comodel_name
-
                 self.generate_xml(pool, comodel_name, field_node, document,
                                   depth - 1, False)
                 continue

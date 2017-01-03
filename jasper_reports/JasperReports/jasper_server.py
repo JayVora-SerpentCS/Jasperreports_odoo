@@ -30,7 +30,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 ##############################################################################
-
 import os
 import glob
 import time
@@ -48,6 +47,7 @@ class JasperServer:
     def __init__(self, port=8090):
         self.port = port
         self.pidfile = None
+        self.javapath = None
         url = 'http://localhost:%d' % port
         self.proxy = xmlrpclib.ServerProxy(url, allow_none=True)
         self.logger = logging.getLogger(__name__)

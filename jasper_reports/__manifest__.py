@@ -57,6 +57,7 @@
         'report_xml_view.xml',
         'security/ir.model.access.csv',
         'data/jasper_data.xml',
+        'res_company_view.xml',
     ],
     "active": False,
     "installable": True,

@@ -46,6 +46,7 @@ from .JasperReports.jasper_report import JasperReport
 
 # Determines the port where the JasperServer process should listen
 # with its XML-RPC server for incoming calls
+
 tools.config['jasperport'] = tools.config.get('jasperport', 8090)
 
 # Determines the file name where the process ID of the
@@ -181,6 +182,7 @@ class Report:
         # PDF file in outputFile
         pages = self.execute_report(data_file, output_file,
                                     sub_report_data_files)
+
         elapsed = (time.time() - start) / 60
         logger.info("ELAPSED: %f" % elapsed)
 
@@ -315,7 +317,6 @@ class ReportJasper(report.interface.report_int):
         # return ( r.execute(), 'pdf' )
         return r.execute()
 
-
 if release.major_version == '5.0':
     # Version 5.0 specific code
 
@@ -330,6 +331,7 @@ if release.major_version == '5.0':
         # the same name given that developers might prefer/need
         # to register the reports themselves.
         # For example, if they need their own parser.
+
         if name in odoo.report.interface.report_int._reports:
             if isinstance(odoo.report.interface.report_int._reports[name],
                           ReportJasper):
@@ -343,7 +345,6 @@ if release.major_version == '5.0':
     # the need for developers to register them programatically.
 
     old_register_all = report.interface.register_all
-
 
     def new_register_all(db):
         value = old_register_all(db)
