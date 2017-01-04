@@ -61,5 +61,6 @@
     ],
     "active": True,
     "installable": True,
-    'application': True,
+    "application": True,
+    "auto_install": True,
 }
