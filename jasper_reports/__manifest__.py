@@ -59,7 +59,7 @@
         'data/jasper_data.xml',
         'res_company_view.xml',
     ],
-    "active": False,
+    "active": True,
     "installable": True,
     'application': True,
 }
