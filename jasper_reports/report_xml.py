@@ -33,11 +33,13 @@
 
 import os
 import base64
-from . import jasper_report
-from openerp.exceptions import except_orm
-from openerp import models, fields, api, _
 import unicodedata
 from xml.dom.minidom import getDOMImplementation
+
+from odoo.exceptions import UserError
+from odoo import api, fields, models, _
+
+from . import jasper_report
 
 src_chars = """ '"()/*-+?¿!&$[]{}@#`'^:;<>=~%,\\"""
 src_chars = unicode(src_chars, 'iso-8859-1')
@@ -45,31 +47,30 @@ dst_chars = """________________________________"""
 dst_chars = unicode(dst_chars, 'iso-8859-1')
 
 
-class report_xml_file(models.Model):
+class ReportXmlFile(models.Model):
     _name = 'ir.actions.report.xml.file'
 
     file = fields.Binary('File', required=True,
-                         filters="*.jrxml,*.properties,*.ttf",)
+                         filters="*.jrxml,*.properties,*.ttf", )
     filename = fields.Char('File Name', size=256)
     report_id = fields.Many2one('ir.actions.report.xml', 'Report',
                                 ondelete='cascade')
     default = fields.Boolean('Default')
 
     @api.model
-    def create(self, vals):
-        result = super(report_xml_file, self).create(vals)
-        ir_actions_report_obj = self.env['ir.actions.report.xml'
-                                         ].browse(vals['report_id'])
+    def create(self, values):
+        result = super(ReportXmlFile, self).create(values)
+        ir_actions_report_obj = \
+            self.env['ir.actions.report.xml'].browse(values['report_id'])
         ir_actions_report_obj.update()
         return result
 
     @api.multi
-    def write(self, vals):
-        result = super(report_xml_file, self).write(vals)
+    def write(self, values):
+        result = super(ReportXmlFile, self).write(values)
         for attachment in self:
-            ir_actions_report_obj = self.env['ir.actions.report.xml'
-                                             ].browse([attachment.report_id.id
-                                                       ])
+            ir_actions_report_obj = self.env['ir.actions.report.xml'].browse(
+                [attachment.report_id.id])
             ir_actions_report_obj.update()
         return result
 
@@ -77,7 +78,8 @@ class report_xml_file(models.Model):
 # Inherit ir.actions.report.xml and add an action to be able to store
 # .jrxml and .properties files attached to the report so they can be
 # used as reports in the application.
-class report_xml(models.Model):
+
+class ReportXml(models.Model):
     _inherit = 'ir.actions.report.xml'
 
     jasper_output = fields.Selection([('html', 'HTML'), ('csv', 'CSV'),
@@ -91,75 +93,85 @@ class report_xml(models.Model):
     jasper_report = fields.Boolean('Is Jasper Report?')
 
     @api.model
-    def create(self, vals):
+    def create(self, values):
         if self._context and self._context.get('jasper_report'):
-            vals['model'] = self.env['ir.model'
-                                     ].browse(vals['jasper_model_id']).model
-            vals['type'] = 'ir.actions.report.xml'
-            vals['report_type'] = 'pdf'
-            vals['jasper_report'] = True
-        return super(report_xml, self).create(vals)
+            values['model'] = \
+                self.env['ir.model'].browse(values['jasper_model_id']).model
+            values['type'] = 'ir.actions.report.xml'
+            values['report_type'] = 'pdf'
+            values['jasper_report'] = True
+
+        return super(ReportXml, self).create(values)
 
     @api.multi
-    def write(self, vals):
+    def write(self, values):
         if self._context and self._context.get('jasper_report'):
-            if 'jasper_model_id' in vals:
-                vals['model'] = self.env['ir.model'
-                                         ].browse(vals['jasper_model_id'
-                                                       ]).model
-            vals['type'] = 'ir.actions.report.xml'
-            vals['report_type'] = 'pdf'
-            vals['jasper_report'] = True
-        return super(report_xml, self).write(vals)
+
+            if 'jasper_model_id' in values:
+                values['model'] = \
+                    self.env['ir.model'].browse(
+                        values['jasper_model_id']).model
+
+            values['type'] = 'ir.actions.report.xml'
+            values['report_type'] = 'pdf'
+            values['jasper_report'] = True
+
+        return super(ReportXml, self).write(values)
 
     @api.multi
     def update(self):
         if self._context is None:
             self._context = {}
+
         pool_values = self.env['ir.values']
+
         for report in self:
             has_default = False
+
             # Browse attachments and store .jrxml and .properties
             # into jasper_reports/custom_reportsdirectory. Also add
             # or update ir.values data so they're shown on model views.for
             # attachment in self.env['ir.attachment'].browse(attachmentIds)
             for attachment in report.jasper_file_ids:
                 content = attachment.file
-                fileName = attachment.filename
-                if not fileName or not content:
+                file_name = attachment.filename
+
+                if not file_name or not content:
                     continue
-                path = self.save_file(fileName, content)
-                if '.jrxml' in fileName:
-                    if attachment.default:
-                        if has_default:
-                            raise except_orm(_('Error'),
-                                             _('There is more than one \
-                                             report marked as default'))
-                        has_default = True
-                        # Update path into report_rml field.
-                        my_obj = self.browse([report.id])
-                        my_obj.write({'report_rml': path})
-                        ser_arg = [('value', '=',
-                                    'ir.actions.report.xml,%s' % report.id)]
-                        valuesId = pool_values.search(ser_arg)
-                        data = {
-                            'name': report.name,
-                            'model': report.model,
-                            'key': 'action',
-                            'object': True,
-                            'key2': 'client_print_multi',
-                            'value': 'ir.actions.report.xml,%s' % report.id
-                        }
-                        if not valuesId.ids:
-                            valuesId = pool_values.create(data)
-                        else:
-                            for pool_obj in pool_values.browse(valuesId.ids):
-                                pool_obj.write(data)
-                                valuesId = valuesId[0]
+
+                path = self.save_file(file_name, content)
+
+                if '.jrxml' in file_name and attachment.default:
+
+                    if has_default:
+                        raise UserError(_('Error'),
+                                        _('There is more than one \
+                                         report marked as default'))
+                    has_default = True
+                    # Update path into report_rml field.
+                    my_obj = self.browse([report.id])
+                    my_obj.write({'report_rml': path})
+                    ser_arg = [('value', '=',
+                                'ir.actions.report.xml,%s' % report.id)]
+                    values_id = pool_values.search(ser_arg)
+                    data = {
+                        'name': report.name,
+                        'model': report.model,
+                        'key': 'action',
+                        'object': True,
+                        'key2': 'client_print_multi',
+                        'value': 'ir.actions.report.xml,%s' % report.id
+                    }
+                    if not values_id.ids:
+                        values_id = pool_values.create(data)
+                    else:
+                        for pool_obj in pool_values.browse(values_id.ids):
+                            pool_obj.write(data)
+                            values_id = values_id[0]
 
             if not has_default:
-                raise except_orm(_('Error'),
-                                 _('No report has been marked as default! \
+                raise UserError(_('Error'),
+                                _('No report has been marked as default! \
                                  You need atleast one jrxml report!'))
 
             # Ensure the report is registered so it can be used immediately
@@ -170,11 +182,10 @@ class report_xml(models.Model):
     def save_file(self, name, value):
         path = os.path.abspath(os.path.dirname(__file__))
         path += '/custom_reports/%s' % name
-        f = open(path, 'wb+')
-        try:
+
+        with open(path, 'wb+') as f:
             f.write(base64.decodestring(value))
-        finally:
-            f.close()
+
         path = 'jasper_reports/custom_reports/%s' % name
         return path
 
@@ -196,40 +207,39 @@ class report_xml(models.Model):
         return output.strip('_').encode('utf-8')
 
     @api.model
-    def generate_xml(self, pool, modelName, parentNode, document, depth,
+    def generate_xml(self, pool, model_name, parent_node, document, depth,
                      first_call):
         if self._context is None:
             self._context = {}
+
         # First of all add "id" field
-        fieldNode = document.createElement('id')
-        parentNode.appendChild(fieldNode)
-        valueNode = document.createTextNode('1')
-        fieldNode.appendChild(valueNode)
+        field_node = document.createElement('id')
+        parent_node.appendChild(field_node)
+        value_node = document.createTextNode('1')
+        field_node.appendChild(value_node)
         language = self._context.get('lang')
         if language == 'en_US':
             language = False
 
         # Then add all fields in alphabetical order
-        model = pool.get(modelName)
-        fields = model._columns.keys()
-        fields += model._inherit_fields.keys()
+        model_fields = pool[model_name]._fields
+        keys_list = model_fields.keys()
+
         # Remove duplicates because model may have fields with the
         # same name as it's parent
-        fields = sorted(list(set(fields)))
-        for field in fields:
+        keys_list = sorted(keys_list)
+
+        for field in keys_list:
             name = False
             if language:
                 # Obtain field string for user's language.
                 name = self.env['ir.translation']._get_source(
-                    '{model},{field}'.format(model=modelName, field=field),
+                    '{model},{field}'.format(model=model_name, field=field),
                     'field', language)
             if not name:
                 # If there's not description in user's language,
                 # use default (english) one.
-                if field in model._columns.keys():
-                    name = model._columns[field].string
-                else:
-                    name = model._inherit_fields[field][2].string
+                name = model_fields[field].string
 
             if name:
                 name = self.unaccent(name)
@@ -238,83 +248,79 @@ class report_xml(models.Model):
                 name = '%s-%s' % (self.unaccent(name), field)
             else:
                 name = field
-            fieldNode = document.createElement(name)
+            field_node = document.createElement(name)
 
-            parentNode.appendChild(fieldNode)
-            if field in pool.get(modelName)._columns:
-                fieldType = model._columns[field]._type
-            else:
-                fieldType = model._inherit_fields[field][2]._type
-            if fieldType in ('many2one', 'one2many', 'many2many'):
+            parent_node.appendChild(field_node)
+            field_type = model_fields[field].type
+
+            if field_type in ('many2one', 'one2many', 'many2many'):
                 if depth <= 1:
                     continue
-                if field in model._columns:
-                    newName = model._columns[field]._obj
-                else:
-                    newName = model._inherit_fields[field][2]._obj
-                self.generate_xml(pool, newName, fieldNode, document,
+
+                comodel_name = model_fields[field].comodel_name
+                self.generate_xml(pool, comodel_name, field_node, document,
                                   depth - 1, False)
                 continue
 
             value = field
-            if fieldType == 'float':
+            if field_type == 'float':
                 value = '12345.67'
-            elif fieldType == 'integer':
+            elif field_type == 'integer':
                 value = '12345'
-            elif fieldType == 'date':
+            elif field_type == 'date':
                 value = '2009-12-31 00:00:00'
-            elif fieldType == 'time':
+            elif field_type == 'time':
                 value = '12:34:56'
-            elif fieldType == 'datetime':
+            elif field_type == 'datetime':
                 value = '2009-12-31 12:34:56'
 
-            valueNode = document.createTextNode(value)
-            fieldNode.appendChild(valueNode)
+            value_node = document.createTextNode(value)
+            field_node.appendChild(value_node)
 
-        if depth > 1 and modelName != 'Attachments':
+        if depth > 1 and model_name != 'Attachments':
             # Create relation with attachments
-            fieldNode = document.createElement('%s-Attachments' % self.
-                                               unaccent(_('Attachments')))
-            parentNode.appendChild(fieldNode)
-            self.generate_xml(pool, 'ir.attachment', fieldNode, document,
+            field_node = document.createElement('%s-Attachments' % self.
+                                                unaccent(_('Attachments')))
+            parent_node.appendChild(field_node)
+            self.generate_xml(pool, 'ir.attachment', field_node, document,
                               depth - 1, False)
 
         if first_call:
             # Create relation with user
-            fieldNode = document.createElement('%s-User' % self.unaccent
-                                               (_('User')))
-            parentNode.appendChild(fieldNode)
-            self.generate_xml(pool, 'res.users', fieldNode, document,
+            field_node = document.createElement('%s-User' %
+                                                self.unaccent(_('User')))
+            parent_node.appendChild(field_node)
+            self.generate_xml(pool, 'res.users', field_node, document,
                               depth - 1, False)
 
             # Create special entries
-            fieldNode = document.createElement('%s-Special' % self.unaccent
-                                               (_('Special')))
-            parentNode.appendChild(fieldNode)
+            field_node = document.createElement('%s-Special' %
+                                                self.unaccent(_('Special')))
+            parent_node.appendChild(field_node)
 
-            newNode = document.createElement('copy')
-            fieldNode.appendChild(newNode)
-            valueNode = document.createTextNode('1')
-            newNode.appendChild(valueNode)
+            new_node = document.createElement('copy')
+            field_node.appendChild(new_node)
+            value_node = document.createTextNode('1')
+            new_node.appendChild(value_node)
 
-            newNode = document.createElement('sequence')
-            fieldNode.appendChild(newNode)
-            valueNode = document.createTextNode('1')
-            newNode.appendChild(valueNode)
+            new_node = document.createElement('sequence')
+            field_node.appendChild(new_node)
+            value_node = document.createTextNode('1')
+            new_node.appendChild(value_node)
 
-            newNode = document.createElement('subsequence')
-            fieldNode.appendChild(newNode)
-            valueNode = document.createTextNode('1')
-            newNode.appendChild(valueNode)
+            new_node = document.createElement('subsequence')
+            field_node.appendChild(new_node)
+            value_node = document.createTextNode('1')
+            new_node.appendChild(value_node)
 
     @api.model
     def create_xml(self, model, depth):
         if self._context is None:
             self._context = {}
         document = getDOMImplementation().createDocument(None, 'data', None)
-        topNode = document.documentElement
-        recordNode = document.createElement('record')
-        topNode.appendChild(recordNode)
-        self.generate_xml(self.pool, model, recordNode, document, depth, True)
-        topNode.toxml()
-        return topNode.toxml()
+        top_node = document.documentElement
+        record_node = document.createElement('record')
+        top_node.appendChild(record_node)
+        self.generate_xml(self.env, model, record_node, document, depth, True)
+        top_node.toxml()
+        return top_node.toxml()

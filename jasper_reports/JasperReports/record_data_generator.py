@@ -30,12 +30,14 @@
 ##############################################################################
 
 import csv
-from xml.dom.minidom import getDOMImplementation
 import codecs
-from . AbstractDataGenerator import AbstractDataGenerator
+from xml.dom.minidom import getDOMImplementation
+
+from .abstract_data_generator import AbstractDataGenerator
 
 
 class CsvRecordDataGenerator(AbstractDataGenerator):
+
     def __init__(self, report, records):
         self.report = report
         self.records = records
@@ -43,27 +45,32 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
 
     # CSV file generation using a list of dictionaries provided by
     # the parser function.
-    def generate(self, fileName):
-        f = open(fileName, 'wb+')
-        try:
+    def generate(self, file_name):
+
+        with open(file_name, 'wb+') as f:
             csv.QUOTE_ALL = True
-            fieldNames = self.report.fieldNames()
+            field_names = self.report.field_names
             # JasperReports CSV reader requires an extra colon
             # at the end of the line.
-            writer = csv.DictWriter(f, fieldNames + [''], delimiter=',',
+            writer = csv.DictWriter(f, field_names + [''], delimiter=',',
                                     quotechar='"')
             header = {}
-            for field in fieldNames + ['']:
+
+            for field in field_names + ['']:
                 header[field] = field
+
             writer.writerow(header)
             error_reported_fields = []
+
             for record in self.records:
+
                 row = {}
                 for field in record:
-                    if field not in self.report.fields():
+                    if field not in self.report.fields:
                         if field not in error_reported_fields:
                             error_reported_fields.append(field)
                         continue
+
                     value = record.get(field, False)
                     if value is False:
                         value = ''
@@ -73,27 +80,33 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
                         value = '%.10f' % value
                     elif not isinstance(value, str):
                         value = str(value)
-                    row[self.report.fields()[field]['name']] = value
+                    row[self.report.fields[field]['name']] = value
+
                 writer.writerow(row)
-        finally:
-            f.close()
 
 
 class XmlRecordDataGenerator(AbstractDataGenerator):
 
+    def __init__(self):
+        super(XmlRecordDataGenerator, self).__init__()
+        self.document = None
+
     # XML file generation using a list of dictionaries provided by
     # the parser function.
-    def generate(self, fileName):
+    def generate(self, file_name):
+
         # Once all records have been calculated, create the XML structure
         self.document = getDOMImplementation().createDocument(None, 'data',
                                                               None)
-        topNode = self.document.documentElement
+        top_node = self.document.documentElement
+
         for record in self.data['records']:
-            recordNode = self.document.createElement('record')
-            topNode.appendChild(recordNode)
+            record_node = self.document.createElement('record')
+            top_node.appendChild(record_node)
+
             for field, value in record.iteritems():
-                fieldNode = self.document.createElement(field)
-                recordNode.appendChild(fieldNode)
+                field_node = self.document.createElement(field)
+                record_node.appendChild(field_node)
                 # The rest of field types must be converted into str
                 if value is False:
                     value = ''
@@ -103,13 +116,10 @@ class XmlRecordDataGenerator(AbstractDataGenerator):
                     value = '%.10f' % value
                 elif not isinstance(value, unicode):
                     value = unicode(value)
-                valueNode = self.document.createTextNode(value)
-                fieldNode.appendChild(valueNode)
-        # Once created, the only missing step is to store the XML into a file
-        f = codecs.open(fileName, 'wb+', 'utf-8')
-        try:
-            topNode.writexml(f)
-        finally:
-            f.close()
 
-# vim:noexpandtab:smartindent:tabstop=8:softtabstop=8:shiftwidth=8:
+                value_node = self.document.createTextNode(value)
+                field_node.appendChild(value_node)
+
+        # Once created, the only missing step is to store the XML into a file
+        with codecs.open(file_name, 'wb+', 'utf-8') as f:
+            top_node.writexml(f)

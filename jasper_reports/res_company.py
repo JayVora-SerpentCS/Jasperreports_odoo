@@ -31,11 +31,13 @@
 #
 ##############################################################################
 
-from openerp import models, fields
+from odoo import models, fields
 
 
-class res_company(models.Model):
+class ResCompany(models.Model):
 
     _inherit = 'res.company'
 
-    java_path = fields.Char('Java Path', help="Your java path which was downloaded from http://www.serpentcs.com/")
+    java_path = fields.Char('Java Path',
+                            help="Your java path which was downloaded "
+                                 "from http://www.serpentcs.com/")

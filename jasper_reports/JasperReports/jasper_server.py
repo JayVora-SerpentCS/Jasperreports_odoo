@@ -37,12 +37,13 @@ import socket
 import subprocess
 import xmlrpclib
 import logging
-from openerp.exceptions import except_orm
-from openerp.tools.translate import _
-from openerp import models, fields, _
-import openerp.pooler as pooler
+
+from odoo.exceptions import UserError
+from odoo.tools.translate import _
+
 
 class JasperServer:
+
     def __init__(self, port=8090):
         self.port = port
         self.pidfile = None
@@ -58,37 +59,34 @@ class JasperServer:
     def path(self):
         return os.path.abspath(os.path.dirname(__file__))
 
-    def setPidFile(self, pidfile):
-        self.pidfile = pidfile
-
-    def set_java_path(self, javapath):
-        self.javapath = javapath
-
     def start(self):
         java_path = self.javapath
-        if java_path == False:
-            raise except_orm(_('Java Path Not Found !'),_('Please add java path into the jasper configuration page under the company form view'))
-        else :
+        if java_path is False:
+            raise UserError(_('Java Path Not Found !'),
+                            _('Please add java path into the jasper '
+                              'configuration page under the company form '
+                              'view'))
+        else:
             libraries = str(java_path) + '/lib'
             if os.path.exists(str(libraries)):
-                java_path = java_path
+                self.javapath = java_path
             else:
-                raise except_orm(_('libraries Not Found !'),_('There is No libraries found in Java'))
+                raise UserError(_('libraries Not Found !'),
+                                _('There is No libraries found in Java'))
+
         env = {}
         env.update(os.environ)
         if os.name == 'nt':
             a = ';'
         else:
             a = ':'
-        libs = os.path.join(java_path, 'lib', '*.jar')
-        env['CLASSPATH'
-            ] = os.path.join(java_path + a
-                             ) + a.join(glob.glob(libs)
-                                        ) + a + os.path.join(self.path(),
-                                                             '..',
-                                                             'custom_reports')
+        libs = os.path.join(self.path(), '..', 'java', 'lib', '*.jar')
+        env['CLASSPATH'] = os.path.join(self.path(), '..', 'java' + a) + \
+            a.join(glob.glob(libs)) + a + os.path.join(self.path(),
+                                                       '..', 'custom_reports')
 
-        cwd = os.path.join(java_path)
+        cwd = os.path.join(self.path(), '..', 'java')
+
         # Set headless = True because otherwise, java may use
         # existing X session and if session is closed JasperServer
         # would start throwing exceptions. So we better avoid
@@ -97,12 +95,10 @@ class JasperServer:
                    'com.nantic.jasperreports.JasperServer',
                    unicode(self.port)]
         process = subprocess.Popen(command, env=env, cwd=cwd)
+
         if self.pidfile:
-            f = open(self.pidfile, 'w')
-            try:
+            with open(self.pidfile, 'w') as f:
                 f.write(str(process.pid))
-            finally:
-                f.close()
 
     def execute(self, *args):
         """
@@ -120,8 +116,6 @@ class JasperServer:
                     self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
                     pass
                 except xmlrpclib.Fault, e:
-                    raise except_orm(_('Report Error'), e.faultString)
+                    raise UserError(_('Report Error'), e.faultString)
         except xmlrpclib.Fault, e:
-            raise except_orm(_('Report Error'), e.faultString)
-
-# vim:noexpandtab:smartindent:tabstop=8:softtabstop=8:shiftwidth=8:
+            raise UserError(_('Report Error'), e.faultString)
