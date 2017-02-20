@@ -85,7 +85,7 @@ class BrowseDataGenerator(AbstractDataGenerator):
 
             values[language] = model.browser(id).mapped(field)
 
-            if model._fields[field]._type == 'selection' and \
+            if model._fields[field].type == 'selection' and \
                     model._fields[field].selection:
                 field_data = model.fields_get(self.cr, self.uid,
                                               allfields=[field],
@@ -180,7 +180,7 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
     # they will imply a LEFT JOIN like behaviour on the rows to be shown.
     def generate(self, file_name):
         self.all_records = []
-        relations = self.report.relations()
+        relations = self.report.relations
         # The following loop generates one entry to all_records list
         # for each record that will be created. If there are any relations
         # it acts like a LEFT JOIN against the main model/table.
@@ -189,7 +189,7 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
             new_records = self.generate_ids(record, relations, '',
                                             [{'root': record}])
             copies = 1
-            if self.report.copiesField() and \
+            if self.report.copies_field and \
                     record.__hasattr__(self.report.copies_field):
                 copies = int(record.__getattr__(self.report.copies_field))
             for new in new_records:
@@ -205,7 +205,7 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
             record_node = self.document.createElement('record')
             top_node.appendChild(record_node)
             self.generate_xml_record(records['root'], records, record_node, '',
-                                     self.report.fields())
+            self.report.fields)
 
         # Once created, the only missing step is to store the XML into a file
         with codecs.open(file_name, 'wb+', 'utf-8') as f:
@@ -268,7 +268,7 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                 continue
 
             if field in record._fields:
-                field_type = record._fields[field]._type
+                field_type = record._fields[field].type
 
             # The rest of field types must be converted into str
             if field == 'id':
@@ -312,14 +312,14 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
     # they will imply a LEFT JOIN like behaviour on the rows to be shown.
     def generate(self, file_name):
         self.all_records = []
-        relations = self.report.relations()
+        relations = self.report.relations
 
         # The following loop generates one entry to allRecords list
         # for each record that will be created. If there are any relations
         # it acts like a LEFT JOIN against the main model/table.
-        reportCopies = self.report.copies() or 1
+        reportCopies = self.report.copies or 1
         sequence = 0
-        copiesField = self.report.copiesField()
+        copiesField = self.report.copies_field
         for record in self.env[self.model].browse(self.ids):
             newRecords = self.generate_ids(record, relations, '',
                                            [{'root': record}])
@@ -341,10 +341,10 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             csv.QUOTE_ALL = True
             # JasperReports CSV reader requires an extra colon at the
             # end of the line.
-            writer = csv.DictWriter(f, self.report.fieldNames() + [''],
+            writer = csv.DictWriter(f, self.report.field_names + [''],
                                     delimiter=",", quotechar='"')
             header = {}
-            for field in self.report.fieldNames() + ['']:
+            for field in self.report.field_names + ['']:
                 if isinstance(field, unicode):
                     name = field.encode('utf-8')
                 else:
@@ -356,7 +356,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             for records in self.all_records:
                 row = {}
                 self.generateCsvRecord(records['root'], records, row, '',
-                                       self.report.fields(),
+                                       self.report.fields,
                                        records['sequence'],
                                        records['subsequence'],
                                        records['copy'])
@@ -393,11 +393,11 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 for f in fields2:
                     p = '%s/%s' % (current_path, f)
                     if f == 'sequence':
-                        row[self.report.fields()[p]['name']] = sequence
+                        row[self.report.fields[p]['name']] = sequence
                     elif f == 'subsequence':
-                        row[self.report.fields()[p]['name']] = subsequence
+                        row[self.report.fields[p]['name']] = subsequence
                     elif f == 'copy':
-                        row[self.report.fields()[p]['name']] = copy
+                        row[self.report.fields[p]['name']] = copy
                 continue
 
             else:
@@ -437,24 +437,24 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                                            subsequence, copy)
                 continue
 
-            # The field might not appear in the self.report.fields()
+            # The field might not appear in the self.report.fields
             # only when the field is a many2one but in this case it's null.
             # This will make the path to look like: "journal_id",
             # when the field actually in the report is "journal_id/name",
             # for example.In order not to change the way we detect many2one
             # fields, we simply check that the field is in self.report.
             # fields() and that's it.
-            if current_path not in self.report.fields():
+            if current_path not in self.report.fields:
                 continue
 
             # Show all translations for a field
-            type = self.report.fields()[current_path]['type']
+            type = self.report.fields[current_path]['type']
             if type == 'java.lang.Object':
                 value = self.value_in_all_languages(record._name, record.id,
                                                     root)
 
             if field in record._fields:
-                field_type = record._fields[field]._type
+                field_type = record._fields[field].type
 
             # The rest of field types must be converted into str
             if field == 'id':
@@ -486,4 +486,4 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 value = '%.10f' % value
             elif not isinstance(value, str):
                 value = str(value)
-            row[self.report.fields()[current_path]['name']] = value
+            row[self.report.fields[current_path]['name']] = value

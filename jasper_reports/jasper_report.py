@@ -132,7 +132,7 @@ class Report:
                                                    self.uid, self.ids,
                                                    self.context)
             generator.generate(data_file)
-            self.temporary_files += generator.temporaryFiles
+            self.temporary_files += generator.temporary_files
 
         sub_report_data_files = []
 
@@ -263,7 +263,7 @@ class Report:
             parameters.update(self.data['parameters'])
 
         server = JasperServer(int(tools.config['jasperport']))
-        server.setPidFile(tools.config['jasperpid'])
+        # server.setPidFile(tools.config['jasperpid'])
         #        java path for jasper server
         company_rec = self.env['res.users'].browse(self.uid).company_id
         server.javapath = company_rec and company_rec.java_path or ''

@@ -62,8 +62,8 @@ class JasperServer:
     def start(self):
         java_path = self.javapath
         if java_path is False:
-            raise UserError(_('Java Path Not Found !'),
-                            _('Please add java path into the jasper '
+            raise UserError(_('Java Path Not Found !\n'
+                            'Please add java path into the jasper '
                               'configuration page under the company form '
                               'view'))
         else:
@@ -71,8 +71,8 @@ class JasperServer:
             if os.path.exists(str(libraries)):
                 self.javapath = java_path
             else:
-                raise UserError(_('libraries Not Found !'),
-                                _('There is No libraries found in Java'))
+                raise UserError(_('libraries Not Found !\n'
+                                'There is No libraries found in Java'))
 
         env = {}
         env.update(os.environ)
@@ -116,6 +116,6 @@ class JasperServer:
                     self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
                     pass
                 except xmlrpclib.Fault, e:
-                    raise UserError(_('Report Error'), e.faultString)
+                    raise UserError(_('Report Error\n%s' % e.faultString))
         except xmlrpclib.Fault, e:
-            raise UserError(_('Report Error'), e.faultString)
+            raise UserError(_('Report Error\n%s' % e.faultString))
