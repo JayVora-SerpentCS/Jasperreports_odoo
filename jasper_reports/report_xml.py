@@ -39,7 +39,7 @@ from xml.dom.minidom import getDOMImplementation
 from odoo.exceptions import UserError
 from odoo import api, fields, models, _
 
-from . import jasper_report
+from .jasper_report import register_jasper_report
 
 src_chars = """ '"()/*-+?¿!&$[]{}@#`'^:;<>=~%,\\"""
 src_chars = unicode(src_chars, 'iso-8859-1')
@@ -175,8 +175,7 @@ class ReportXml(models.Model):
                                  You need atleast one jrxml report!'))
 
             # Ensure the report is registered so it can be used immediately
-            jasper_report.register_jasper_report(report.report_name,
-                                                 report.model)
+            register_jasper_report(report.report_name, report.model)
         return True
 
     def save_file(self, name, value):
