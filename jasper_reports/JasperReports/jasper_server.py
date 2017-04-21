@@ -53,26 +53,39 @@ class JasperServer:
         self.logger = logging.getLogger(__name__)
 
     def error(self, message):
+        
         if self.logger:
             self.logger.error("%s" % message)
+            
+            
+    def setPidFile(self, pidfile):
+        self.pidfile = pidfile
+        
+#   
+
 
     def path(self):
         return os.path.abspath(os.path.dirname(__file__))
 
     def start(self):
         java_path = self.javapath
+        
+        
         if java_path is False:
-            raise UserError(_('Java Path Not Found !\n'
-                            'Please add java path into the jasper '
+            raise UserError(
+                            ('Java Path Not Found ! \n Please add java path into the jasper '
                               'configuration page under the company form '
                               'view'))
         else:
             libraries = str(java_path) + '/lib'
+            
+            
             if os.path.exists(str(libraries)):
                 self.javapath = java_path
+               
             else:
-                raise UserError(_('libraries Not Found !\n'
-                                'There is No libraries found in Java'))
+                 raise UserError(('libraries Not Found !\n There are no libraries found in Java'))
+                                
 
         env = {}
         env.update(os.environ)
@@ -105,17 +118,27 @@ class JasperServer:
         Render report and return the number of pages generated.
         """
         try:
+
             return self.proxy.Report.execute(*args)
-        except (xmlrpclib.ProtocolError, socket.error), e:
+        
+           
+        except (xmlrpclib.ProtocolError,socket.error),e:
             self.start()
+            
+            
             for x in xrange(40):
                 time.sleep(1)
                 try:
+                   
                     return self.proxy.Report.execute(*args)
-                except (xmlrpclib.ProtocolError, socket.error), e:
+                except (xmlrpclib.ProtocolError, socket.error),e:
                     self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
                     pass
-                except xmlrpclib.Fault, e:
-                    raise UserError(_('Report Error\n%s' % e.faultString))
-        except xmlrpclib.Fault, e:
-            raise UserError(_('Report Error\n%s' % e.faultString))
+                except xmlrpclib.Fault,e:
+                    
+                    raise UserError(('Report Error'), e.faultString)
+                
+                except xmlrpclib.Fault,e:
+                    
+                    raise UserError(('Report Error'), e.faultString)
+       

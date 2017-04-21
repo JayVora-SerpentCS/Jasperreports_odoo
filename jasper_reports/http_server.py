@@ -52,8 +52,10 @@ class JasperHandler(BaseHTTPRequestHandler):
         pass
 
     def parse_request(self, *args, **kwargs):
-        path = self.raw_requestline.replace('GET', '').strip().split(' ')[0]
+        path = self.raw_requestline.replace('GET','').strip().split(' ')[0]
         try:
+            
+            
             result = self.execute(path)
         except Exception, e:
             result = '<error><exception>%s</exception></error>' % (e.args,)
@@ -87,7 +89,7 @@ class JasperHandler(BaseHTTPRequestHandler):
 
         context = {'lang': language}
 
-        uid = netsvc.dispatch_rpc('common', 'login', (database, user,
+        uid = netsvc.dispatch_rpc('common','login', (database, user,
                                                       password))
         result = netsvc.dispatch_rpc('object',
                                      'execute',
