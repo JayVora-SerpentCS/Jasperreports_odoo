@@ -72,13 +72,22 @@ class Report:
         self.report = None
         self.temporary_files = []
         self.output_format = 'pdf'
-
+        
+        
+     
+    def temporary_files (self):
+        return self.temporary_files 
+   
+      
+       
     def execute(self):
         """
         If self.context contains "return_pages = True" it will return
         the number of pages of the generated report.
         """
         logger = logging.getLogger(__name__)
+        
+      
 
         # * Get report path *
         # Not only do we search the report by name but also ensure that
@@ -110,10 +119,14 @@ class Report:
         self.report = JasperReport(self.report_path)
 
         # Create temporary input (XML) and output (PDF) files
+        
+        
+        
         fd, data_file = tempfile.mkstemp()
         os.close(fd)
         fd, output_file = tempfile.mkstemp()
         os.close(fd)
+        
 
         self.temporary_files.append(data_file)
         self.temporary_files.append(output_file)
@@ -131,8 +144,12 @@ class Report:
                                                    self.env, self.cr,
                                                    self.uid, self.ids,
                                                    self.context)
+                
             generator.generate(data_file)
-            self.temporary_files += generator.temporary_files
+            
+            self.temporary_files += self.temporary_files
+            
+
 
         sub_report_data_files = []
 
@@ -243,7 +260,7 @@ class Report:
         return tools.config['db_password'] or password
 
     def execute_report(self, data_file, output_file, sub_report_data_files):
-        locale = self.context.get('lang', 'en_US')
+        locale = self.context.get('lang','en_US')
 
         connection_parameters = {
             'output': self.output_format,
@@ -263,7 +280,9 @@ class Report:
             parameters.update(self.data['parameters'])
 
         server = JasperServer(int(tools.config['jasperport']))
-        # server.setPidFile(tools.config['jasperpid'])
+        
+        
+        server.setPidFile(tools.config['jasperpid'])
         #        java path for jasper server
         company_rec = self.env['res.users'].browse(self.uid).company_id
         server.javapath = company_rec and company_rec.java_path or ''
@@ -294,7 +313,9 @@ class ReportJasper(report.interface.report_int):
 
         if self.parser:
             d = self.parser(cr, uid, ids, datas, context)
+            
             ids = d.get('ids', ids)
+            
             name = d.get('name', self.name)
             # Use model defined in ReportJasper definition.
             # Necessary for menu entries.

@@ -64,6 +64,35 @@ class JasperReport:
         self.is_header = False
         if file_name:
             self.extract_properties()
+            
+            
+    def language(self):
+        return self.language
+
+    def fields(self):
+        return self.fields
+
+    def fieldNames(self):
+        return self.field_names
+
+    def subreports(self):
+        return self.subreports
+
+    def datasets(self):
+        return self.datasets
+
+    def relations(self):
+        return self.relations
+
+    def copiesField(self):
+        return self.copies_field
+
+
+    def isHeader(self):
+        return self.is_header    
+
+    def copies(self):
+        return self.copies
 
     def subreport_directory(self):
         return os.path.join(os.path.abspath(

@@ -1,0 +1,48 @@
+1    [XML-RPC-0] ERROR org.apache.xmlrpc.server.XmlRpcErrorLogger - No such handler: Report.__str__
+org.apache.xmlrpc.server.XmlRpcNoSuchHandlerException: No such handler: Report.__str__
+	at org.apache.xmlrpc.server.AbstractReflectiveHandlerMapping.getHandler(AbstractReflectiveHandlerMapping.java:214)
+	at org.apache.xmlrpc.server.XmlRpcServerWorker.execute(XmlRpcServerWorker.java:45)
+	at org.apache.xmlrpc.server.XmlRpcServer.execute(XmlRpcServer.java:86)
+	at org.apache.xmlrpc.server.XmlRpcStreamServer.execute(XmlRpcStreamServer.java:200)
+	at org.apache.xmlrpc.webserver.Connection.run(Connection.java:208)
+	at org.apache.xmlrpc.util.ThreadPool$Poolable$1.run(ThreadPool.java:68)
+1    [XML-RPC-0] ERROR org.apache.xmlrpc.server.XmlRpcErrorLogger - No such handler: Report.__str__
+org.apache.xmlrpc.server.XmlRpcNoSuchHandlerException: No such handler: Report.__str__
+	at org.apache.xmlrpc.server.AbstractReflectiveHandlerMapping.getHandler(AbstractReflectiveHandlerMapping.java:214)
+	at org.apache.xmlrpc.server.XmlRpcServerWorker.execute(XmlRpcServerWorker.java:45)
+	at org.apache.xmlrpc.server.XmlRpcServer.execute(XmlRpcServer.java:86)
+	at org.apache.xmlrpc.server.XmlRpcStreamServer.execute(XmlRpcStreamServer.java:200)
+	at org.apache.xmlrpc.webserver.Connection.run(Connection.java:208)
+	at org.apache.xmlrpc.util.ThreadPool$Poolable$1.run(ThreadPool.java:68)
+1    [XML-RPC-0] ERROR org.apache.xmlrpc.server.XmlRpcErrorLogger - No such handler: Report.__str__
+org.apache.xmlrpc.server.XmlRpcNoSuchHandlerException: No such handler: Report.__str__
+	at org.apache.xmlrpc.server.AbstractReflectiveHandlerMapping.getHandler(AbstractReflectiveHandlerMapping.java:214)
+	at org.apache.xmlrpc.server.XmlRpcServerWorker.execute(XmlRpcServerWorker.java:45)
+	at org.apache.xmlrpc.server.XmlRpcServer.execute(XmlRpcServer.java:86)
+	at org.apache.xmlrpc.server.XmlRpcStreamServer.execute(XmlRpcStreamServer.java:200)
+	at org.apache.xmlrpc.webserver.Connection.run(Connection.java:208)
+	at org.apache.xmlrpc.util.ThreadPool$Poolable$1.run(ThreadPool.java:68)
+0    [XML-RPC-0] ERROR org.apache.xmlrpc.server.XmlRpcErrorLogger - No such handler: Report.__str__
+org.apache.xmlrpc.server.XmlRpcNoSuchHandlerException: No such handler: Report.__str__
+	at org.apache.xmlrpc.server.AbstractReflectiveHandlerMapping.getHandler(AbstractReflectiveHandlerMapping.java:214)
+	at org.apache.xmlrpc.server.XmlRpcServerWorker.execute(XmlRpcServerWorker.java:45)
+	at org.apache.xmlrpc.server.XmlRpcServer.execute(XmlRpcServer.java:86)
+	at org.apache.xmlrpc.server.XmlRpcStreamServer.execute(XmlRpcStreamServer.java:200)
+	at org.apache.xmlrpc.webserver.Connection.run(Connection.java:208)
+	at org.apache.xmlrpc.util.ThreadPool$Poolable$1.run(ThreadPool.java:68)
+1    [XML-RPC-0] ERROR org.apache.xmlrpc.server.XmlRpcErrorLogger - No such handler: Report.__str__
+org.apache.xmlrpc.server.XmlRpcNoSuchHandlerException: No such handler: Report.__str__
+	at org.apache.xmlrpc.server.AbstractReflectiveHandlerMapping.getHandler(AbstractReflectiveHandlerMapping.java:214)
+	at org.apache.xmlrpc.server.XmlRpcServerWorker.execute(XmlRpcServerWorker.java:45)
+	at org.apache.xmlrpc.server.XmlRpcServer.execute(XmlRpcServer.java:86)
+	at org.apache.xmlrpc.server.XmlRpcStreamServer.execute(XmlRpcStreamServer.java:200)
+	at org.apache.xmlrpc.webserver.Connection.run(Connection.java:208)
+	at org.apache.xmlrpc.util.ThreadPool$Poolable$1.run(ThreadPool.java:68)
+1    [XML-RPC-0] ERROR org.apache.xmlrpc.server.XmlRpcErrorLogger - No such handler: Report.__str__
+org.apache.xmlrpc.server.XmlRpcNoSuchHandlerException: No such handler: Report.__str__
+	at org.apache.xmlrpc.server.AbstractReflectiveHandlerMapping.getHandler(AbstractReflectiveHandlerMapping.java:214)
+	at org.apache.xmlrpc.server.XmlRpcServerWorker.execute(XmlRpcServerWorker.java:45)
+	at org.apache.xmlrpc.server.XmlRpcServer.execute(XmlRpcServer.java:86)
+	at org.apache.xmlrpc.server.XmlRpcStreamServer.execute(XmlRpcStreamServer.java:200)
+	at org.apache.xmlrpc.webserver.Connection.run(Connection.java:208)
+	at org.apache.xmlrpc.util.ThreadPool$Poolable$1.run(ThreadPool.java:68)
