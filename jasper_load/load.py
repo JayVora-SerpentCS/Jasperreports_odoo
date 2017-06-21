@@ -29,9 +29,8 @@
 
 
 import os
-import openerp
-import openerp.tools.config as Config
-
+import odoo
+import odoo.tools.config as Config
 
 def gevent_server_init(self, app):
     """"To overwrite the openerp gevent server __init__ method and changed
@@ -46,7 +45,7 @@ def gevent_server_init(self, app):
     self.pid = os.getpid()
 
 
-openerp.service.server.GeventServer.__init__ = gevent_server_init
+odoo.service.server.GeventServer.__init__ = gevent_server_init
 
 
 def prefork_server_init(self, app):
@@ -71,4 +70,4 @@ def prefork_server_init(self, app):
     self.long_polling_pid = None
 
 
-openerp.service.server.PreforkServer.__init__ = prefork_server_init
+odoo.service.server.PreforkServer.__init__ = prefork_server_init
