@@ -1,11 +1,7 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
-#                         http://www.NaN-tic.com
-# Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
-#                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
-# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2017-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -31,14 +27,13 @@
 #
 ##############################################################################
 
-#from openerp.service import server
-#from openerp.service.server import GeventServer, PreforkServer, CommonServer
-import openerp, os
+
+import os
+import openerp
 import openerp.tools.config as config
 
-
 def gevent_server_init(self, app):
-    """"To overritte the openerp gevent server __init__ method and changed 
+    """"To overwrite the openerp gevent server __init__ method and changed
     xmlrpc port no instead of the longpolling port  """
 
     self.port = config['xmlrpc_port']
@@ -52,11 +47,11 @@ def gevent_server_init(self, app):
 openerp.service.server.GeventServer.__init__ = gevent_server_init
 
 def prefork_server_init(self, app):
-    """"To overritte the openerp prefork server __init__ method and changed 
+    """"To overwrite the openerp prefork server __init__ method and changed
     longpolling port no instead of the xmlrpc port  """
 
     self.address = config['xmlrpc'] and \
-            (config['xmlrpc_interface'] or '0.0.0.0', config['longpolling_port'])
+        (config['xmlrpc_interface'] or '0.0.0.0', config['longpolling_port'])
     self.population = config['workers']
     self.timeout = config['limit_time_real']
     self.limit_request = config['limit_request']

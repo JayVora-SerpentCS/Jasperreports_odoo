@@ -35,9 +35,9 @@
     "name": "Jasper Reports",
     "version": "1.1.1",
     "description": '''
-    This module integrates Jasper Reports with OpenERP. V6 and v7 compatible"
+    This module integrates Jasper Reports with Odoo. V6 and v7 compatible"
     version was made by NaN-tic.
-    Serpent Consulting Services Pvt. Ltd. has migrated it to v8. ''',
+    Serpent Consulting Services Pvt. Ltd. has migrated it to v10. ''',
     "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd.",
     "website": "http://www.nan-tic.com, http://www.serpentcs.com",
     'images': [
