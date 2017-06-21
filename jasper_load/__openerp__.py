@@ -29,7 +29,7 @@
 
 {
     "name": "Jasper Reports - Load initially",
-    "version": "1.1.1",
+    "version": "10.0.0.0.1",
     "description": '''
     This module integrates Jasper Reports with Odoo. V6 and v7 compatible"
     version was made by NaN-tic.
@@ -40,5 +40,4 @@
     "category": "Generic Modules/Jasper Reports",
     "active": True,
     "installable": True,
-    'application': True,
 }
