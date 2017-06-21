@@ -32,6 +32,7 @@ import os
 import openerp
 import openerp.tools.config as config
 
+
 def gevent_server_init(self, app):
     """"To overwrite the openerp gevent server __init__ method and changed
     xmlrpc port no instead of the longpolling port  """
@@ -44,7 +45,9 @@ def gevent_server_init(self, app):
     # runtime
     self.pid = os.getpid()
 
+
 openerp.service.server.GeventServer.__init__ = gevent_server_init
+
 
 def prefork_server_init(self, app):
     """"To overwrite the openerp prefork server __init__ method and changed
@@ -66,5 +69,6 @@ def prefork_server_init(self, app):
     self.generation = 0
     self.queue = []
     self.long_polling_pid = None
+
 
 openerp.service.server.PreforkServer.__init__ = prefork_server_init

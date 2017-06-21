@@ -205,7 +205,7 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
             record_node = self.document.createElement('record')
             top_node.appendChild(record_node)
             self.generate_xml_record(records['root'], records, record_node, '',
-            self.report.fields)
+                                     self.report.fields)
 
         # Once created, the only missing step is to store the XML into a file
         with codecs.open(file_name, 'wb+', 'utf-8') as f:
