@@ -52,10 +52,10 @@ class ReportXmlFile(models.Model):
 
     file = fields.Binary('File', required=True,
                          filters="*.jrxml,*.properties,*.ttf", )
-    filename = fields.Char('File Name', size=256)
+    filename = fields.Char('File Name')
     report_id = fields.Many2one('ir.actions.report.xml', 'Report',
                                 ondelete='cascade')
-    default = fields.Boolean('Default')
+    default = fields.Boolean('Default', default=True)
 
     @api.model
     def create(self, values):
@@ -78,6 +78,7 @@ class ReportXmlFile(models.Model):
 # Inherit ir.actions.report.xml and add an action to be able to store
 # .jrxml and .properties files attached to the report so they can be
 # used as reports in the application.
+
 
 class ReportXml(models.Model):
     _inherit = 'ir.actions.report.xml'
@@ -106,7 +107,6 @@ class ReportXml(models.Model):
     @api.multi
     def write(self, values):
         if self._context and self._context.get('jasper_report'):
-
             if 'jasper_model_id' in values:
                 values['model'] = \
                     self.env['ir.model'].browse(
@@ -115,7 +115,6 @@ class ReportXml(models.Model):
             values['type'] = 'ir.actions.report.xml'
             values['report_type'] = 'pdf'
             values['jasper_report'] = True
-
         return super(ReportXml, self).write(values)
 
     @api.multi
@@ -144,8 +143,7 @@ class ReportXml(models.Model):
                 if '.jrxml' in file_name and attachment.default:
 
                     if has_default:
-                        raise UserError(_('Error'),
-                                        _('There is more than one \
+                        raise UserError(_('There is more than one \
                                          report marked as default'))
                     has_default = True
                     # Update path into report_rml field.
@@ -170,8 +168,7 @@ class ReportXml(models.Model):
                             values_id = values_id[0]
 
             if not has_default:
-                raise UserError(_('Error'),
-                                _('No report has been marked as default! \
+                raise UserError(_('No report has been marked as default! \
                                  You need atleast one jrxml report!'))
 
             # Ensure the report is registered so it can be used immediately
