@@ -33,7 +33,7 @@ import signal
 import logging
 import odoo
 import odoo.tools.config as Config
-from odoo.tools import stripped_sys_argv, dumpstacks, log_ormcache_stats
+from odoo.tools import dumpstacks, log_ormcache_stats
 
 _logger = logging.getLogger(__name__)
 
@@ -52,6 +52,7 @@ def gevent_server_init(self, app):
 
 
 odoo.service.server.GeventServer.__init__ = gevent_server_init
+
 
 def prefork_server_init(self, app):
     """"To overwrite the openerp prefork server __init__ method and changed
@@ -80,13 +81,10 @@ def prefork_server_init(self, app):
 
 odoo.service.server.PreforkServer.__init__ = prefork_server_init
 
+
 def gevent_server_start(self):
     import gevent
     from gevent.wsgi import WSGIServer
-
-        # Set process memory limit as an extra safeguard
-#        _, hard = resource.getrlimit(resource.RLIMIT_AS)
-#        resource.setrlimit(resource.RLIMIT_AS, (config['limit_memory_hard'], hard))
 
     if os.name == 'posix':
         signal.signal(signal.SIGQUIT, dumpstacks)
@@ -94,11 +92,14 @@ def gevent_server_start(self):
 
     gevent.spawn(self.watchdog)
     self.httpd = WSGIServer((self.interface, self.port), self.app)
-    _logger.info('Evented Service (longpolling) running on %s:%s', self.interface, self.port)
+    _logger.info('Evented Service (longpolling) running on %s:%s',
+                 self.interface, self.port)
     try:
         self.httpd.serve_forever()
     except:
-        _logger.exception("Evented Service (longpolling): uncaught error during main loop")
+        _logger.exception("Evented Service (longpolling): uncaught error\
+        during main loop")
         raise
+
 
 odoo.service.server.GeventServer.start = gevent_server_start
