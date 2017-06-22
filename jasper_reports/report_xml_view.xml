@@ -19,9 +19,11 @@
 			<field name="model">ir.actions.report.xml.file</field>
 			<field name="arch" type="xml">
 				<form string="Jasper Reports File">
-					<field name="file" filename="filename" />
-					<field name="filename" />
-					<field name="default" />
+                    <group col="4" colspan="4">
+                        <field name="file" string="Select .jrxml file" filename="filename" />
+                        <field name="filename" />
+                        <field name="default" />
+                    </group>
 				</form>
 			</field>
 		</record>
@@ -57,9 +59,11 @@
 						<separator string="Files" colspan="4" />
 						<field name="jasper_file_ids" colspan="4" nolabel="1" widget="one2many_list">
 							<form string="Jasper Reports File">
-								<field name="file" filename="filename" string="File"/>
-								<field name="filename" />
-								<field name="default" />
+                                <group col="4" colspan="4">
+                                    <field name="file" filename="filename" string="Upload .jrxml file"/>
+                                    <field name="filename"/>
+                                    <field name="default"/>
+                                </group>
 							</form>
 						</field>
 						<separator string="Groups" colspan="4" />
