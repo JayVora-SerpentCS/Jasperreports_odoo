@@ -45,7 +45,7 @@
         'images/jasper_reports.png'
     ],
     "depends": [
-        "sale",
+        "sale", "jasper_load"
     ],
     "category": "Generic Modules/Jasper Reports",
     "demo": [
@@ -59,8 +59,6 @@
         'data/jasper_data.xml',
         'res_company_view.xml',
     ],
-    "active": True,
     "installable": True,
     "application": True,
-    "auto_install": True,
 }
