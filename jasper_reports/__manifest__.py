@@ -5,7 +5,7 @@
 #                         http://www.NaN-tic.com
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
-# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2014-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -33,7 +33,7 @@
 
 {
     "name": "Jasper Reports",
-    "version": "1.1.1",
+    "version": "10.0.0.1.1",
     "description": '''
     This module integrates Jasper Reports with Odoo. V6 and v7 compatible"
     version was made by NaN-tic.
