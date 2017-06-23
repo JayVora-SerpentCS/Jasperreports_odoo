@@ -1,10 +1,6 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
-#                         http://www.NaN-tic.com
-# Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
-#                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
 # Copyright (C) 2017-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
@@ -38,8 +34,8 @@
     This module integrates Jasper Reports with OpenERP. V6 and v7 compatible"
     version was made by NaN-tic.
     Serpent Consulting Services Pvt. Ltd. has migrated it to v8. ''',
-    "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd.",
-    "website": "http://www.nan-tic.com, http://www.serpentcs.com",
+    "author": "Serpent Consulting Services Pvt. Ltd.",
+    "website": "http://www.serpentcs.com",
     
     "depends": ["base"],
     "category": "Generic Modules/Jasper Reports",
