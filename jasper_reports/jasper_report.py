@@ -301,7 +301,6 @@ if release.major_version == '5.0':
     # Version 5.0 specific code
 
     # Ugly hack to avoid developers the need to register reports
-    import pooler
     import report
 
     def register_jasper_report(name, model):
