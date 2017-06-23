@@ -56,7 +56,7 @@ def prefork_server_init(self, app):
     """"To overritte the openerp prefork server __init__ method and changed
     longpolling port no instead of the xmlrpc port  """
 
-    self.address = config['xmlrpc'] and\
+    self.address = config['xmlrpc'] and \
         (config['xmlrpc_interface'] or '0.0.0.0', config['longpolling_port'])
     self.population = config['workers']
     self.timeout = config['limit_time_real']
