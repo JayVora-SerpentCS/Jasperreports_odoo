@@ -297,6 +297,7 @@ class report_jasper(report.interface.report_int):
         # return ( r.execute(), 'pdf' )
         return r.execute()
 
+
 if release.major_version == '5.0':
     # Version 5.0 specific code
 
