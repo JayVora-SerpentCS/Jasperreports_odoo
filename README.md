@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.org/JayVora-SerpentCS/Jasperreports_odoo
-.svg?branch=8.0)](https://travis-ci.org/JayVora-SerpentCS/Jasperreports_odoo
-)
+[![Build Status](https://travis-ci.org/JayVora-SerpentCS/Jasperreports_odoo.svg?branch=8.0)](https://travis-ci.org/JayVora-SerpentCS/Jasperreports_odoo)
 ========
 
 This is the reopository for Jasper Reports in Odoo
