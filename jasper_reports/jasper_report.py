@@ -297,11 +297,11 @@ class report_jasper(report.interface.report_int):
         # return ( r.execute(), 'pdf' )
         return r.execute()
 
+
 if release.major_version == '5.0':
     # Version 5.0 specific code
 
     # Ugly hack to avoid developers the need to register reports
-    import pooler
     import report
 
     def register_jasper_report(name, model):
@@ -337,21 +337,8 @@ if release.major_version == '5.0':
             register_jasper_report(record['report_name'], record['model'])
         return value
 
-    report.interface.register_all = new_register_all
 
-
-def register_jasper_report(report_name, model_name):
-    name = 'report.%s' % report_name
-    # Register only if it didn't exist another "jasper_report"
-    # with the same name given that developers might prefer/need
-    # to register the reports themselves.
-    # For example, if they need their own parser.
-    if name in openerp.report.interface.report_int._reports:
-        if isinstance(openerp.report.interface.report_int._reports[name],
-                      report_jasper):
-            return openerp.report.interface.report_int._reports[name]
-        del openerp.report.interface.report_int._reports[name]
-    return report_jasper(name, model_name)
+report.interface.register_all = new_register_all
 
 
 class ir_actions_report_xml(models.Model):

@@ -103,4 +103,5 @@ class JasperHandler(BaseHTTPRequestHandler):
 
         return result
 
+
 reg_http_service('/jasper/', JasperHandler)
