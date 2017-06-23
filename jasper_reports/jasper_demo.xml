@@ -1,26 +1,26 @@
 <?xml version="1.0"?>
 <openerp>
 <data>
-	<record id="res_users_jaspertest" model="ir.actions.report.xml">
-		<field name="string">Jasper Users</field>
-		<field name="auto">True</field>
-		<field name="model">res.users</field>
-		<field name="jasper_model_id" ref="base.model_res_users"/>
-		<field name="name">Jasper Users</field>
-		<field name="report_name">res.user.jaspertest</field>
-		<field name="rml">jasper_reports/demo/user.jrxml</field>
-		<field name="report_rml">jasper_reports/demo/user.jrxml</field>
-		<field name="menu">True</field>
-		<field name="header">False</field>
-		<field name="jasper_report">True</field>
-		<field name="jasper_output">pdf</field>
-	</record>
-	
-	<record id="res_users_jaspertest_values" model="ir.values">
-			<field name="name">Jasper Users</field>
-			<field name="model">res.users</field>
-			<field name="key2" eval="'client_print_multi'" />
-			<field name="value_unpickle" eval="'ir.actions.report.xml, ' +str(res_users_jaspertest)" />
-		</record>
+    <record id="res_users_jaspertest" model="ir.actions.report.xml">
+        <field name="string">Jasper Users</field>
+        <field name="auto">True</field>
+        <field name="model">res.users</field>
+        <field name="jasper_model_id" ref="base.model_res_users"/>
+        <field name="name">Jasper Users</field>
+        <field name="report_name">res.user.jaspertest</field>
+        <field name="rml">jasper_reports/demo/user.jrxml</field>
+        <field name="report_rml">jasper_reports/demo/user.jrxml</field>
+        <field name="menu">True</field>
+        <field name="header">False</field>
+        <field name="jasper_report">True</field>
+        <field name="jasper_output">pdf</field>
+    </record>
+    
+    <record id="res_users_jaspertest_values" model="ir.values">
+            <field name="name">Jasper Users</field>
+            <field name="model">res.users</field>
+            <field name="key2" eval="'client_print_multi'" />
+            <field name="value_unpickle" eval="'ir.actions.report.xml, ' +str(res_users_jaspertest)" />
+        </record>
 </data>
 </openerp>
