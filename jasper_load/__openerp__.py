@@ -36,7 +36,6 @@
     Serpent Consulting Services Pvt. Ltd. has migrated it to v8. ''',
     "author": "Serpent Consulting Services Pvt. Ltd.",
     "website": "http://www.serpentcs.com",
-    
     "depends": ["base"],
     "category": "Generic Modules/Jasper Reports",
     "active": True,
