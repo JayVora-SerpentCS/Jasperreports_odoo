@@ -73,17 +73,17 @@ class BrowseDataGenerator(AbstractDataGenerator):
         return self._languages
 
     def value_in_all_languages(self, model, id, field):
-        context = copy.copy(self._context)
+        context = self.env.context.copy()
         model = self.env[model]
         values = {}
 
         for language in self.languages():
             if language == 'en_US':
-                context['lang'] = False
+                context.update({'lang': False})
             else:
-                context['lang'] = language
-
-            values[language] = model.browser(id).mapped(field)
+                context.update({'lang': language})
+                
+            values[language] = model.browse(id).mapped(field)
 
             if model._fields[field].type == 'selection' and \
                     model._fields[field].selection:
