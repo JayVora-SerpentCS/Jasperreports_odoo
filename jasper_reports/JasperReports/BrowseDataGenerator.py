@@ -373,7 +373,8 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                           subsequence, copy):
         # One field (many2one, many2many or one2many) can appear several times
         # Process each "root" field only once by using a set.
-        unrepeated = set([field.partition('/')[0] for field in fields])
+        field_type = False
+        unrepeated = set( [field.partition('/')[0] for field in fields] )
         for field in unrepeated:
             root = field.partition('/')[0]
             if path:
@@ -465,8 +466,11 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 # Check for field 'id' because we can't find it's
                 # type in _columns
                 value = str(value)
-            elif value in (False, None):
-                value = ''
+            elif value in (False,None):
+                if field_type and field_type == 'float':
+                    value = 0.0
+                else:
+                    value = ''
             elif field_type == 'date':
                 value = '%s 00:00:00' % str(value)
             elif field_type == 'binary':
