@@ -32,7 +32,7 @@
 """
 
 import logging
-from SimpleHTTPServer import SimpleHTTPRequestHandler
+from http.server import SimpleHTTPRequestHandler
 
 _logger = logging.getLogger(__name__)
 

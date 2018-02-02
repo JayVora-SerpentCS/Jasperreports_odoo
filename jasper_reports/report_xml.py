@@ -42,9 +42,9 @@ from odoo import api, fields, models, _
 from .jasper_report import register_jasper_report
 
 src_chars = """ '"()/*-+?¿!&$[]{}@#`'^:;<>=~%,\\"""
-src_chars = unicode(src_chars, 'iso-8859-1')
+src_chars = str.encode(src_chars, 'iso-8859-1')
 dst_chars = """________________________________"""
-dst_chars = unicode(dst_chars, 'iso-8859-1')
+dst_chars = str.encode(dst_chars, 'iso-8859-1')
 
 
 class ReportXmlFile(models.Model):
@@ -53,7 +53,7 @@ class ReportXmlFile(models.Model):
     file = fields.Binary('File', required=True,
                          filters="*.jrxml,*.properties,*.ttf", )
     filename = fields.Char('File Name')
-    report_id = fields.Many2one('ir.actions.report.xml', 'Report',
+    report_id = fields.Many2one('ir.actions.report', 'Report',
                                 ondelete='cascade')
     default = fields.Boolean('Default', default=True)
 
@@ -61,7 +61,7 @@ class ReportXmlFile(models.Model):
     def create(self, values):
         result = super(ReportXmlFile, self).create(values)
         ir_actions_report_obj = \
-            self.env['ir.actions.report.xml'].browse(values['report_id'])
+            self.env['ir.actions.report'].browse(values['report_id'])
         ir_actions_report_obj.update()
         return result
 
@@ -69,7 +69,7 @@ class ReportXmlFile(models.Model):
     def write(self, values):
         result = super(ReportXmlFile, self).write(values)
         for attachment in self:
-            ir_actions_report_obj = self.env['ir.actions.report.xml'].browse(
+            ir_actions_report_obj = self.env['ir.actions.report'].browse(
                 [attachment.report_id.id])
             ir_actions_report_obj.update()
         return result
@@ -81,7 +81,7 @@ class ReportXmlFile(models.Model):
 
 
 class ReportXml(models.Model):
-    _inherit = 'ir.actions.report.xml'
+    _inherit = 'ir.actions.report'
 
     jasper_output = fields.Selection([('html', 'HTML'), ('csv', 'CSV'),
                                       ('xls', 'XLS'), ('rtf', 'RTF'),
@@ -98,10 +98,9 @@ class ReportXml(models.Model):
         if self._context and self._context.get('jasper_report'):
             values['model'] = \
                 self.env['ir.model'].browse(values['jasper_model_id']).model
-            values['type'] = 'ir.actions.report.xml'
-            values['report_type'] = 'pdf'
+            values['type'] = 'ir.actions.report'
+            values['report_type'] = 'qweb-pdf'
             values['jasper_report'] = True
-
         return super(ReportXml, self).create(values)
 
     @api.multi
@@ -112,8 +111,8 @@ class ReportXml(models.Model):
                     self.env['ir.model'].browse(
                         values['jasper_model_id']).model
 
-            values['type'] = 'ir.actions.report.xml'
-            values['report_type'] = 'pdf'
+            values['type'] = 'ir.actions.report'
+            values['report_type'] = 'qweb-pdf'
             values['jasper_report'] = True
         return super(ReportXml, self).write(values)
 
@@ -121,8 +120,9 @@ class ReportXml(models.Model):
     def update(self):
         if self._context is None:
             self._context = {}
-
-        pool_values = self.env['ir.values']
+        # ir.values are removed from the odoo 10
+#         pool_values = self.env['ir.values']
+        pool_values = self.env['ir.actions.act_window']
 
         for report in self:
             has_default = False
@@ -149,8 +149,11 @@ class ReportXml(models.Model):
                     # Update path into report_rml field.
                     my_obj = self.browse([report.id])
                     my_obj.write({'report_rml': path})
-                    ser_arg = [('value', '=',
-                                'ir.actions.report.xml,%s' % report.id)]
+                    # Value field to name
+                    ser_arg = [('name', '=', 
+                                'ir.actions.report,%s' % report.id)]
+#                     ser_arg = [('value', '=',
+#                                 'ir.actions.report,%s' % report.id)]
                     values_id = pool_values.search(ser_arg)
                     data = {
                         'name': report.name,
@@ -158,7 +161,7 @@ class ReportXml(models.Model):
                         'key': 'action',
                         'object': True,
                         'key2': 'client_print_multi',
-                        'value': 'ir.actions.report.xml,%s' % report.id
+                        'value': 'ir.actions.report,%s' % report.id
                     }
                     if not values_id.ids:
                         values_id = pool_values.create(data)
@@ -186,17 +189,18 @@ class ReportXml(models.Model):
         return path
 
     def normalize(self, text):
-        if isinstance(text, unicode):
+        if isinstance(text, str):
             text = text.encode('utf-8')
         return text
 
     def unaccent(self, text):
         if isinstance(text, str):
-            text = unicode(text, 'utf-8')
+            text = str.encode(text, 'utf-8')
         output = text
         for c in xrange(len(src_chars)):
             if c >= len(dst_chars):
                 break
+            print ("\n\n\n\n ---------src_chars[c]----dst_chars[c]---", src_chars[c], dst_chars[c])
             output = output.replace(src_chars[c], dst_chars[c])
         output = unicodedata.normalize('NFKD', output).encode('ASCII',
                                                               'ignore')

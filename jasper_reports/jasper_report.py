@@ -37,7 +37,7 @@ import os
 import time
 
 import odoo
-from odoo import api, release, tools, report, models
+from odoo import api, release, tools, models
 
 from .JasperReports.browse_data_generator import CsvBrowseDataGenerator
 from .JasperReports.jasper_server import JasperServer
@@ -90,7 +90,7 @@ class Report:
         # named 'purchase.order' so we need to destinguish
         # between the two by searching '.jrxml' in report_rml.
 
-        rep_xml_set = self.env['ir.actions.report.xml'].search(
+        rep_xml_set = self.env['ir.actions.report'].search(
             [('report_name', '=', self.name[7:]),
              ('report_rml', 'ilike', '.jrxml')])
 
@@ -272,7 +272,7 @@ class Report:
                               output_file, parameters)
 
 
-class ReportJasper(report.interface.report_int):
+class ReportJasper():
     def __init__(self, name, model, parser=None):
         # Remove report name from list of services if it already
         # exists to avoid report_int's assert. We want to keep the
@@ -357,7 +357,7 @@ def register_jasper_report(report_name, model_name):
 
 
 class IrActionsReportXML(models.Model):
-    _inherit = 'ir.actions.report.xml'
+    _inherit = 'ir.actions.report'
 
     def _lookup_report(self, name):
         """

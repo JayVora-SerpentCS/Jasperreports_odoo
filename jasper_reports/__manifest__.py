@@ -49,7 +49,7 @@
     ],
     "category": "Generic Modules/Jasper Reports",
     "demo": [
-        'jasper_demo.xml',
+#         'jasper_demo.xml',
     ],
     "data": [
         'wizard/jasper_create_data_template.xml',
