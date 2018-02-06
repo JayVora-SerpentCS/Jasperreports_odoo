@@ -1,11 +1,7 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
-#                         http://www.NaN-tic.com
-# Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
-#                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
-# Copyright (C) 2014-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2017-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -31,35 +27,24 @@
 #
 ##############################################################################
 
-{
-    "name": "Jasper Reports",
-    "version": "10.0.0.1.1",
-    "description": '''
-    This module integrates Jasper Reports with Odoo. V6 and v7 compatible"
-    version was made by NaN-tic.
-    Serpent Consulting Services Pvt. Ltd. has migrated it to v10. ''',
-    "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd.",
-    "website": "http://www.nan-tic.com, http://www.serpentcs.com",
-    'images': [
-        'images/jasper_reports-hover.png',
-        'images/jasper_reports.png'
-    ],
-    "depends": [
-        "sale", "jasper_load", "report_jasper"
-    ],
-    "category": "Generic Modules/Jasper Reports",
-    "demo": [
-#         'jasper_demo.xml',
-    ],
-    "data": [
-        'jasper_report_menu.xml',
-        'wizard/jasper_create_data_template.xml',
-        'jasper_wizard.xml',
-        'report_xml_view.xml',
-        'security/ir.model.access.csv',
-        'data/jasper_data.xml',
-        'res_company_view.xml',
-    ],
-    "installable": True,
-    "application": True,
-}
+from odoo.tests import common
+import logging
+_logger = logging.getLogger(__name__)
+
+try:
+    from xlrd import open_workbook
+except ImportError:
+    _logger.debug('Can not import xlsxwriter`.')
+
+
+class TestReport(common.TransactionCase):
+    def test_report(self):
+        report_object = self.env['ir.actions.report']
+        report_name = 'report_xlsx.partner_xlsx'
+        report = report_object._get_report_from_name(report_name)
+        docs = self.env['res.company'].search([], limit=1).partner_id
+        self.assertEqual(report.report_type, 'xlsx')
+        rep = report.render(docs.ids, {})
+        wb = open_workbook(file_contents=rep[0])
+        sheet = wb.sheet_by_index(0)
+        self.assertEqual(sheet.cell(0, 0).value, docs.name)

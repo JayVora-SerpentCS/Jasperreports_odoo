@@ -39,7 +39,7 @@ from xml.dom.minidom import getDOMImplementation
 from odoo.exceptions import UserError
 from odoo import api, fields, models, _
 
-from .jasper_report import register_jasper_report
+# from .jasper_report import register_jasper_report
 
 src_chars = """ '"()/*-+?¿!&$[]{}@#`'^:;<>=~%,\\"""
 src_chars = str.encode(src_chars, 'iso-8859-1')
@@ -62,6 +62,8 @@ class ReportXmlFile(models.Model):
         result = super(ReportXmlFile, self).create(values)
         ir_actions_report_obj = \
             self.env['ir.actions.report'].browse(values['report_id'])
+            # Removed the update method for the call the create_action() of
+            # ir.actions.report object
         ir_actions_report_obj.update()
         return result
 
@@ -99,7 +101,7 @@ class ReportXml(models.Model):
             values['model'] = \
                 self.env['ir.model'].browse(values['jasper_model_id']).model
             values['type'] = 'ir.actions.report'
-            values['report_type'] = 'qweb-pdf'
+            values['report_type'] = 'jasper'
             values['jasper_report'] = True
         return super(ReportXml, self).create(values)
 
@@ -112,7 +114,7 @@ class ReportXml(models.Model):
                         values['jasper_model_id']).model
 
             values['type'] = 'ir.actions.report'
-            values['report_type'] = 'qweb-pdf'
+            values['report_type'] = 'jasper'
             values['jasper_report'] = True
         return super(ReportXml, self).write(values)
 
@@ -147,28 +149,30 @@ class ReportXml(models.Model):
                                          report marked as default'))
                     has_default = True
                     # Update path into report_rml field.
-                    my_obj = self.browse([report.id])
-                    my_obj.write({'report_rml': path})
+#                     my_obj = self.browse([report.id])
+                    # report_rml to report_file
+                    report.write({'report_file': path})
+                    report.create_action()
                     # Value field to name
-                    ser_arg = [('name', '=', 
-                                'ir.actions.report,%s' % report.id)]
-#                     ser_arg = [('value', '=',
+#                     ser_arg = [('name', '=', 
 #                                 'ir.actions.report,%s' % report.id)]
-                    values_id = pool_values.search(ser_arg)
-                    data = {
-                        'name': report.name,
-                        'model': report.model,
-                        'key': 'action',
-                        'object': True,
-                        'key2': 'client_print_multi',
-                        'value': 'ir.actions.report,%s' % report.id
-                    }
-                    if not values_id.ids:
-                        values_id = pool_values.create(data)
-                    else:
-                        for pool_obj in pool_values.browse(values_id.ids):
-                            pool_obj.write(data)
-                            values_id = values_id[0]
+# #                     ser_arg = [('value', '=',
+# #                                 'ir.actions.report,%s' % report.id)]
+#                     values_id = pool_values.search(ser_arg)
+#                     data = {
+#                         'name': report.name,
+#                         'model': report.model,
+#                         'key': 'action',
+#                         'object': True,
+#                         'key2': 'client_print_multi',
+#                         'value': 'ir.actions.report,%s' % report.id
+#                     }
+#                     if not values_id.ids:
+#                         values_id = pool_values.create(data)
+#                     else:
+#                         for pool_obj in pool_values.browse(values_id.ids):
+#                             pool_obj.write(data)
+#                             values_id = values_id[0]
 
             if not has_default:
                 raise UserError(_('No report has been marked as default! \
@@ -200,7 +204,6 @@ class ReportXml(models.Model):
         for c in xrange(len(src_chars)):
             if c >= len(dst_chars):
                 break
-            print ("\n\n\n\n ---------src_chars[c]----dst_chars[c]---", src_chars[c], dst_chars[c])
             output = output.replace(src_chars[c], dst_chars[c])
         output = unicodedata.normalize('NFKD', output).encode('ASCII',
                                                               'ignore')
@@ -324,3 +327,4 @@ class ReportXml(models.Model):
         self.generate_xml(self.env, model, record_node, document, depth, True)
         top_node.toxml()
         return top_node.toxml()
+

@@ -320,7 +320,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
         reportCopies = self.report.copies or 1
         sequence = 0
         copiesField = self.report.copies_field
-        for record in self.env[self.model].browse(self.ids):
+        for record in self.env['res.users'].browse(self.ids):
             newRecords = self.generate_ids(record, relations, '',
                                            [{'root': record}])
             copies = reportCopies
@@ -345,10 +345,10 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                                     delimiter=",", quotechar='"')
             header = {}
             for field in self.report.field_names + ['']:
-                if isinstance(field, unicode):
-                    name = field.encode('utf-8')
+                if isinstance(field, str):
+                    name = bytes(field.encode('utf-8'))
                 else:
-                    name = field
+                    name = bytes(field)
                 header[field] = name
             writer.writerow(header)
             # Once all records have been calculated,
