@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (C) 2017-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2018-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -26,23 +26,5 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 ##############################################################################
-{
-    'name': "Base report Jasper",
 
-    'summary': """
-        Base module to create Jasper report""",
-    'author': 'NaN·tic, Serpent Consulting Services Pvt. Ltd.',
-    'website': "http://www.nan-tic.com, http://www.serpentcs.com",
-    'category': 'Reporting',
-    'version': '11.0.1.0.0',
-    'license': 'AGPL-3',
-    'depends': [
-        'base', 'web',
-    ],
-    'data': [
-        'views/webclient_templates.xml',
-    ],
-    'demo': [],
-    'installable': True,
-    'application': True,
-}
+from . import main

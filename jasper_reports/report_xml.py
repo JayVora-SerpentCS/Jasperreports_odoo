@@ -204,10 +204,10 @@ class ReportXml(models.Model):
         for c in xrange(len(src_chars)):
             if c >= len(dst_chars):
                 break
-            output = output.replace(src_chars[c], dst_chars[c])
-        output = unicodedata.normalize('NFKD', output).encode('ASCII',
+            output = output.replace(bytes(src_chars[c]), bytes(dst_chars[c]))
+        output = unicodedata.normalize('NFKD', str(output)).encode('ASCII',
                                                               'ignore')
-        return output.strip('_').encode('utf-8')
+        return str(output).strip('_').encode('utf-8')
 
     @api.model
     def generate_xml(self, pool, model_name, parent_node, document, depth,

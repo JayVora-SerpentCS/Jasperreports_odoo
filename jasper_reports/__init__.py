@@ -31,6 +31,7 @@
 #
 ##############################################################################
 
+from . import controllers
 from . import res_company
 from . import jasper_report
 from . import report_xml

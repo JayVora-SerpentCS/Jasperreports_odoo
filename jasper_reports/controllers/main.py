@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (C) 2017-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2018-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -52,14 +52,22 @@ class ReportController(report.ReportController):
                     del data['context']['lang']
                 context.update(data['context'])
             jasper = report_jas.with_context(context).render_jasper(docids, data=data)
-            pdfhttpheaders = [('Content-Type', 'application/pdf'), ('Content-Length', len(jasper))]
-#             xlsxhttpheaders = [
-#                 ('Content-Type', 'application/vnd.openxmlformats-'
-#                                  'officedocument.spreadsheetml.sheet'),
+#             pdfhttpheaders = [('Content-Type', 'application/pdf'), 
+#                               ('Content-Length', len(jasper))]
+            pdfhttpheaders = [
+                ('Content-Type', 'application/pdf'),
+                ('Content-Length', len(jasper)),
+                (
+                    'Content-Disposition',
+                    'attachment; filename=' + str(report_jas.name) + '.pdf'
+                )
+            ]
+#             pdfhttpheaders = [
+#                 ('Content-Type', 'application/pdf'),
 #                 ('Content-Length', len(jasper)),
 #                 (
 #                     'Content-Disposition',
-#                     'attachment; filename=' + report.report_file + '.pdf'
+#                     'attachment; filename=' + 'aaaaaa' + '.pdf'
 #                 )
 #             ]
             return request.make_response(jasper, headers=pdfhttpheaders)

@@ -45,13 +45,14 @@
         'images/jasper_reports.png'
     ],
     "depends": [
-        "sale", "jasper_load", "report_jasper"
+        "sale", "jasper_load"
     ],
     "category": "Generic Modules/Jasper Reports",
     "demo": [
 #         'jasper_demo.xml',
     ],
     "data": [
+        'views/webclient_templates.xml',
         'jasper_report_menu.xml',
         'wizard/jasper_create_data_template.xml',
         'jasper_wizard.xml',
