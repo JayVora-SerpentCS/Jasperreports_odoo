@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+    <odoo>
+
+	    <report 
+            id="users_jasper"
+            model="res.users"
+            string="Jasper Users"
+            report_type="jasper"
+            name="report_jasper.users_jasper"
+            file="jasper_reports/demo/user.jrxml"
+            attachment_use="False"
+            />
+        
+        <report 
+            id="sale_order_jaspertest"
+            model="sale.order"
+            string="Jasper Sale Order"
+            report_type="jasper"
+            name="report_jasper.sale_order_jaspertest"
+            file="jasper_reports/demo/sale_order_report.jrxml"
+            attachment_use="False"
+            />
+</odoo>

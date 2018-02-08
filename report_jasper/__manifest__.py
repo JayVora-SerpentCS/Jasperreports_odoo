@@ -1,11 +1,7 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
-#                         http://www.NaN-tic.com
-# Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
-#                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
-# Copyright (C) 2014-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2017-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -30,36 +26,23 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 ##############################################################################
-
 {
-    "name": "Jasper Reports",
-    "version": "10.0.0.1.1",
-    "description": '''
-    This module integrates Jasper Reports with Odoo. V6 and v7 compatible"
-    version was made by NaN-tic.
-    Serpent Consulting Services Pvt. Ltd. has migrated it to v10. ''',
-    "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd.",
-    "website": "http://www.nan-tic.com, http://www.serpentcs.com",
-    'images': [
-        'images/jasper_reports-hover.png',
-        'images/jasper_reports.png'
+    'name': "Base report Jasper",
+
+    'summary': """
+        Base module to create Jasper report""",
+    'author': 'NaN·tic, Serpent Consulting Services Pvt. Ltd.',
+    'website': "http://www.nan-tic.com, http://www.serpentcs.com",
+    'category': 'Reporting',
+    'version': '11.0.1.0.0',
+    'license': 'AGPL-3',
+    'depends': [
+        'base', 'web',
     ],
-    "depends": [
-        "sale", "jasper_load", "report_jasper"
+    'data': [
+        'views/webclient_templates.xml',
     ],
-    "category": "Generic Modules/Jasper Reports",
-    "demo": [
-#         'jasper_demo.xml',
-    ],
-    "data": [
-        'jasper_report_menu.xml',
-        'wizard/jasper_create_data_template.xml',
-        'jasper_wizard.xml',
-        'report_xml_view.xml',
-        'security/ir.model.access.csv',
-        'data/jasper_data.xml',
-        'res_company_view.xml',
-    ],
-    "installable": True,
-    "application": True,
+    'demo': [],
+    'installable': True,
+    'application': True,
 }

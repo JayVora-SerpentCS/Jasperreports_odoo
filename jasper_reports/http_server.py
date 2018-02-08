@@ -31,7 +31,7 @@
 #
 ##############################################################################
 
-from BaseHTTPServer import BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler
 from odoo import netsvc
 from odoo import tools
 from .websrv_lib import reg_http_service
@@ -55,7 +55,7 @@ class JasperHandler(BaseHTTPRequestHandler):
         path = self.raw_requestline.replace('GET', '').strip().split(' ')[0]
         try:
             result = self.execute(path)
-        except Exception, e:
+        except Exception as e:
             result = '<error><exception>%s</exception></error>' % (e.args,)
         self.wfile.write(result)
         return True
@@ -86,13 +86,12 @@ class JasperHandler(BaseHTTPRequestHandler):
             return self.cache[key]
 
         context = {'lang': language}
-
         uid = netsvc.dispatch_rpc('common', 'login', (database, user,
                                                       password))
         result = netsvc.dispatch_rpc('object',
                                      'execute',
                                      (database, uid, password,
-                                      'ir.actions.report.xml',
+                                      'ir.actions.report',
                                       'create_xml', model, depth, context))
 
         if use_cache:
