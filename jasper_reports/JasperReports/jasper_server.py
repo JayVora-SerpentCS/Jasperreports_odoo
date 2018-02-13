@@ -94,7 +94,7 @@ class JasperServer:
         # using the session at all.
         command = ['java', '-Djava.awt.headless=true',
                    'com.nantic.jasperreports.JasperServer',
-                   unicode(self.port)]
+                   str(self.port)]
         process = subprocess.Popen(command, env=env, cwd=cwd)
 
         if self.pidfile:
@@ -120,7 +120,7 @@ class JasperServer:
                     pass
 #                 except xmlrpclib.Fault, e:
                 except xmlrpclib.Fault as e:
-                    raise UserError(_('Report Error\n%s' % e.faultString))
+                    raise UserError(_('Report Error\n%s' % e))
 #         except xmlrpclib.Fault, e:
         except xmlrpclib.Fault as e:
-            raise UserError(_('Report Error\n%s' % e.faultString))
+            raise UserError(_('Report Error\n%s' % e))

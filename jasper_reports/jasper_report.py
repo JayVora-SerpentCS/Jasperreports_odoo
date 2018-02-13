@@ -134,10 +134,8 @@ class Report:
             self.temporary_files += generator.temporary_files
 
         sub_report_data_files = []
-
         for sub_report_info in self.report.subreports:
             sub_report = sub_report_info['report']
-
             if sub_report.language() == 'xpath':
                 message = 'Creating CSV '
 
@@ -346,14 +344,17 @@ class ReportAction(models.Model):
     def render_jasper(self, docids, data):
         cr, uid, context = self.env.args
         report_model_name = 'report.%s' % self.report_name
-#         report_model = self.env.get(report_model_name)
-#         if report_model is None:
-#             raise UserError(_('%s model was not found' % report_model_name))
+        self.env.cr.execute('''SELECT id, model FROM ir_act_report_xml WHERE 
+                                report_name = '%s' limit 1 ''' %(self.report_name))
+        record = self.env.cr.dictfetchone()
+        report_model = self.search([('report_name', '=', report_model_name)])
+        if report_model is None:
+            raise UserError(_('%s model was not found' % report_model_name))
 #         return report_model.with_context({
 #             'active_model': self.model,
 #             'report_name': report_model_name
 #         }).create_jasper_report(docids, data)
-        data.update({'env': self.env})
+        data.update({'env': self.env, 'model': record.get('model')})
         r = Report(report_model_name, cr, uid, docids, data, context)
         return r.execute()
 

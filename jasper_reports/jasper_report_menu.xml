@@ -10,7 +10,7 @@
             file="jasper_reports/demo/user.jrxml"
             attachment_use="False"
             />
-        
+
         <report 
             id="sale_order_jaspertest"
             model="sale.order"
@@ -18,6 +18,26 @@
             report_type="jasper"
             name="report_jasper.sale_order_jaspertest"
             file="jasper_reports/demo/sale_order_report.jrxml"
+            attachment_use="False"
+            />
+
+        <report 
+            id="res_partner_jaspertest"
+            model="res.partner"
+            string="Jasper Partner"
+            report_type="jasper"
+            name="report_jasper.partner_jaspertest"
+            file="jasper_reports/demo/partner.jrxml"
+            attachment_use="False"
+            />
+
+        <report 
+            id="account_invoice_jaspertest"
+            model="account.invoice"
+            string="Jasper Invoice"
+            report_type="jasper"
+            name="report_jasper.account_invoice_jaspertest"
+            file="jasper_reports/custom_reports/report2s.jrxml"
             attachment_use="False"
             />
 </odoo>
