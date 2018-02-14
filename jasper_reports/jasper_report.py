@@ -42,6 +42,8 @@ from . JasperReports.JasperServer import JasperServer
 from . JasperReports.RecordDataGenerator import CsvRecordDataGenerator
 from . JasperReports.JasperReport import JasperReport
 
+import base64
+
 # Determines the port where the JasperServer process should listen
 # with its XML-RPC server for incomming calls
 tools.config['jasperport'] = tools.config.get('jasperport', 8090)
@@ -87,20 +89,45 @@ class Report:
         # As the previous record is not removed, we end up with two records
         # named 'purchase.order' so we need to destinguish
         # between the two by searching '.jrxml' in report_rml.
-        ids = self.pool.get('ir.actions.report.xml'
-                            ).search(self.cr, self.uid,
-                                     [('report_name', '=', self.name[7:]),
-                                      ('report_rml', 'ilike', '.jrxml')],
-                                     context=self.context)
-        data = self.pool.get('ir.actions.report.xml'
-                             ).read(self.cr, self.uid, ids[0],
-                                    ['report_rml', 'jasper_output'])
-        if data['jasper_output']:
-            self.outputFormat = data['jasper_output']
-        self.reportPath = data['report_rml']
-        self.reportPath = os.path.join(self.addonsPath(), self.reportPath)
-        if not os.path.lexists(self.reportPath):
-            self.reportPath = self.addonsPath(path=data['report_rml'])
+        act_report_obj = self.pool.get('ir.actions.report.xml')
+        ids = act_report_obj.search(self.cr, self.uid,
+                                    [('report_name', '=', self.name[7:]),
+                                     ('report_rml', 'ilike', '.jrxml')],
+                                    context=self.context)
+        report_action = act_report_obj.browse(self.cr, self.uid,
+                                              ids, self.context)
+        if report_action.jasper_output:
+            self.outputFormat = report_action.jasper_output
+
+        main_report = report_action.jasper_file_ids.filtered(lambda x:
+                                                             x.default)
+        main_report_path = os.path.join(self.path(), 'custom_reports',
+                                        main_report.filename)
+        self.reportPath = main_report_path
+
+        # If the requested report does not exist in 'custom_reports'
+        # we rewrite the file from the data stored in the Database.
+
+        # Skip rewriting the jrxml file if it exists
+        if not os.path.isfile(main_report_path):
+            logger.info("Writing File: '%s'" % main_report_path)
+            main_report_data = base64.b64decode(main_report.file)
+            main_report_file = open(main_report_path, 'w')
+            main_report_file.write(main_report_data)
+            main_report_file.close()
+
+        subreports = report_action.jasper_file_ids.filtered(lambda x:
+                                                            not x.default)
+        for subreport in subreports:
+            subreport_path = os.path.join(self.path(), 'custom_reports',
+                                          subreport.filename)
+            # Skip rewriting the jrxml files if they exists
+            if not os.path.isfile(subreport_path):
+                logger.info("Writing File: '%s'" % subreport_path)
+                subreport_data = base64.b64decode(subreport.file)
+                subreport_file = open(subreport_path, 'w')
+                subreport_file.write(subreport_data)
+                subreport_file.close()
 
         # Get report information from the jrxml file
         logger.info("Requested report: '%s'" % self.reportPath)
