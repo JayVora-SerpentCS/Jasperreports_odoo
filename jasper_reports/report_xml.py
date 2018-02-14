@@ -198,16 +198,25 @@ class ReportXml(models.Model):
         return text
 
     def unaccent(self, text):
+        src_chars_list = ['(',')',',','/','*','-','+','?','¿','!','&',\
+                          '$','[',']','{','}','@','#','`','^',':',';','<','>','=','~','%','\\']
         if isinstance(text, str):
-            text = str.encode(text, 'utf-8')
-        output = text
-        for c in xrange(len(src_chars)):
-            if c >= len(dst_chars):
-                break
-            output = output.replace(bytes(src_chars[c]), bytes(dst_chars[c]))
-        output = unicodedata.normalize('NFKD', str(output)).encode('ASCII',
-                                                              'ignore')
-        return str(output).strip('_').encode('utf-8')
+            for src in src_chars_list:
+                text = text.replace(src, "_")
+        return text
+
+#     def unaccent(self, text):
+#         
+#         if isinstance(text, str):
+#             text = str.encode(text, 'utf-8')
+#         output = text
+#         for c in xrange(len(src_chars)):
+#             if c >= len(dst_chars):
+#                 break
+#             output = output.replace(bytes(src_chars[c]), bytes(dst_chars[c]))
+#         output = unicodedata.normalize('NFKD', str(output)).encode('ASCII',
+#                                                               'ignore')
+#         return str(output).strip('_').encode('utf-8')
 
     @api.model
     def generate_xml(self, pool, model_name, parent_node, document, depth,
@@ -243,15 +252,14 @@ class ReportXml(models.Model):
                 # If there's not description in user's language,
                 # use default (english) one.
                 name = model_fields[field].string
-
             if name:
-                name = self.unaccent(name)
+                self.unaccent(name)
             # After unaccent the name might result in an empty string
             if name:
                 name = '%s-%s' % (self.unaccent(name), field)
             else:
                 name = field
-            field_node = document.createElement(name)
+            field_node = document.createElement(name.replace(' ', '_'))
 
             parent_node.appendChild(field_node)
             field_type = model_fields[field].type
@@ -282,23 +290,20 @@ class ReportXml(models.Model):
 
         if depth > 1 and model_name != 'Attachments':
             # Create relation with attachments
-            field_node = document.createElement('%s-Attachments' % self.
-                                                unaccent(_('Attachments')))
+            field_node = document.createElement('Attachments-Attachments')
             parent_node.appendChild(field_node)
             self.generate_xml(pool, 'ir.attachment', field_node, document,
                               depth - 1, False)
 
         if first_call:
             # Create relation with user
-            field_node = document.createElement('%s-User' %
-                                                self.unaccent(_('User')))
+            field_node = document.createElement('User-User')
             parent_node.appendChild(field_node)
             self.generate_xml(pool, 'res.users', field_node, document,
                               depth - 1, False)
 
             # Create special entries
-            field_node = document.createElement('%s-Special' %
-                                                self.unaccent(_('Special')))
+            field_node = document.createElement('Special-Special')
             parent_node.appendChild(field_node)
 
             new_node = document.createElement('copy')
@@ -325,6 +330,5 @@ class ReportXml(models.Model):
         record_node = document.createElement('record')
         top_node.appendChild(record_node)
         self.generate_xml(self.env, model, record_node, document, depth, True)
-        top_node.toxml()
         return top_node.toxml()
 
