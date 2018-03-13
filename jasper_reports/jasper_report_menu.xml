@@ -40,4 +40,14 @@
             file="jasper_reports/custom_reports/report2s.jrxml"
             attachment_use="False"
             />
+
+        <report 
+            id="quotation_jasper"
+            model="sale.order"
+            string="Jasper Quotation"
+            report_type="jasper"
+            name="report_jasper.Quotation"
+            file="jasper_reports/custom_reports/Quotation.jrxml"
+            attachment_use="False"
+            />
 </odoo>
