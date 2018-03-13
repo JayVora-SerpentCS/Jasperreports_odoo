@@ -287,7 +287,7 @@ class ReportJasper():
         self.parser = parser
 
     def create(self, cr, uid, ids, datas, context=None):
-        name = 'report.report_jasper.l'
+        name = 'report.report_jasper.users_jasper'
 #         data.update()
         if self.parser:
             d = self.parser(cr, uid, ids, datas, context)
