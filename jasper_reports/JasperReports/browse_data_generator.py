@@ -335,22 +335,34 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
 				for x in xrange(copies):
 					new['copy'] = x
 					self.all_records.append(new.copy())
-
-		f = open(file_name, 'w')
-		try:
-			csv.QUOTE_ALL = True
-			# JasperReports CSV reader requires an extra colon at the
-			# end of the line.
-			writer = csv.DictWriter(f, self.report.field_names + [''],
-									delimiter=",", quotechar='"')
+		with open(file_name, 'w') as csvfile:
+			fieldnames = self.report.field_names + ['']
+			writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+			writer.writeheader()
 			header = {}
 			for field in self.report.field_names + ['']:
-				if isinstance(field, str):
-					name = bytes(field.encode('utf-8'))
-				else:
-					name = bytes(field)
-				header[field] = name
-			writer.writerow(header)
+				header[field] = field
+				writer.writerow(header)
+
+# 		f = open(file_name, 'w')
+# 		
+# 			csv.QUOTE_ALL = True
+# 			# JasperReports CSV reader requires an extra colon at the
+# 			# end of the line.
+# 			writer = csv.DictWriter(f, self.report.field_names + [''],
+# 									delimiter=",", quotechar='"')
+# 			header = {}
+# 			for field in self.report.field_names + ['']:
+# 				if isinstance(field, str):
+# 					name = str(field.encode('utf-8'))
+# 					print ('name----------------------', name)
+# 				else:
+# 					name = field
+# 				name = field.encode('utf-8')
+# 				print ('name----------------------', name)
+# 				header[field] = name.tostring
+# 				print ('header----------------------', header)
+# 			writer.writerow(header)
 			# Once all records have been calculated,
 			# create the CSV structure itself
 			for records in self.all_records:
@@ -361,8 +373,8 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
 									   records['subsequence'],
 									   records['copy'])
 				writer.writerow(row)
-		finally:
-			f.close()
+		# finally:
+		# 	f.close()
 
 	def generateCsvRecord(self, record, records, row, path, fields, sequence,
 						  subsequence, copy):
@@ -481,7 +493,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
 					self.image_files[image_id] = file_name
 				value = file_name
 			elif isinstance(value, str):
-				value = value.encode('utf-8')
+				value = value
 			elif isinstance(value, float):
 				value = '%.10f' % value
 			elif not isinstance(value, str):
