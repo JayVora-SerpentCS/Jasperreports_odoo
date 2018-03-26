@@ -342,7 +342,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
 			header = {}
 			for field in self.report.field_names + ['']:
 				header[field] = field
-				writer.writerow(header)
+			writer.writerow(header)
 
 # 		f = open(file_name, 'w')
 # 		
@@ -372,6 +372,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
 									   records['sequence'],
 									   records['subsequence'],
 									   records['copy'])
+
 				writer.writerow(row)
 		# finally:
 		# 	f.close()

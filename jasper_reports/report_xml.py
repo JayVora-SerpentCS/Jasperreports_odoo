@@ -198,15 +198,16 @@ class ReportXml(models.Model):
         return text
 
     def unaccent(self, text):
-        src_chars_list = ['(',')',',','/','*','-','+','?','¿','!','&',\
-                          '$','[',']','{','}','@','#','`','^',':',';','<','>','=','~','%','\\']
+        src_chars_list = [
+            "'", "(", ")", ",", "/", "*", "-", "+", "?", "¿", "!",\
+            "&", "$", "[", "]", "{", "}", "@", "#", "`", "^", ":",\
+            ";", "<", ">", "=", "~", "%", "\\"]
         if isinstance(text, str):
             for src in src_chars_list:
                 text = text.replace(src, "_")
         return text
 
 #     def unaccent(self, text):
-#         
 #         if isinstance(text, str):
 #             text = str.encode(text, 'utf-8')
 #         output = text
@@ -267,7 +268,6 @@ class ReportXml(models.Model):
             if field_type in ('many2one', 'one2many', 'many2many'):
                 if depth <= 1:
                     continue
-
                 comodel_name = model_fields[field].comodel_name
                 self.generate_xml(pool, comodel_name, field_node, document,
                                   depth - 1, False)
@@ -331,4 +331,3 @@ class ReportXml(models.Model):
         top_node.appendChild(record_node)
         self.generate_xml(self.env, model, record_node, document, depth, True)
         return top_node.toxml()
-
