@@ -124,11 +124,9 @@ class ReportXml(models.Model):
             self._context = {}
         # ir.values are removed from the odoo 10
 #         pool_values = self.env['ir.values']
-        pool_values = self.env['ir.actions.act_window']
-
+        # pool_values = self.env['ir.actions.act_window']
         for report in self:
             has_default = False
-
             # Browse attachments and store .jrxml and .properties
             # into jasper_reports/custom_reportsdirectory. Also add
             # or update ir.values data so they're shown on model views.for
@@ -136,14 +134,10 @@ class ReportXml(models.Model):
             for attachment in report.jasper_file_ids:
                 content = attachment.file
                 file_name = attachment.filename
-
                 if not file_name or not content:
                     continue
-
                 path = self.save_file(file_name, content)
-
                 if '.jrxml' in file_name and attachment.default:
-
                     if has_default:
                         raise UserError(_('There is more than one \
                                          report marked as default'))
@@ -154,7 +148,7 @@ class ReportXml(models.Model):
                     report.write({'report_file': path})
                     report.create_action()
                     # Value field to name
-#                     ser_arg = [('name', '=', 
+#                     ser_arg = [('name', '=',
 #                                 'ir.actions.report,%s' % report.id)]
 # #                     ser_arg = [('value', '=',
 # #                                 'ir.actions.report,%s' % report.id)]
@@ -179,7 +173,7 @@ class ReportXml(models.Model):
                                  You need atleast one jrxml report!'))
 
             # Ensure the report is registered so it can be used immediately
-            register_jasper_report(report.report_name, report.model)
+            # register_jasper_report(report.report_name, report.model)
         return True
 
     def save_file(self, name, value):
@@ -188,7 +182,6 @@ class ReportXml(models.Model):
 
         with open(path, 'wb+') as f:
             f.write(base64.decodestring(value))
-
         path = 'jasper_reports/custom_reports/%s' % name
         return path
 
