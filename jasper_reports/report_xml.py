@@ -167,11 +167,9 @@ class ReportXml(models.Model):
 #                         for pool_obj in pool_values.browse(values_id.ids):
 #                             pool_obj.write(data)
 #                             values_id = values_id[0]
-
-            if not has_default:
-                raise UserError(_('No report has been marked as default! \
-                                 You need atleast one jrxml report!'))
-
+                if not has_default:
+                    raise UserError(_('No report has been marked as default! \
+                                     You need atleast one jrxml report!'))
             # Ensure the report is registered so it can be used immediately
             # register_jasper_report(report.report_name, report.model)
         return True
