@@ -82,16 +82,16 @@ class BrowseDataGenerator(AbstractDataGenerator):
                 context.update({'lang': False})
             else:
                 context.update({'lang': language})
-                
+
             values[language] = model.browse(id).mapped(field)
 
             if model._fields[field].type == 'selection' and \
                     model._fields[field].selection:
-                field_data = model.fields_get(self.cr, self.uid,
+                field_data = model.with_context(context).fields_get(
                                               allfields=[field],
-                                              context=context)
+                                              )
                 values[language] = dict(field_data[field]['selection']).get(
-                    values[language], values[language])
+                    values[language][0], values[language][0])
 
         result = []
         for key, value in values.iteritems():
