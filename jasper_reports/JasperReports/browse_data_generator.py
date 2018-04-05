@@ -368,6 +368,8 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                           subsequence, copy):
         # One field (many2one, many2many or one2many) can appear several times
         # Process each "root" field only once by using a set.
+        if not record:
+            return
         unrepeated = set([field.partition('/')[0] for field in fields])
 
         for field in unrepeated:
