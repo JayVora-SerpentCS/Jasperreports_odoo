@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <odoo>
 
-	<report id="report_quotation_jasper" model="sale.order" string="Jasper Quotation" report_type="jasper" name="quotation" file="jasper_reports/demo/sale_order_report.jrxml" attachment_use="False"/>
+    <report id="report_quotation_jasper" model="sale.order" string="Jasper Quotation" report_type="jasper" name="quotation" file="jasper_reports/demo/sale_order_report.jrxml" attachment_use="False"/>
 
-	<report id="invoice_jasper_new" model="account.invoice" string="Jasper Invoice new" report_type="jasper" name="report_jasper.invoice_jasper" file="jasper_reports/custom_reports/invoice_jasper.jrxml" attachment_use="False"/>
+    <report id="invoice_jasper_new" model="account.invoice" string="Jasper Invoice new" report_type="jasper" name="report_jasper.invoice_jasper" file="jasper_reports/custom_reports/invoice_jasper.jrxml" attachment_use="False"/>
 
-	<!-- <report id="users_jasper" model="res.users" string="Jasper Users" report_type="jasper" name="report_jasper.users_jasper" file="jasper_reports/demo/user.jrxml" attachment_use="False" /> <report id="jasper_report_new" model="res.users"
-	string="Jasper Users New" report_type="jasper" name="report_jasper.jasper_report_new" file="jasper_reports/custom_reports/jasper_report_new.jrxml" attachment_use="False" /> <report id="sale_order_jaspertest" model="sale.order" string="Jasper Sale
-	Order" report_type="jasper" name="report_jasper.sale_order_jaspertest" file="jasper_reports/demo/sale_order_report.jrxml" attachment_use="False" /> <report id="res_partner_jaspertest" model="res.partner" string="Jasper Partner" report_type="jasper"
-	name="report_jasper.partner_jaspertest" file="jasper_reports/demo/partner.jrxml" attachment_use="False" /> <report id="res_partner_contact" model="res.partner" string="Jasper" report_type="jasper" name="report_jasper.partner_contact"
-	file="jasper_reports/custom_reports/partner_contact.jrxml" attachment_use="False" /> <report id="account_invoice_new_jasper" model="account.invoice" string="Invoice New" report_type="jasper" name="report_jasper.invoice_new"
-	file="jasper_reports/custom_reports/invoice_new.jrxml" attachment_use="False" /> -->
+    <!-- <report id="users_jasper" model="res.users" string="Jasper Users" report_type="jasper" name="report_jasper.users_jasper" file="jasper_reports/demo/user.jrxml" attachment_use="False" /> <report id="jasper_report_new" model="res.users"
+    string="Jasper Users New" report_type="jasper" name="report_jasper.jasper_report_new" file="jasper_reports/custom_reports/jasper_report_new.jrxml" attachment_use="False" /> <report id="sale_order_jaspertest" model="sale.order" string="Jasper Sale
+    Order" report_type="jasper" name="report_jasper.sale_order_jaspertest" file="jasper_reports/demo/sale_order_report.jrxml" attachment_use="False" /> <report id="res_partner_jaspertest" model="res.partner" string="Jasper Partner" report_type="jasper"
+    name="report_jasper.partner_jaspertest" file="jasper_reports/demo/partner.jrxml" attachment_use="False" /> <report id="res_partner_contact" model="res.partner" string="Jasper" report_type="jasper" name="report_jasper.partner_contact"
+    file="jasper_reports/custom_reports/partner_contact.jrxml" attachment_use="False" /> <report id="account_invoice_new_jasper" model="account.invoice" string="Invoice New" report_type="jasper" name="report_jasper.invoice_new"
+    file="jasper_reports/custom_reports/invoice_new.jrxml" attachment_use="False" /> -->
 
 </odoo>
