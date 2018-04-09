@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/JayVora-SerpentCS/Jasperreports_odoo.svg?branch=10.0)](https://travis-ci.org/JayVora-SerpentCS/Jasperreports_odoo)
 
+# Jasper Report
 This is the repository for Jasper Reports in Odoo
 
 Source : https://launchpad.net/openobject-jasper-reports
