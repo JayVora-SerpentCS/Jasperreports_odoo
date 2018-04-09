@@ -308,32 +308,32 @@ class ReportJasper():
         return r.execute()
 
 
-if release.major_version == '5.0':
+# if release.major_version == '5.0':
     # Version 5.0 specific code
     # Ugly hack to avoid developers the need to register reports
 
     # This hack allows automatic registration of jrxml files without
     # the need for developers to register them programatically.
 
-    old_register_all = report.interface.register_all
-
-    def new_register_all(db):
-
-        value = old_register_all(db)
-
-        cr = db.cursor()
+    # old_register_all = report.interface.register_all
+    #
+    # def new_register_all(db):
+    #
+    #     value = old_register_all(db)
+    #
+    #     cr = db.cursor()
         # Originally we had auto=true in the SQL filter but we will
         # register all reports.
-        query = "SELECT * FROM ir_act_report_xml WHERE \
-        report_file ilike '%.jrxml' ORDER BY id"
-        cr.execute(query)
-        records = cr.dictfetchall()
-        cr.close()
-        for record in records:
-            register_jasper_report(record['report_name'], record['model'])
-        return value
-
-    report.interface.register_all = new_register_all
+    #     query = "SELECT * FROM ir_act_report_xml WHERE \
+    #     report_file ilike '%.jrxml' ORDER BY id"
+    #     cr.execute(query)
+    #     records = cr.dictfetchall()
+    #     cr.close()
+    #     for record in records:
+    #         register_jasper_report(record['report_name'], record['model'])
+    #     return value
+    #
+    # report.interface.register_all = new_register_all
 
 
 class ReportAction(models.Model):
