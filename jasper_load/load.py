@@ -65,7 +65,7 @@ def prefork_server_init(self, app):
     self.limit_request = Config['limit_request']
     self.cron_timeout = Config['limit_time_real_cron'] or None
     if self.cron_timeout == -1:
-            self.cron_timeout = self.timeout
+        self.cron_timeout = self.timeout
     # working vars
     self.beat = 4
     self.app = app
@@ -96,7 +96,7 @@ def gevent_server_start(self):
                  self.interface, self.port)
     try:
         self.httpd.serve_forever()
-    except:
+    except BaseException:
         _logger.exception("Evented Service (longpolling): uncaught error\
         during main loop")
         raise
