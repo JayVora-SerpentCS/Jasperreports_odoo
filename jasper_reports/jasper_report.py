@@ -37,7 +37,7 @@ import os
 import time
 
 # import odoo
-from odoo import api, release, tools, models, fields, _
+from odoo import api, tools, models, fields, _
 from odoo.exceptions import UserError
 from .JasperReports.browse_data_generator import CsvBrowseDataGenerator
 from .JasperReports.jasper_server import JasperServer
