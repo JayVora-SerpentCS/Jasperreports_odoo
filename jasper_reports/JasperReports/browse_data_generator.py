@@ -193,7 +193,7 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                     record.__hasattr__(self.report.copies_field):
                 copies = int(record.__getattr__(self.report.copies_field))
             for new in new_records:
-                for x in xrange(copies):
+                for x in range(copies):
                     self.all_records.append(new)
 
         # Once all records have been calculated, create the
@@ -294,11 +294,11 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                 value = file_name
 
             elif isinstance(value, str):
-                value = unicode(value, 'utf-8')
+                value = str(value, 'utf-8')
             elif isinstance(value, float):
                 value = '%.10f' % value
-            elif not isinstance(value, unicode):
-                value = unicode(value)
+            elif not isinstance(value, str):
+                value = str(value)
 
             value_node = self.document.createTextNode(value)
             field_node.appendChild(value_node)
@@ -332,7 +332,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 new['sequence'] = sequence
                 new['subsequence'] = subsequence
                 subsequence += 1
-                for x in xrange(copies):
+                for x in range(copies):
                     new['copy'] = x
                     self.all_records.append(new.copy())
         with open(file_name, 'w') as csvfile:

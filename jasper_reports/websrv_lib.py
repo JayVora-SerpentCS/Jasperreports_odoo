@@ -228,7 +228,7 @@ class HttpOptions:
             # http://www.ibm.com/developerworks/rational/library/2089.html
 
         for key, value in opts.items():
-            if isinstance(value, basestring):
+            if isinstance(value, str):
                 self.send_header(key, value)
             elif isinstance(value, (tuple, list)):
                 self.send_header(key, ', '.join(value))

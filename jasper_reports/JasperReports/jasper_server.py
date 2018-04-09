@@ -110,7 +110,7 @@ class JasperServer:
 #         except (xmlrpclib.ProtocolError, socket.error), e:
         except socket.error as e:
             self.start()
-            for x in xrange(40):
+            for x in range(40):
                 time.sleep(1)
                 try:
                     return self.proxy.Report.execute(*args)
