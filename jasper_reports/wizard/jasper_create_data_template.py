@@ -45,8 +45,10 @@ class CreateDataTemplate(models.TransientModel):
         for rec in self:
             for data in rec.read([]):
                 model = self.env['ir.model'].browse(data['model'][0])
-                xml = self.env['ir.actions.report'].create_xml(model.model, data['depth'])
-                base64_str = base64.encodestring(('%s' % (xml)).encode()).decode().replace('\n', '')
+                xml = self.env['ir.actions.report'].create_xml(
+                    model.model, data['depth'])
+                base64_str = base64.encodestring(
+                    ('%s' % (xml)).encode()).decode().replace('\n', '')
 #                 base64_str = base64.decodestring(xml)
                 rec.write({
                     'data': base64_str,

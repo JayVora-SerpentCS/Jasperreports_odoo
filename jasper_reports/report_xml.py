@@ -33,7 +33,7 @@
 
 import os
 import base64
-import unicodedata
+# import unicodedata
 from xml.dom.minidom import getDOMImplementation
 
 from odoo.exceptions import UserError
@@ -62,8 +62,8 @@ class ReportXmlFile(models.Model):
         result = super(ReportXmlFile, self).create(values)
         ir_actions_report_obj = \
             self.env['ir.actions.report'].browse(values['report_id'])
-            # Removed the update method for the call the create_action() of
-            # ir.actions.report object
+        # Removed the update method for the call the create_action() of
+        # ir.actions.report object
         ir_actions_report_obj.update()
         return result
 
@@ -190,8 +190,8 @@ class ReportXml(models.Model):
 
     def unaccent(self, text):
         src_chars_list = [
-            "'", "(", ")", ",", "/", "*", "-", "+", "?", "¿", "!",\
-            "&", "$", "[", "]", "{", "}", "@", "#", "`", "^", ":",\
+            "'", "(", ")", ",", "/", "*", "-", "+", "?", "¿", "!",
+            "&", "$", "[", "]", "{", "}", "@", "#", "`", "^", ":",
             ";", "<", ">", "=", "~", "%", "\\"]
         if isinstance(text, str):
             for src in src_chars_list:
