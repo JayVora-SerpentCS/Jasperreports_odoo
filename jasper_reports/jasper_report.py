@@ -345,14 +345,17 @@ class ReportAction(models.Model):
     def render_jasper(self, docids, data):
         cr, uid, context = self.env.args
         report_model_name = 'report.%s' % self.report_name
-        columns = "id, model"
-        query = '''SELECT %{columns} FROM %{table} WHERE
-                                report_name =\
-                                 '%s' limit 1 ''' \
-                                 % ({'columns': columns,
-                                     'table': 'ir_act_report_xml'},
-                                    self.report_name)
-        self.env.cr.execute(query)
+        # columns = "id, model"
+        # query = '''SELECT %{columns} FROM %{table} WHERE
+        #                         report_name =\
+        #                          '%s' limit 1 ''' \
+        #                          % ({'columns': columns,
+        #                              'table': 'ir_act_report_xml'},
+        #                             self.report_name)
+        self.env.cr.execute('SELECT id, model FROM'
+                            'ir_act_report_xml WHERE'
+                            'report_name = %s LIMIT 1',
+                            (self.report_name,))
         record = self.env.cr.dictfetchone()
         report_model = self.search([('report_name', '=', report_model_name)])
         if report_model is None:
