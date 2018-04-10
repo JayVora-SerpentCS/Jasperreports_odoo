@@ -39,6 +39,8 @@ from xml.dom.minidom import getDOMImplementation
 from odoo.exceptions import UserError
 from odoo import api, fields, models, _
 
+from . jasper_report import Report
+
 # from .jasper_report import register_jasper_report
 
 src_chars = """ '"()/*-+?¿!&$[]{}@#`'^:;<>=~%,\\"""
@@ -94,6 +96,46 @@ class ReportXml(models.Model):
                                       'report_id', 'Files', help='')
     jasper_model_id = fields.Many2one('ir.model', 'Model', help='')
     jasper_report = fields.Boolean('Is Jasper Report?')
+    report_type = fields.Selection(selection_add=[("jasper", "Jasper")])
+
+    @api.model
+    def render_jasper(self, docids, data):
+        cr, uid, context = self.env.args
+        report_model_name = 'report.%s' % self.report_name
+        # columns = "id, model"
+        # query = '''SELECT %{columns} FROM %{table} WHERE
+        #                         report_name =\
+        #                          '%s' limit 1 ''' \
+        #                          % ({'columns': columns,
+        #                              'table': 'ir_act_report_xml'},
+        #                             self.report_name)
+        self.env.cr.execute('SELECT id, model FROM '
+                            'ir_act_report_xml WHERE '
+                            'report_name = %s LIMIT 1',
+                            (self.report_name,))
+        record = self.env.cr.dictfetchone()
+        report_model = self.search([('report_name', '=', report_model_name)])
+        if report_model is None:
+            raise UserError(_('%s model was not found' % report_model_name))
+#         return report_model.with_context({
+#             'active_model': self.model,
+#             'report_name': report_model_name
+#         }).create_jasper_report(docids, data)
+        data.update({'env': self.env, 'model': record.get('model')})
+        r = Report(report_model_name, cr, uid, docids, data, context)
+        return r.execute()
+
+    @api.model
+    def _get_report_from_name(self, report_name):
+        res = super(ReportXml, self)._get_report_from_name(report_name)
+        if res:
+            return res
+        report_obj = self.env['ir.actions.report']
+        qwebtypes = ['jasper']
+        conditions = [('report_type', 'in', qwebtypes),
+                      ('report_name', '=', report_name)]
+        context = self.env['res.users'].context_get()
+        return report_obj.with_context(context).search(conditions, limit=1)
 
     @api.model
     def create(self, values):

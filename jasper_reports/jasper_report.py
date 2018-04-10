@@ -37,8 +37,9 @@ import os
 import time
 
 # import odoo
-from odoo import api, tools, models, fields, _
-from odoo.exceptions import UserError
+# from odoo import api, tools, models, fields, _
+# from odoo.exceptions import UserError
+from odoo import tools
 from .JasperReports.browse_data_generator import CsvBrowseDataGenerator
 from .JasperReports.jasper_server import JasperServer
 from .JasperReports.record_data_generator import CsvRecordDataGenerator
@@ -269,44 +270,43 @@ class Report:
                               output_file, parameters)
 
 
-class ReportJasper():
-    def __init__(self, name, model, parser=None):
-        # Remove report name from list of services if it already
-        # exists to avoid report_int's assert. We want to keep the
-        # automatic registration at login, but at the same time we
-        # need modules to be able to use a parser for certain reports.
-        #         if release.major_version == '5.0':
-        #             if name in odoo.report.interface.report_int._reports:
-        #                 del odoo.report.interface.report_int._reports[name]
-        #         else:
-        #             if name in odoo.report.interface.report_int._reports:
-        #                 del odoo.report.interface.report_int._reports[name]
-
-        super(ReportJasper, self).__init__()
-        self.model = model
-        self.parser = parser
-
-    def create(self, cr, uid, ids, datas, context=None):
-        name = 'report.report_jasper.users_jasper'
+# class ReportJasper():
+#     def __init__(self, name, model, parser=None):
+#         Remove report name from list of services if it already
+#         exists to avoid report_int's assert. We want to keep the
+#         automatic registration at login, but at the same time we
+#         need modules to be able to use a parser for certain reports.
+#             if release.major_version == '5.0':
+#                 if name in odoo.report.interface.report_int._reports:
+#                     del odoo.report.interface.report_int._reports[name]
+#             else:
+#                 if name in odoo.report.interface.report_int._reports:
+#                     del odoo.report.interface.report_int._reports[name]
+#
+#         super(ReportJasper, self).__init__()
+#         self.model = model
+#         self.parser = parser
+#
+#     def create(self, ids, datas):
+#         name = 'report.report_jasper.users_jasper'
 #         data.update()
-        if self.parser:
-            d = self.parser(cr, uid, ids, datas, context)
-            ids = d.get('ids', ids)
-            name = d.get('name', self.name)
-            # Use model defined in ReportJasper definition.
-            # Necessary for menu entries.
-            datas['model'] = d.get('model', self.model)
-            datas['records'] = d.get('records', [])
-            # data_source can be 'model' or 'records' and lets parser to return
-            # an empty 'records' parameter while still executing using
-            # 'records'
-            datas['data_source'] = d.get('data_source', 'model')
-            datas['parameters'] = d.get('parameters', {})
-
-        datas['env'] = api.Environment(cr, uid, context or {})
-        r = Report(name, cr, uid, ids, datas, context)
-        return r.execute()
-
+#         if self.parser:
+#             d = self.parser(ids, datas)
+#             ids = d.get('ids', ids)
+#             name = d.get('name', self.name)
+#             Use model defined in ReportJasper definition.
+#             Necessary for menu entries.
+#             datas['model'] = d.get('model', self.model)
+#             datas['records'] = d.get('records', [])
+#             data_source can be 'model' or 'records' and lets parser to return
+#             an empty 'records' parameter while still executing using
+#             'records'
+#             datas['data_source'] = d.get('data_source', 'model')
+#             datas['parameters'] = d.get('parameters', {})
+#
+#         datas['env'] = api.Environment()
+#         r = Report(name, ids, datas)
+#         return r.execute()
 
 # if release.major_version == '5.0':
     # Version 5.0 specific code
@@ -336,49 +336,49 @@ class ReportJasper():
     # report.interface.register_all = new_register_all
 
 
-class ReportAction(models.Model):
-    _inherit = 'ir.actions.report'
-
-    report_type = fields.Selection(selection_add=[("jasper", "Jasper")])
-
-    @api.model
-    def render_jasper(self, docids, data):
-        cr, uid, context = self.env.args
-        report_model_name = 'report.%s' % self.report_name
-        # columns = "id, model"
-        # query = '''SELECT %{columns} FROM %{table} WHERE
-        #                         report_name =\
-        #                          '%s' limit 1 ''' \
-        #                          % ({'columns': columns,
-        #                              'table': 'ir_act_report_xml'},
-        #                             self.report_name)
-        self.env.cr.execute('SELECT id, model FROM'
-                            'ir_act_report_xml WHERE'
-                            'report_name = %s LIMIT 1',
-                            (self.report_name,))
-        record = self.env.cr.dictfetchone()
-        report_model = self.search([('report_name', '=', report_model_name)])
-        if report_model is None:
-            raise UserError(_('%s model was not found' % report_model_name))
-#         return report_model.with_context({
-#             'active_model': self.model,
-#             'report_name': report_model_name
-#         }).create_jasper_report(docids, data)
-        data.update({'env': self.env, 'model': record.get('model')})
-        r = Report(report_model_name, cr, uid, docids, data, context)
-        return r.execute()
-
-    @api.model
-    def _get_report_from_name(self, report_name):
-        res = super(ReportAction, self)._get_report_from_name(report_name)
-        if res:
-            return res
-        report_obj = self.env['ir.actions.report']
-        qwebtypes = ['jasper']
-        conditions = [('report_type', 'in', qwebtypes),
-                      ('report_name', '=', report_name)]
-        context = self.env['res.users'].context_get()
-        return report_obj.with_context(context).search(conditions, limit=1)
+# class ReportAction(models.Model):
+#     _inherit = 'ir.actions.report'
+#
+#     report_type = fields.Selection(selection_add=[("jasper", "Jasper")])
+#
+#     @api.model
+#     def render_jasper(self, docids, data):
+#         cr, uid, context = self.env.args
+#         report_model_name = 'report.%s' % self.report_name
+#         # columns = "id, model"
+#         # query = '''SELECT %{columns} FROM %{table} WHERE
+#         #                         report_name =\
+#         #                          '%s' limit 1 ''' \
+#         #                          % ({'columns': columns,
+#         #                              'table': 'ir_act_report_xml'},
+#         #                             self.report_name)
+#         self.env.cr.execute('SELECT id, model FROM '
+#                             'ir_act_report_xml WHERE '
+#                             'report_name = %s LIMIT 1',
+#                             (self.report_name,))
+#         record = self.env.cr.dictfetchone()
+#         report_model = self.search([('report_name', '=', report_model_name)])
+#         if report_model is None:
+#             raise UserError(_('%s model was not found' % report_model_name))
+# #         return report_model.with_context({
+# #             'active_model': self.model,
+# #             'report_name': report_model_name
+# #         }).create_jasper_report(docids, data)
+#         data.update({'env': self.env, 'model': record.get('model')})
+#         r = Report(report_model_name, cr, uid, docids, data, context)
+#         return r.execute()
+#
+#     @api.model
+#     def _get_report_from_name(self, report_name):
+#         res = super(ReportAction, self)._get_report_from_name(report_name)
+#         if res:
+#             return res
+#         report_obj = self.env['ir.actions.report']
+#         qwebtypes = ['jasper']
+#         conditions = [('report_type', 'in', qwebtypes),
+#                       ('report_name', '=', report_name)]
+#         context = self.env['res.users'].context_get()
+#         return report_obj.with_context(context).search(conditions, limit=1)
 
 
 # def register_jasper_report(report_name, model_name):
