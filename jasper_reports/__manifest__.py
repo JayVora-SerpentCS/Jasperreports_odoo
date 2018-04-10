@@ -34,7 +34,7 @@
 {
     "name": "Jasper Reports",
     "version": "10.0.0.1.1",
-    "description": '''
+    "summary": '''
     This module integrates Jasper Reports with Odoo. V6 and v7 compatible"
     version was made by NaN-tic.
     Serpent Consulting Services Pvt. Ltd. has migrated it to v10. ''',
@@ -64,4 +64,5 @@
     ],
     "installable": True,
     "application": True,
+    "license": "AGPL-3",
 }
