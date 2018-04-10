@@ -19,6 +19,18 @@
 	<field name="Name-name" class="java.lang.String">
 		<fieldDescription><![CDATA[Order_Lines-order_line/Product-product_id/Name-name]]></fieldDescription>
 	</field>
+	<field name="Unit_Price-price_unit" class="java.lang.String">
+		<fieldDescription><![CDATA[Order_Lines-order_line/Unit_Price-price_unit]]></fieldDescription>
+	</field>
+	<field name="Total-amount_total" class="java.lang.String">
+		<fieldDescription><![CDATA[Total-amount_total]]></fieldDescription>
+	</field>
+	<field name="Quantity-product_uom_qty" class="java.lang.String">
+		<fieldDescription><![CDATA[Order_Lines-order_line/Quantity-product_uom_qty]]></fieldDescription>
+	</field>
+	<field name="Subtotal-price_subtotal" class="java.lang.String">
+		<fieldDescription><![CDATA[Order_Lines-order_line/Subtotal-price_subtotal]]></fieldDescription>
+	</field>
 	<title>
 		<band height="79">
 			<staticText>
@@ -127,6 +139,27 @@
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{Name-name}]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement x="312" y="2" width="100" height="20"/>
+				<textElement lineSpacing="Single">
+					<font size="13"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Unit_Price-price_unit}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="441" y="2" width="100" height="20"/>
+				<textElement lineSpacing="Single">
+					<font size="13"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Subtotal-price_subtotal}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="177" y="2" width="100" height="20"/>
+				<textElement lineSpacing="Single">
+					<font size="13"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Quantity-product_uom_qty}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<columnFooter>
@@ -138,7 +171,13 @@
 				</textElement>
 				<text><![CDATA[Total :]]></text>
 			</staticText>
-			
+			<textField>
+				<reportElement x="427" y="20" width="114" height="20"/>
+				<textElement lineSpacing="Single">
+					<font size="13"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[Float.valueOf( $F{Total-amount_total} )]]></textFieldExpression>
+			</textField>
 		</band>
 	</columnFooter>
 	<pageFooter>
