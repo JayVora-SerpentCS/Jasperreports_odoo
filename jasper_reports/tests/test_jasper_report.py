@@ -37,6 +37,6 @@ class TestJasperReport(TransactionCase):
 
     def test_report(self):
         return {
-                   'type': 'ir.actions.report.xml',
-                   'report_name': self.report_data.report_name,
-               }
+            'type': 'ir.actions.report.xml',
+            'report_name': self.report_data.report_name,
+        }
