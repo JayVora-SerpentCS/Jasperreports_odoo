@@ -344,25 +344,6 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 header[field] = field
             writer.writerow(header)
 
-# 		f = open(file_name, 'w')
-#
-# 			csv.QUOTE_ALL = True
-# 			# JasperReports CSV reader requires an extra colon at the
-# 			# end of the line.
-# 			writer = csv.DictWriter(f, self.report.field_names + [''],
-# 									delimiter=",", quotechar='"')
-# 			header = {}
-# 			for field in self.report.field_names + ['']:
-# 				if isinstance(field, str):
-# 					name = str(field.encode('utf-8'))
-# 					print ('name----------------------', name)
-# 				else:
-# 					name = field
-# 				name = field.encode('utf-8')
-# 				print ('name----------------------', name)
-# 				header[field] = name.tostring
-# 				print ('header----------------------', header)
-# 			writer.writerow(header)
             # Once all records have been calculated,
             # create the CSV structure itself
             for records in self.all_records:

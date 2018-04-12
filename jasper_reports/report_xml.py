@@ -33,7 +33,6 @@
 
 import os
 import base64
-# import unicodedata
 from xml.dom.minidom import getDOMImplementation
 
 from odoo.exceptions import UserError
@@ -41,7 +40,6 @@ from odoo import api, fields, models, _
 
 from . jasper_report import Report
 
-# from .jasper_report import register_jasper_report
 
 src_chars = """ '"()/*-+?¿!&$[]{}@#`'^:;<>=~%,\\"""
 src_chars = str.encode(src_chars, 'iso-8859-1')
@@ -102,13 +100,6 @@ class ReportXml(models.Model):
     def render_jasper(self, docids, data):
         cr, uid, context = self.env.args
         report_model_name = 'report.%s' % self.report_name
-        # columns = "id, model"
-        # query = '''SELECT %{columns} FROM %{table} WHERE
-        #                         report_name =\
-        #                          '%s' limit 1 ''' \
-        #                          % ({'columns': columns,
-        #                              'table': 'ir_act_report_xml'},
-        #                             self.report_name)
         self.env.cr.execute('SELECT id, model FROM '
                             'ir_act_report_xml WHERE '
                             'report_name = %s LIMIT 1',
@@ -117,10 +108,6 @@ class ReportXml(models.Model):
         report_model = self.search([('report_name', '=', report_model_name)])
         if report_model is None:
             raise UserError(_('%s model was not found' % report_model_name))
-#         return report_model.with_context({
-#             'active_model': self.model,
-#             'report_name': report_model_name
-#         }).create_jasper_report(docids, data)
         data.update({'env': self.env, 'model': record.get('model')})
         r = Report(report_model_name, cr, uid, docids, data, context)
         return r.execute()
@@ -164,9 +151,6 @@ class ReportXml(models.Model):
     def update(self):
         if self._context is None:
             self._context = {}
-        # ir.values are removed from the odoo 10
-#         pool_values = self.env['ir.values']
-        # pool_values = self.env['ir.actions.act_window']
         for report in self:
             has_default = False
             # Browse attachments and store .jrxml and .properties
@@ -184,31 +168,8 @@ class ReportXml(models.Model):
                         raise UserError(_('There is more than one \
                                          report marked as default'))
                     has_default = True
-                    # Update path into report_rml field.
-#                     my_obj = self.browse([report.id])
-                    # report_rml to report_file
                     report.write({'report_file': path})
                     report.create_action()
-                    # Value field to name
-#                     ser_arg = [('name', '=',
-#                                 'ir.actions.report,%s' % report.id)]
-# #                     ser_arg = [('value', '=',
-# #                                 'ir.actions.report,%s' % report.id)]
-#                     values_id = pool_values.search(ser_arg)
-#                     data = {
-#                         'name': report.name,
-#                         'model': report.model,
-#                         'key': 'action',
-#                         'object': True,
-#                         'key2': 'client_print_multi',
-#                         'value': 'ir.actions.report,%s' % report.id
-#                     }
-#                     if not values_id.ids:
-#                         values_id = pool_values.create(data)
-#                     else:
-#                         for pool_obj in pool_values.browse(values_id.ids):
-#                             pool_obj.write(data)
-#                             values_id = values_id[0]
                 if not has_default:
                     raise UserError(_('No report has been marked as default! \
                                      You need atleast one jrxml report!'))
@@ -239,18 +200,6 @@ class ReportXml(models.Model):
             for src in src_chars_list:
                 text = text.replace(src, "_")
         return text
-
-#     def unaccent(self, text):
-#         if isinstance(text, str):
-#             text = str.encode(text, 'utf-8')
-#         output = text
-#         for c in xrange(len(src_chars)):
-#             if c >= len(dst_chars):
-#                 break
-#             output = output.replace(bytes(src_chars[c]), bytes(dst_chars[c]))
-#         output = unicodedata.normalize('NFKD', str(output)).encode('ASCII',
-#                                                               'ignore')
-#         return str(output).strip('_').encode('utf-8')
 
     @api.model
     def generate_xml(self, pool, model_name, parent_node, document, depth,

@@ -49,7 +49,6 @@ class CreateDataTemplate(models.TransientModel):
                     model.model, data['depth'])
                 base64_str = base64.encodestring(
                     ('%s' % (xml)).encode()).decode().replace('\n', '')
-#                 base64_str = base64.decodestring(xml)
                 rec.write({
                     'data': base64_str,
                     'filename': str(rec.model.name) + '_template.xml'
