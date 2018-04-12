@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
-sys.path.append('/home/serpentcs/workspace/odoo11/')
 import base64
 from odoo.tests.common import TransactionCase
 from odoo.modules.module import get_module_resource
