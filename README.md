@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/JayVora-SerpentCS/Jasperreports_odoo.svg?branch=10.0)](https://travis-ci.org/JayVora-SerpentCS/Jasperreports_odoo)
+[![Build Status](https://travis-ci.org/JayVora-SerpentCS/Jasperreports_odoo.svg?branch=11.0)](https://travis-ci.org/JayVora-SerpentCS/Jasperreports_odoo)
 
 # Jasper Report
 This Module Gives The Features for creating Jasper Reports
