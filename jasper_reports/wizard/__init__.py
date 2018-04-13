@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.

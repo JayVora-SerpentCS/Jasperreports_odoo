@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
@@ -74,7 +74,7 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
                     value = record.get(field, False)
                     if value is False:
                         value = ''
-                    elif isinstance(value, unicode):
+                    elif isinstance(value, str):
                         value = value.encode('utf-8')
                     elif isinstance(value, float):
                         value = '%.10f' % value
@@ -111,11 +111,11 @@ class XmlRecordDataGenerator(AbstractDataGenerator):
                 if value is False:
                     value = ''
                 elif isinstance(value, str):
-                    value = unicode(value, 'utf-8')
+                    value = str(value, 'utf-8')
                 elif isinstance(value, float):
                     value = '%.10f' % value
-                elif not isinstance(value, unicode):
-                    value = unicode(value)
+                elif not isinstance(value, str):
+                    value = str(value)
 
                 value_node = self.document.createTextNode(value)
                 field_node.appendChild(value_node)

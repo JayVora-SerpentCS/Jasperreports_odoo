@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
@@ -36,9 +36,7 @@ import logging
 import os
 import time
 
-import odoo
-from odoo import api, release, tools, models,fields
-from odoo.exceptions import UserError
+from odoo import tools
 from .JasperReports.browse_data_generator import CsvBrowseDataGenerator
 from .JasperReports.jasper_server import JasperServer
 from .JasperReports.record_data_generator import CsvRecordDataGenerator
@@ -244,7 +242,6 @@ class Report:
 
         connection_parameters = {
             'output': self.output_format,
-            # 'xml': data_file,
             'csv': data_file,
             'dsn': self.dsn(),
             'user': self.user_name(),
@@ -267,186 +264,3 @@ class Report:
         server.pidfile = tools.config['jasperpid']
         return server.execute(connection_parameters, self.report_path,
                               output_file, parameters)
-
-
-class ReportJasper():
-    def __init__(self, name, model, parser=None):
-        # Remove report name from list of services if it already
-        # exists to avoid report_int's assert. We want to keep the
-        # automatic registration at login, but at the same time we
-        # need modules to be able to use a parser for certain reports.
-#         if release.major_version == '5.0':
-#             if name in odoo.report.interface.report_int._reports:
-#                 del odoo.report.interface.report_int._reports[name]
-#         else:
-#             if name in odoo.report.interface.report_int._reports:
-#                 del odoo.report.interface.report_int._reports[name]
-
-        super(ReportJasper, self).__init__()
-        self.model = model
-        self.parser = parser
-
-    def create(self, cr, uid, ids, datas, context=None):
-        name = 'report.report_jasper.users_jasper'
-#         data.update()
-        if self.parser:
-            d = self.parser(cr, uid, ids, datas, context)
-            ids = d.get('ids', ids)
-            name = d.get('name', self.name)
-            # Use model defined in ReportJasper definition.
-            # Necessary for menu entries.
-            datas['model'] = d.get('model', self.model)
-            datas['records'] = d.get('records', [])
-            # data_source can be 'model' or 'records' and lets parser to return
-            # an empty 'records' parameter while still executing using
-            # 'records'
-            datas['data_source'] = d.get('data_source', 'model')
-            datas['parameters'] = d.get('parameters', {})
-
-        datas['env'] = api.Environment(cr, uid, context or {})
-        r = Report(name, cr, uid, ids, datas, context)
-        return r.execute()
-
-
-if release.major_version == '5.0':
-    # Version 5.0 specific code
-    # Ugly hack to avoid developers the need to register reports
-
-    # This hack allows automatic registration of jrxml files without
-    # the need for developers to register them programatically.
-
-    old_register_all = report.interface.register_all
-
-    def new_register_all(db):
-
-        value = old_register_all(db)
-
-        cr = db.cursor()
-        # Originally we had auto=true in the SQL filter but we will
-        # register all reports.
-        query = "SELECT * FROM ir_act_report_xml WHERE \
-        report_file ilike '%.jrxml' ORDER BY id"
-        cr.execute(query)
-        records = cr.dictfetchall()
-        cr.close()
-        for record in records:
-            register_jasper_report(record['report_name'], record['model'])
-        return value
-
-    report.interface.register_all = new_register_all
-
-class ReportAction(models.Model):
-    _inherit = 'ir.actions.report'
-
-    report_type = fields.Selection(selection_add=[("jasper", "Jasper")])
-
-    @api.model
-    def render_jasper(self, docids, data):
-        cr, uid, context = self.env.args
-        report_model_name = 'report.%s' % self.report_name
-        self.env.cr.execute('''SELECT id, model FROM ir_act_report_xml WHERE
-                                report_name = '%s' limit 1 ''' %(self.report_name))
-        record = self.env.cr.dictfetchone()
-        report_model = self.search([('report_name', '=', report_model_name)])
-        if report_model is None:
-            raise UserError(_('%s model was not found' % report_model_name))
-#         return report_model.with_context({
-#             'active_model': self.model,
-#             'report_name': report_model_name
-#         }).create_jasper_report(docids, data)
-        data.update({'env': self.env, 'model': record.get('model')})
-        r = Report(report_model_name, cr, uid, docids, data, context)
-        return r.execute()
-
-    @api.model
-    def _get_report_from_name(self, report_name):
-        res = super(ReportAction, self)._get_report_from_name(report_name)
-        if res:
-            return res
-        report_obj = self.env['ir.actions.report']
-        qwebtypes = ['jasper']
-        conditions = [('report_type', 'in', qwebtypes),
-                      ('report_name', '=', report_name)]
-        context = self.env['res.users'].context_get()
-        return report_obj.with_context(context).search(conditions, limit=1)
-
-
-# def register_jasper_report(report_name, model_name):
-#     name = 'report.%s' % report_name
-    # Register only if it didn't exist another "jasper_report"
-    # with the same name given that developers might prefer/need
-    # to register the reports themselves.
-    # For example, if they need their own parser.
-#     if name in odoo.report.interface.report_int._reports:
-#         if isinstance(odoo.report.interface.report_int._reports[name],
-#                       ReportJasper):
-#             return odoo.report.interface.report_int._reports[name]
-# 
-#         del odoo.report.interface.report_int._reports[name]
-
-#     return ReportJasper(name, model_name)
-
-# class ReportJasperAbstract(models.AbstractModel):
-#     _name = 'report.report_jasper.abstract'
-# 
-#     def create_jasper_report(self, docids, data):
-#         report_name = self.env.context.get('report_name')
-#         r = Report(report_name,data)
-#         return r.execute()
-
-# class PartnerXlsx(models.AbstractModel):
-#     _name = 'report.report_jasper.users_jasper'
-#     _inherit = 'report.report_jasper.abstract'
-# 
-#     def generate_jasper_report(self, data, objs, model_name,report_name):
-#         print("\n\n generate_jasper_report",data, objs, model_name,report_name)
-#         aa = ReportJasper(report_name, model_name)
-#         aa.create(self._cr, self._uid, self._ids, data)
-#         return ReportJasper(report_name, model_name)
-        
-
-# class IrActionsReport(models.Model):
-#     _inherit = 'ir.actions.report
-# 
-#     report_type = fields.Selection(selection_add=[("jasper", "Jasper")])
-# 
-#     @api.model
-#     def render_jasper(self, docids, data):
-#         report_model_name = 'report.%s' % self.report_name
-#         report_model = self.env.get(report_model_name)
-#         if report_model is None:
-#             raise UserError(_('%s model was not found' % report_model_name))
-#         return ReportJasper(report_model_name, report_model)
-# 
-#     @api.model
-#     def _get_report_from_name(self, report_name):
-#         res = super(IrActionsReport, self)._get_report_from_name(report_name)
-#         if res:
-#             return res
-#         report_obj = self.env['ir.actions.report']
-#         qwebtypes = ['jasper']
-#         conditions = [('report_type', 'in', qwebtypes),
-#                       ('report_name', '=', report_name)]
-#         context = self.env['res.users'].context_get()
-#         return report_obj.with_context(context).search(conditions, limit=1)
-
-#     def _lookup_report(self, name):
-#         """
-#         Look up a report definition.
-#         """
-#         # First lookup in the deprecated place, because if the report
-#         # definition has not been updated, it is more likely
-#         # the correct definition is there.
-#         # Only reports with custom parser specified in Python are still there.
-#         query = "SELECT * FROM ir_act_report_xml WHERE \
-#         jasper_report='t' and report_name=%s limit 1"
-#         self.env.cr.execute(query, (name,))
-#         record = self.env.cr.dictfetchone()
-#         
-#         if not record:
-#             return super(IrActionsReport, self)._lookup_report(name)
-# 
-#         # Calling Jasper
-#         return register_jasper_report(name, record['model'])
-
-

@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2012 Omar Castiñeira Saavedra <omar@pexego.es>
@@ -45,9 +45,10 @@ class CreateDataTemplate(models.TransientModel):
         for rec in self:
             for data in rec.read([]):
                 model = self.env['ir.model'].browse(data['model'][0])
-                xml = self.env['ir.actions.report'].create_xml(model.model, data['depth'])
-                base64_str = base64.encodestring(('%s' % (xml)).encode()).decode().replace('\n', '')
-#                 base64_str = base64.decodestring(xml)
+                xml = self.env['ir.actions.report'].create_xml(
+                    model.model, data['depth'])
+                base64_str = base64.encodestring(
+                    ('%s' % (xml)).encode()).decode().replace('\n', '')
                 rec.write({
                     'data': base64_str,
                     'filename': str(rec.model.name) + '_template.xml'

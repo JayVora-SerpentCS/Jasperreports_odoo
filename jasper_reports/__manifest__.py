@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
@@ -34,11 +34,12 @@
 {
     "name": "Jasper Reports",
     "version": "10.0.0.1.1",
-    "description": '''
+    "summary": '''
     This module integrates Jasper Reports with Odoo. V6 and v7 compatible"
     version was made by NaN-tic.
     Serpent Consulting Services Pvt. Ltd. has migrated it to v10. ''',
-    "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd.",
+    "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd., \
+    Odoo Community Association (OCA)",
     "website": "http://www.nan-tic.com, http://www.serpentcs.com",
     'images': [
         'images/jasper_reports-hover.png',
@@ -49,7 +50,7 @@
     ],
     "category": "Generic Modules/Jasper Reports",
     "demo": [
-#         'jasper_demo.xml',
+        #         'jasper_demo.xml',
     ],
     "data": [
         'views/webclient_templates.xml',
@@ -63,4 +64,5 @@
     ],
     "installable": True,
     "application": True,
+    "license": "AGPL-3",
 }

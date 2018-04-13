@@ -23,8 +23,7 @@
         </field>
     </record>
 
-    <record id="action_jasper_create_date_template"
-            model="ir.actions.act_window">
+    <record id="action_jasper_create_date_template" model="ir.actions.act_window">
         <field name="name">Create Data Template</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">jasper.create.data.template</field>

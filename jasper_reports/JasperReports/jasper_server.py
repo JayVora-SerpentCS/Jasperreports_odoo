@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
@@ -35,7 +35,6 @@ import glob
 import time
 import socket
 import subprocess
-# import xmlrpclib
 from xmlrpc import client as xmlrpclib
 import logging
 
@@ -107,20 +106,16 @@ class JasperServer:
         """
         try:
             return self.proxy.Report.execute(*args)
-#         except (xmlrpclib.ProtocolError, socket.error), e:
         except socket.error as e:
             self.start()
-            for x in xrange(40):
+            for x in range(40):
                 time.sleep(1)
                 try:
                     return self.proxy.Report.execute(*args)
-#                 except (xmlrpclib.ProtocolError, socket.error), e:
                 except socket.error as e:
                     self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
                     pass
-#                 except xmlrpclib.Fault, e:
                 except xmlrpclib.Fault as e:
                     raise UserError(_('Report Error\n%s' % e))
-#         except xmlrpclib.Fault, e:
         except xmlrpclib.Fault as e:
             raise UserError(_('Report Error\n%s' % e))

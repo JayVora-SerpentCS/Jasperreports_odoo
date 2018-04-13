@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (C) 2018-Today Serpent Consulting Services Pvt. Ltd.
@@ -37,7 +37,10 @@ class ReportController(report.ReportController):
     @route()
     def report_routes(self, reportname, docids=None, converter=None, **data):
         if converter == 'jasper':
-            report_jas = request.env['ir.actions.report']._get_report_from_name(reportname)
+            report_jas = request.env[
+                'ir.actions.report'
+                ]._get_report_from_name(
+                reportname)
             context = dict(request.env.context)
             if docids:
                 docids = [int(i) for i in docids.split(',')]
@@ -51,9 +54,8 @@ class ReportController(report.ReportController):
                 if data['context'].get('lang'):
                     del data['context']['lang']
                 context.update(data['context'])
-            jasper = report_jas.with_context(context).render_jasper(docids, data=data)
-#             pdfhttpheaders = [('Content-Type', 'application/pdf'), 
-#                               ('Content-Length', len(jasper))]
+            jasper = report_jas.with_context(
+                context).render_jasper(docids, data=data)
             pdfhttpheaders = [
                 ('Content-Type', 'application/pdf'),
                 ('Content-Length', len(jasper)),
@@ -62,14 +64,6 @@ class ReportController(report.ReportController):
                     'attachment; filename=' + str(report_jas.name) + '.pdf'
                 )
             ]
-#             pdfhttpheaders = [
-#                 ('Content-Type', 'application/pdf'),
-#                 ('Content-Length', len(jasper)),
-#                 (
-#                     'Content-Disposition',
-#                     'attachment; filename=' + 'aaaaaa' + '.pdf'
-#                 )
-#             ]
             return request.make_response(jasper, headers=pdfhttpheaders)
         return super(ReportController, self).report_routes(
             reportname, docids, converter, **data
