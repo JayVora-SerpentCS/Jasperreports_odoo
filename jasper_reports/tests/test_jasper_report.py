@@ -43,7 +43,7 @@ class TestJasperReport(TransactionCase):
         with mock.patch('odoo.addons.jasper_reports.controllers.main.'
                         'ReportController') as ReportController:
             return ReportController.report_routes(
-                                                  self,
-                                                  reportname=self.
-                                                  report_data.report_name,
-                                                  converter="jasper")
+                                              self,
+                                              reportname=self.
+                                              report_data.report_name,
+                                              converter="jasper")
