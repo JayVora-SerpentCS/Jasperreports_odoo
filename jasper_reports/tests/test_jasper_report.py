@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 import base64
+import mock
 from odoo.tests.common import TransactionCase
 from odoo.modules.module import get_module_resource
+# from odoo.addons.jasper_reports.controllers.main import ReportController
+# from odoo.addons.web.controllers.main import ReportController
 
 
 class TestJasperReport(TransactionCase):
+
     def setUp(self):
         super(TestJasperReport, self).setUp()
         # File path
@@ -36,7 +40,10 @@ class TestJasperReport(TransactionCase):
         })
 
     def test_report(self):
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': self.report_data.report_name,
-        }
+        with mock.patch('odoo.addons.jasper_reports.controllers.main.'
+                        'ReportController') as ReportController:
+            return ReportController.report_routes(
+                                                  self,
+                                                  reportname=self.
+                                                  report_data.report_name,
+                                                  converter="jasper")
