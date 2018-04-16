@@ -198,7 +198,7 @@ class Report:
         if self.context.get('return_pages'):
             return data, self.output_format, pages
         else:
-            return data, self.output_format
+            return data
 
     def path(self):
         return os.path.abspath(os.path.dirname(__file__))

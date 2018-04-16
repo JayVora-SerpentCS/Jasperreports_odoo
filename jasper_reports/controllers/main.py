@@ -56,12 +56,25 @@ class ReportController(report.ReportController):
                 context.update(data['context'])
             jasper = report_jas.with_context(
                 context).render_jasper(docids, data=data)
+            # Get the report output type
+            output_type = report_jas.jasper_output
+            report_name = str(report_jas.name) + '.' + output_type
+            content_dict = {
+                'pdf': 'application/pdf',
+                'html': 'text/html',
+                'csv': 'text/csv',
+                'xls': 'application/xls',
+                'rtf': 'application/octet-stream',
+                'odt': 'application/vnd.oasis.opendocument.text',
+                'ods': 'application/vnd.oasis.opendocument.spreadsheet',
+                'txt': 'text/plain',
+            }
             pdfhttpheaders = [
-                ('Content-Type', 'application/pdf'),
+                ('Content-Type', content_dict.get(output_type)),
                 ('Content-Length', len(jasper)),
                 (
                     'Content-Disposition',
-                    'attachment; filename=' + str(report_jas.name) + '.pdf'
+                    'attachment; filename=' + report_name
                 )
             ]
             return request.make_response(jasper, headers=pdfhttpheaders)
