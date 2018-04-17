@@ -31,7 +31,7 @@ before_install:
   - "sh -e /etc/init.d/xvfb start"
 
 before_script:
-  - psql -c "CREATE USER skateparks WITH PASSWORD 'skateparks';" -U postgres
+  - sudo psql -c "CREATE USER jasper WITH PASSWORD 'jasper';" -U postgres
 
 install:
   - git clone https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
