@@ -22,12 +22,12 @@ class TestJasperReport(TransactionCase):
         report_file = base64.b64encode(file_content)
 
         self.JasperReport = self.env['ir.actions.report']
-        self.users_modal = self.env['ir.model'].search([
-            ('model', '=', 'res.users')]).id
+        self.users_model = self.env['ir.model'].search([
+            ('model', '=', 'res.users')])
         self.report_data = self.JasperReport.create({
             'name': 'Jasper Test Report',
             'model': 'res.users',
-            'jasper_model_id': self.users_modal,
+            'jasper_model_id': self.users_model and users_model.id or False,
             'jasper_output': 'pdf',
             'report_name': 'res_users_jasper',
             'jasper_report': True,

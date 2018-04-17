@@ -239,7 +239,14 @@ class Report:
 
     def execute_report(self, data_file, output_file, sub_report_data_files):
         locale = self.context.get('lang', 'en_US')
-
+        print("\n\n\n\n==============")
+        print("config", self.env['ir.config_parameter'].get_param(
+            'db_user'))
+        print("\n")
+        print("system", self.system_user_name())
+        print("\n")
+        print("tools", tools.config['db_user'])
+        print("==============\n\n\n\n")
         connection_parameters = {
             'output': self.output_format,
             'csv': data_file,

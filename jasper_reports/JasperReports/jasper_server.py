@@ -104,6 +104,9 @@ class JasperServer:
         """
         Render report and return the number of pages generated.
         """
+        print("\n\n\n*******************")
+        print("\n\n\n", args, "\n\n\n")
+        print("*******************\n\n\n")
         try:
             return self.proxy.Report.execute(*args)
         except socket.error as e:
