@@ -32,6 +32,7 @@ before_install:
 
 before_script:
   - sudo psql -c "CREATE USER jasper WITH PASSWORD 'jasper';" -U postgres
+  - psql -c "GRANT permissions ON DATABASE openerp_test TO jasper;" -U postgres
 
 install:
   - git clone https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
