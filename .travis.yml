@@ -29,8 +29,9 @@ env:
 before_install:
   - "export DISPLAY=:911.0"
   - "sh -e /etc/init.d/xvfb start"
-  - psql -c "CREATE DATABASE testing_jasper;" -U postgres
-  - psql -c "CREATE USER jasper WITH PASSWORD 'jasper';" -U postgres
+
+before_script:
+  - psql -c "CREATE USER skateparks WITH PASSWORD 'skateparks';" -U postgres
 
 install:
   - git clone https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
