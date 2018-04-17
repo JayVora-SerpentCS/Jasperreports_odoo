@@ -18,7 +18,7 @@ env:
   global:
   - VERSION="11.0" TESTS="0" LINT_CHECK="0" TRANSIFEX="0"
   - TRANSIFEX_USER='transbot@odoo-community.org'
-
+  
   matrix:
   - LINT_CHECK="1"
   - TRANSIFEX="1"
@@ -29,7 +29,7 @@ env:
 before_install:
   - "export DISPLAY=:911.0"
   - "sh -e /etc/init.d/xvfb start"
-   - psql -c "CREATE DATABASE testing_db;" -U postgres
+  - psql -c "CREATE DATABASE testing_jasper;" -U postgres
   - psql -c "CREATE USER jasper WITH PASSWORD 'jasper';" -U postgres
 
 install:
@@ -42,4 +42,4 @@ script:
   - travis_run_tests
 
 after_success:
-  - travis_after_tests_success
+  - travis_after_tests_success	
