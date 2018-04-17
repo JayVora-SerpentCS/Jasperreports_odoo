@@ -27,7 +27,7 @@ class TestJasperReport(TransactionCase):
         self.report_data = self.JasperReport.create({
             'name': 'Jasper Test Report',
             'model': 'res.users',
-            'jasper_model_id': self.users_model and users_model.id or False,
+            'jasper_model_id': self.users_model and self.users_model.id or False,
             'jasper_output': 'pdf',
             'report_name': 'res_users_jasper',
             'jasper_report': True,
