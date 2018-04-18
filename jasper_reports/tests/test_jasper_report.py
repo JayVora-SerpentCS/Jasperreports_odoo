@@ -47,6 +47,9 @@ class TestJasperReport(TransactionCase):
         report = report_object._get_report_from_name(report_name)
         docs = self.env['res.users'].search([])
         self.assertEqual(report.report_type, 'qweb-pdf')
+        # We are giving travis postgres cradentials for
+        # db connectivity in order to make sure that test case
+        # can connect with database.
         self.env['ir.config_parameter'].set_param('db_user', 'postgres')
         self.env['ir.config_parameter'].set_param('db_password', '')
         return report.render_jasper(docs.ids, {})
