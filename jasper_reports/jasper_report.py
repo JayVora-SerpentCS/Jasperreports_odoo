@@ -198,7 +198,7 @@ class Report:
         if self.context.get('return_pages'):
             return data, self.output_format, pages
         else:
-            return data, self.output_format
+            return data
 
     def path(self):
         return os.path.abspath(os.path.dirname(__file__))
@@ -239,7 +239,6 @@ class Report:
 
     def execute_report(self, data_file, output_file, sub_report_data_files):
         locale = self.context.get('lang', 'en_US')
-
         connection_parameters = {
             'output': self.output_format,
             'csv': data_file,
