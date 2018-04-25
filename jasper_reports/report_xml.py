@@ -92,7 +92,9 @@ class ReportXml(models.Model):
                                      'Jasper Output', default='pdf')
     jasper_file_ids = fields.One2many('ir.actions.report.xml.file',
                                       'report_id', 'Files', help='')
-    jasper_model_id = fields.Many2one('ir.model', 'Model', help='')
+    # To get the model name from current models in database,we add a new field
+    # and it will give us model name at create and update time.
+    jasper_model_id = fields.Many2one('ir.model', 'Model', help='Select Model')
     jasper_report = fields.Boolean('Is Jasper Report?')
     report_type = fields.Selection(selection_add=[("jasper", "Jasper")])
 
