@@ -228,12 +228,14 @@ class Report:
         return 'jdbc:postgresql://%s:%s/%s' % (host, port, db_name)
 
     def user_name(self):
-        user_name = self.env['ir.config_parameter'].get_param(
+        # To allow all users to get db_user we have to call it with sudo
+        user_name = self.env['ir.config_parameter'].sudo().get_param(
             'db_user') or self.system_user_name()
         return tools.config['db_user'] or user_name
 
     def password(self):
-        password = self.env['ir.config_parameter'].get_param(
+        # To allow all users to get db_password we have to call it with sudo
+        password = self.env['ir.config_parameter'].sudo().get_param(
             'db_password') or ''
         return tools.config['db_password'] or password
 
