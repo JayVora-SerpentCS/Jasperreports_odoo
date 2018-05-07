@@ -32,7 +32,7 @@ pushd $scriptdir
 
 
 if [ -z "$JAVA_HOME" ]; then
-	directories="/usr/lib/jvm/java-6-sun-1.6.0.10/bin /usr/lib/j2sdk1.6-sun /usr/lib/j2sdk1.5-sun"
+	directories="/usr/lib/jvm/java-1.8.0-openjdk-amd64/ /usr/lib/jvm/java-8-openjdk-amd64/"
 	for d in $directories; do
 		if [ -d "$d" ]; then
 			export JAVA_HOME="$d"
