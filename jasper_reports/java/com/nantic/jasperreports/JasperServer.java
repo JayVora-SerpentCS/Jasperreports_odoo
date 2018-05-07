@@ -36,7 +36,7 @@ import net.sf.jasperreports.engine.JRRewindableDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.design.JRDesignField;
 import net.sf.jasperreports.engine.util.JRLoader;
-import net.sf.jasperreports.engine.JasperFillManager; 
+import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReport;
@@ -50,16 +50,25 @@ import net.sf.jasperreports.engine.JREmptyDataSource;
 
 // Exporters
 import net.sf.jasperreports.engine.JRAbstractExporter;
-import net.sf.jasperreports.engine.JRExporterParameter;
+// import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRRtfExporter;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
+import net.sf.jasperreports.export.SimpleWriterExporterOutput;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
-import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+// import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.engine.export.JRTextExporter;
-import net.sf.jasperreports.engine.export.JRTextExporterParameter;
-import net.sf.jasperreports.engine.export.JRHtmlExporter;
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
+import net.sf.jasperreports.export.SimpleTextReportConfiguration;
+// import net.sf.jasperreports.engine.export.JRTextExporterParameter;
+import net.sf.jasperreports.export.TextReportConfiguration;
+import net.sf.jasperreports.engine.export.HtmlExporter;
+// import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
+import net.sf.jasperreports.export.SimpleHtmlExporterConfiguration;
+import net.sf.jasperreports.export.SimpleHtmlReportConfiguration;
+import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
 import net.sf.jasperreports.engine.export.oasis.JROdtExporter;
 import net.sf.jasperreports.engine.export.oasis.JROdsExporter;
 
@@ -83,7 +92,7 @@ import java.util.Locale;
 
 
 
-public class JasperServer { 
+public class JasperServer {
     /* Compiles the given .jrxml (inputFile) */
     public Boolean compile( String jrxmlPath ) throws java.lang.Exception {
         File jrxmlFile;
@@ -136,7 +145,7 @@ public class JasperServer {
         // Ensure report is compiled
         compile( jrxmlPath );
 
-        report = (JasperReport) JRLoader.loadObject( jasperPath( jrxmlPath ) );
+        report = (JasperReport) JRLoader.loadObjectFromFile( jasperPath( jrxmlPath ) );
 
         // Add SUBREPORT_DIR parameter
         index = jrxmlPath.lastIndexOf('/');
@@ -149,13 +158,13 @@ public class JasperServer {
         // Fill in report parameters
         JRParameter[] reportParameters = report.getParameters();
         for( int j=0; j < reportParameters.length; j++ ){
-            JRParameter jparam = reportParameters[j];    
+            JRParameter jparam = reportParameters[j];
             if ( jparam.getValueClassName().equals( "java.util.Locale" ) ) {
                 // REPORT_LOCALE
                 if ( ! parameters.containsKey( jparam.getName() ) )
                     continue;
                 String[] locales = ((String)parameters.get( jparam.getName() )).split( "_" );
-                
+
                 Locale locale;
                 if ( locales.length == 1 )
                     locale = new Locale( locales[0] );
@@ -166,7 +175,7 @@ public class JasperServer {
 
                 // Initialize translation system
                 // SQL reports will need to declare the TRANSLATOR paramter for translations to work.
-                // CSV/XML based ones will not need that because we will integrate the translator 
+                // CSV/XML based ones will not need that because we will integrate the translator
                 // with the CsvMultiLanguageDataSource.
                 translator = new Translator( bundlePath(jrxmlPath), locale );
                 parameters.put( "TRANSLATOR", translator );
@@ -237,47 +246,76 @@ public class JasperServer {
 
         System.out.println( "JasperServer: Exporting..." );
         if ( output.equalsIgnoreCase( "html" ) ) {
-            exporter = new JRHtmlExporter();
-            exporter.setParameter(JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN, Boolean.FALSE);
-            exporter.setParameter(JRHtmlExporterParameter.HTML_HEADER, "");
-            exporter.setParameter(JRHtmlExporterParameter.BETWEEN_PAGES_HTML, "");
-            exporter.setParameter(JRHtmlExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
-            exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER, "");
+            // exporter.setParameter(JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN, Boolean.FALSE);
+            // exporter.setParameter(JRHtmlExporterParameter.HTML_HEADER, "");
+            // exporter.setParameter(JRHtmlExporterParameter.BETWEEN_PAGES_HTML, "");
+            // exporter.setParameter(JRHtmlExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
+            // exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER, "");
+            exporter = new HtmlExporter();
+            SimpleHtmlExporterConfiguration configuration = new SimpleHtmlExporterConfiguration();
+            configuration.setHtmlHeader("");
+            configuration.setBetweenPagesHtml("");
+            configuration.setHtmlFooter("");
+            SimpleHtmlReportConfiguration reportExportConfiguration = new SimpleHtmlReportConfiguration();
+            reportExportConfiguration.setRemoveEmptySpaceBetweenRows(true);
+            exporter.setConfiguration(reportExportConfiguration);
+            exporter.setConfiguration(configuration);
+            exporter.setExporterOutput(new SimpleHtmlExporterOutput(outputFile));
         } else if ( output.equalsIgnoreCase( "csv" ) ) {
             exporter = new JRCsvExporter();
+            exporter.setExporterOutput(new SimpleWriterExporterOutput(outputFile));
         } else if ( output.equalsIgnoreCase( "xls" ) ) {
+            // exporter = new JRXlsExporter();
+            // exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
+            // exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_COLUMNS,Boolean.TRUE);
+            // exporter.setParameter(JRXlsExporterParameter.MAXIMUM_ROWS_PER_SHEET, new Integer(65000));
+            // exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE, Boolean.TRUE);
             exporter = new JRXlsExporter();
-            exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
-            exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_COLUMNS,Boolean.TRUE);
-            exporter.setParameter(JRXlsExporterParameter.MAXIMUM_ROWS_PER_SHEET, new Integer(65000));
-            exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE, Boolean.TRUE);
+            SimpleXlsReportConfiguration configuration = new SimpleXlsReportConfiguration();
+            configuration.setRemoveEmptySpaceBetweenRows(true);
+            configuration.setRemoveEmptySpaceBetweenColumns(true);
+            configuration.setMaxRowsPerSheet(new Integer(65000));
+            configuration.setDetectCellType(true);
+            exporter.setConfiguration(configuration);
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFile));
         } else if ( output.equalsIgnoreCase( "rtf" ) ) {
             exporter = new JRRtfExporter();
+            exporter.setExporterOutput(new SimpleWriterExporterOutput(outputFile));
         } else if ( output.equalsIgnoreCase( "odt" ) ) {
             exporter = new JROdtExporter();
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFile));
         } else if ( output.equalsIgnoreCase( "ods" ) ) {
             exporter = new JROdsExporter();
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFile));
         } else if ( output.equalsIgnoreCase( "txt" ) ) {
+            // exporter.setParameter(TextReportConfiguration.getPageWidthInChars(), new Integer(80));
+            // exporter.setParameter(TextReportConfiguration.getPageHeightInChars(), new Integer(150));
             exporter = new JRTextExporter();
-            exporter.setParameter(JRTextExporterParameter.PAGE_WIDTH, new Integer(80));
-            exporter.setParameter(JRTextExporterParameter.PAGE_HEIGHT, new Integer(150));
+            SimpleTextReportConfiguration configuration = new SimpleTextReportConfiguration();
+            configuration.setPageWidthInChars(new Integer(80));
+            configuration.setPageHeightInChars(new Integer(150));
+            exporter.setConfiguration(configuration);
+            exporter.setExporterOutput(new SimpleWriterExporterOutput(outputFile));
         } else {
             exporter = new JRPdfExporter();
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFile));
         }
-        exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-        exporter.setParameter(JRExporterParameter.OUTPUT_FILE, outputFile);
+        // exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+        // exporter.setParameter(JRExporterParameter.OUTPUT_FILE, outputFile);
+        exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+
         exporter.exportReport();
         System.out.println( "JasperServer: Exported." );
-        return jasperPrint.getPages().size(); 
+        return jasperPrint.getPages().size();
     }
 
-    public static Connection getConnection( Hashtable datasource ) throws java.lang.ClassNotFoundException, java.sql.SQLException { 
-        Connection connection; 
-        Class.forName("org.postgresql.Driver"); 
-        connection = DriverManager.getConnection( (String)datasource.get("dsn"), (String)datasource.get("user"), 
-        (String)datasource.get("password") ); 
-        connection.setAutoCommit(true); 
-        return connection; 
+    public static Connection getConnection( Hashtable datasource ) throws java.lang.ClassNotFoundException, java.sql.SQLException {
+        Connection connection;
+        Class.forName("org.postgresql.Driver");
+        connection = DriverManager.getConnection( (String)datasource.get("dsn"), (String)datasource.get("user"),
+        (String)datasource.get("password") );
+        connection.setAutoCommit(true);
+        return connection;
     }
 
     public static void main (String [] args) {
