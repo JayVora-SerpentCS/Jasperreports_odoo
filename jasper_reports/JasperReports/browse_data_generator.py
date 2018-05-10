@@ -35,7 +35,6 @@
 
 import os
 import csv
-import copy
 import base64
 from xml.dom.minidom import getDOMImplementation
 import tempfile
@@ -88,8 +87,7 @@ class BrowseDataGenerator(AbstractDataGenerator):
             if model._fields[field].type == 'selection' and \
                     model._fields[field].selection:
                 field_data = model.with_context(context).fields_get(
-                                              allfields=[field],
-                                              )
+                                              allfields=[field])
                 values[language] = dict(field_data[field]['selection']).get(
                     values[language][0], values[language][0])
 
