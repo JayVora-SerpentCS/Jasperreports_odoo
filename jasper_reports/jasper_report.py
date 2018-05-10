@@ -35,6 +35,7 @@ import tempfile
 import logging
 import os
 import time
+import json
 
 from odoo import tools
 from .JasperReports.browse_data_generator import CsvBrowseDataGenerator
@@ -255,8 +256,7 @@ class Report:
             'IDS': self.ids,
         }
         if 'parameters' in self.data:
-            parameters.update(self.data['parameters'])
-
+            parameters.update(json.loads(self.data.get('parameters')))
         server = JasperServer(int(tools.config['jasperport']))
         # server.setPidFile(tools.config['jasperpid'])
         #        java path for jasper server
