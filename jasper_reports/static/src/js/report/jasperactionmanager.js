@@ -8,6 +8,10 @@ odoo.define('report_xml.report', function(require) {
     ActionManager.include({
         ir_actions_report: function(action, options) {
             var self = this;
+            var parameters = '';
+            if(action.data){
+                var parameters = action.data.parameters
+            }
             var cloned_action = _.clone(action);
             if (cloned_action.report_type === 'jasper') {
                 framework.blockUI();
@@ -21,9 +25,10 @@ odoo.define('report_xml.report', function(require) {
                 self.getSession().get_file({
                     url: report_jasper_url,
                     data: {
+                        parameters: JSON.stringify(parameters),
                         data: JSON.stringify([
                             report_jasper_url,
-                            cloned_action.report_type
+                            cloned_action.report_type,
                         ])
                     },
                     error: crash_manager.rpc_error.bind(crash_manager),
