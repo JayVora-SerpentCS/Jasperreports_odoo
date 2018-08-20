@@ -338,7 +338,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
         with open(file_name, 'w') as csvfile:
             fieldnames = self.report.field_names + ['']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
+            # writer.writeheader() #header should only printed from jrxml file.
             header = {}
             for field in self.report.field_names + ['']:
                 header[field] = field
