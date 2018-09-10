@@ -198,7 +198,12 @@ class ReportXml(models.Model):
             "'", "(", ")", ",", "/", "*", "-", "+", "?", "¿", "!",
             "&", "$", "[", "]", "{", "}", "@", "#", "`", "^", ":",
             ";", "<", ">", "=", "~", "%", "\\"]
+        num_char_dict = {
+            '1': 'One', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five',
+            '6': 'Six', '7': 'Seven', '8': 'Eight', '9': 'Nine', '0': 'Zero'}
         if isinstance(text, str):
+            if text[0] in num_char_dict:
+                text = text.replace(text[0], num_char_dict.get(text[0]))
             for src in src_chars_list:
                 text = text.replace(src, "_")
         return text
