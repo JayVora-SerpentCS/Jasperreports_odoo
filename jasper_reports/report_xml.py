@@ -200,6 +200,11 @@ class ReportXml(models.Model):
             output = output.replace(src_chars[c], dst_chars[c])
         output = unicodedata.normalize('NFKD', output).encode('ASCII',
                                                               'ignore')
+        num_char_dict = {
+            '1': 'One', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five',
+            '6': 'Six', '7': 'Seven', '8': 'Eight', '9': 'Nine', '0': 'Zero'}
+        if output[0] in num_char_dict:
+            output = output.replace(output[0], num_char_dict.get(output[0]))
         return output.strip('_').encode('utf-8')
 
     @api.model
