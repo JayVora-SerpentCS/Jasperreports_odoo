@@ -40,4 +40,5 @@
     "category": "Generic Modules/Jasper Reports",
     "active": True,
     "installable": True,
+    "license": "AGPL-3",
 }
