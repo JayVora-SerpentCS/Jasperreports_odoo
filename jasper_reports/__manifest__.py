@@ -38,8 +38,7 @@
     This module integrates Jasper Reports with Odoo. V6 and v7 compatible"
     version was made by NaN-tic.
     Serpent Consulting Services Pvt. Ltd. has migrated it to v11. ''',
-    "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd., \
-    Odoo Community Association (OCA)",
+    "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd.",
     "website": "http://www.nan-tic.com, http://www.serpentcs.com",
     'images': [
         'images/jasper_reports-hover.png',
