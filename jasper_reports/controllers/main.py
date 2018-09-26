@@ -26,11 +26,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 ##############################################################################
+import json
 
 from odoo.addons.web.controllers import main as report
 from odoo.http import route, request
-
-import json
 
 
 class ReportController(report.ReportController):
@@ -38,9 +37,7 @@ class ReportController(report.ReportController):
     def report_routes(self, reportname, docids=None, converter=None, **data):
         if converter == 'jasper':
             report_jas = request.env[
-                'ir.actions.report'
-                ]._get_report_from_name(
-                reportname)
+                'ir.actions.report']._get_report_from_name(reportname)
             context = dict(request.env.context)
             if docids:
                 docids = [int(i) for i in docids.split(',')]

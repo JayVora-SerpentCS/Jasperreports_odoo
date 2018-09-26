@@ -31,15 +31,20 @@
 #
 ##############################################################################
 
-import os
 import base64
+import io
+import logging
+import os
+import time
 from xml.dom.minidom import getDOMImplementation
 
-from odoo.exceptions import UserError
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError, AccessError
+from odoo.tools.safe_eval import safe_eval
 
 from . jasper_report import Report
 
+_logger = logging.getLogger(__name__)
 
 src_chars = """ '"()/*-+?¿!&$[]{}@#`'^:;<>=~%,\\"""
 src_chars = str.encode(src_chars, 'iso-8859-1')
@@ -98,9 +103,70 @@ class ReportXml(models.Model):
     jasper_report = fields.Boolean('Is Jasper Report?')
     report_type = fields.Selection(selection_add=[("jasper", "Jasper")])
 
+    @api.multi
+    def retrieve_jasper_attachment(self, record):
+        '''Retrieve an attachment for a specific record.
+
+        :param record: The record owning of the attachment.
+        :param attachment_name: The optional name of the attachment.
+        :return: A recordset of length <=1 or None
+        '''
+        if self.attachment:
+            attachment_name = safe_eval(
+                self.attachment, {'object': record, 'time': time})
+        else:
+            attachment_name = str(self.name) + '.' + self.jasper_output
+        return self.env['ir.attachment'].search([
+            ('datas_fname', '=', attachment_name),
+            ('res_model', '=', self.model),
+            ('res_id', '=', record.id)
+        ], limit=1)
+
+    @api.multi
+    def postprocess_jasper_report(self, record, buffer):
+        '''Hook to handle post processing during the jasper report generation.
+        The basic behavior consists to create a new attachment containing the
+        jasper base64 encoded.
+
+        :param record_id: The record that will own the attachment.
+        :param pdf_content: The optional name content of the file to avoid
+                            reading both times.
+        :return: The newly generated attachment if no AccessError, else None.
+        '''
+        if self.attachment:
+            attachment_name = safe_eval(
+                self.attachment, {'object': record, 'time': time})
+        else:
+            attachment_name = str(self.name) + '.' + self.jasper_output
+        attachment_vals = {
+            'name': attachment_name,
+            'datas': base64.encodestring(buffer.getvalue()),
+            'datas_fname': attachment_name,
+            'res_model': self.model,
+            'res_id': record.id,
+        }
+        attachment = None
+        try:
+            attachment = self.env['ir.attachment'].create(attachment_vals)
+        except AccessError:
+            _logger.info(
+                "Cannot save %s report %r as attachment",
+                self.jasper_output, attachment_vals['name'])
+        else:
+            _logger.info('The %s document %s is now saved in the database',
+                         self.jasper_output, attachment_vals['name'])
+        return attachment
+
     @api.model
     def render_jasper(self, docids, data):
         cr, uid, context = self.env.args
+        doc_record = self.jasper_model_id.browse(docids)
+        if self.attachment_use:
+            save_in_attachment = {}
+            attachment_id = self.retrieve_jasper_attachment(doc_record)
+            if attachment_id:
+                save_in_attachment[doc_record.id] = attachment_id
+                return self._post_pdf(save_in_attachment)
         report_model_name = 'report.%s' % self.report_name
         self.env.cr.execute('SELECT id, model FROM '
                             'ir_act_report_xml WHERE '
@@ -112,7 +178,12 @@ class ReportXml(models.Model):
             raise UserError(_('%s model was not found' % report_model_name))
         data.update({'env': self.env, 'model': record.get('model')})
         r = Report(report_model_name, cr, uid, docids, data, context)
-        return r.execute()
+        jasper = r.execute()
+        if self.attachment_use:
+            jasper_content_stream = io.BytesIO(jasper)
+            self.postprocess_jasper_report(
+                doc_record, jasper_content_stream)
+        return jasper
 
     @api.model
     def _get_report_from_name(self, report_name):
