@@ -51,8 +51,8 @@ Demo reports can be founded in jasper_reports/demo folder.
 
 
 
-If you are using workers, do use the jasper_load module and mention the module among the Server Wise load modules.
-i.e.: load=web,jasper_load
+**If you are using workers, do use the jasper_load module and mention the module among the Server Wise load modules.
+i.e.: load=web,jasper_load**
 
 Help us do better by donating to us and motivating us : http://www.serpentcs.com/page/donate-to-serpentcs
 Thanks.

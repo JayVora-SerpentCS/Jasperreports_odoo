@@ -42,11 +42,11 @@ def gevent_server_init(self, app):
     """"To overwrite the openerp gevent server __init__ method and changed
     xmlrpc port no instead of the longpolling port  """
 
-    self.port = Config['xmlrpc_port']
+    self.port = Config['http_port']
     self.httpd = None
     self.app = app
     # config
-    self.interface = Config['xmlrpc_interface'] or '0.0.0.0'
+    self.interface = Config['http_interface'] or '0.0.0.0'
     # runtime
     self.pid = os.getpid()
 
@@ -58,8 +58,8 @@ def prefork_server_init(self, app):
     """"To overwrite the openerp prefork server __init__ method and changed
     longpolling port no instead of the xmlrpc port  """
 
-    self.address = Config['xmlrpc'] and \
-        (Config['xmlrpc_interface'] or '0.0.0.0', Config['longpolling_port'])
+    self.address = Config['http_enable'] and \
+        (Config['http_interface'] or '0.0.0.0', Config['longpolling_port'])
     self.population = Config['workers']
     self.timeout = Config['limit_time_real']
     self.limit_request = Config['limit_request']
