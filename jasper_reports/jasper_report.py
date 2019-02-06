@@ -36,6 +36,7 @@ import logging
 import os
 import time
 import json
+import base64
 
 from odoo import tools
 from .JasperReports.browse_data_generator import CsvBrowseDataGenerator
@@ -89,19 +90,42 @@ class Report:
         # As the previous record is not removed, we end up with two records
         # named 'purchase.order' so we need to destinguish
         # between the two by searching '.jrxml' in report_rml.
+
         rep_xml_set = self.env['ir.actions.report'].search(
             [('report_name', '=', self.name[7:]),
              ('report_file', 'ilike', '.jrxml')])
-        data = rep_xml_set and rep_xml_set[0]
+        report = rep_xml_set and rep_xml_set[0]
 
-        if data['jasper_output']:
-            self.output_format = data['jasper_output']
+        if report.jasper_output:
+            self.outputFormat = report.jasper_output
 
-        self.report_path = data['report_file']
-        self.report_path = os.path.join(self.addons_path(), self.report_path)
+        main_report = report.jasper_file_ids.filtered(lambda x: x.default)
+        main_report_path = os.path.join(self.path(), 'custom_reports',
+                                        main_report.filename)
+        self.report_path = main_report_path
 
-        if not os.path.lexists(self.report_path):
-            self.report_path = self.addons_path(path=data['report_file'])
+        # If the requested report does not exist in 'custom_reports'
+        # we rewrite the file from the data stored in the Database.
+
+        # Skip rewriting the jrxml file if it exists
+        if not os.path.isfile(main_report_path):
+            logger.info("Writing File: '%s'" % main_report_path)
+            main_report_data = base64.b64decode(main_report.file)
+            main_report_file = open(main_report_path, 'w')
+            main_report_file.write(main_report_data.decode())
+            main_report_file.close()
+
+        subreports = report.jasper_file_ids.filtered(lambda x: not x.default)
+        for subreport in subreports:
+            subreport_path = os.path.join(self.path(), 'custom_reports',
+                                          subreport.filename)
+            # Skip rewriting the jrxml files if they exists
+            if not os.path.isfile(subreport_path):
+                logger.info("Writing File: '%s'" % subreport_path)
+                subreport_data = base64.b64decode(subreport.file)
+                subreport_file = open(subreport_path, 'w')
+                subreport_file.write(subreport_data.decode())
+                subreport_file.close()
 
         # Get report information from the jrxml file
         logger.info("Requested report: '%s'" % self.report_path)
