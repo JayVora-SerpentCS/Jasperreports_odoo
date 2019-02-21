@@ -97,7 +97,7 @@ class Report:
         report = rep_xml_set and rep_xml_set[0]
 
         if report.jasper_output:
-            self.outputFormat = report.jasper_output
+            self.output_format = report.jasper_output
 
         main_report = report.jasper_file_ids.filtered(lambda x: x.default)
         main_report_path = os.path.join(self.path(), 'custom_reports',
