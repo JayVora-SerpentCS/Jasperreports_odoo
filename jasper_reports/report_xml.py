@@ -91,7 +91,8 @@ class ReportXml(models.Model):
     _inherit = 'ir.actions.report'
 
     jasper_output = fields.Selection([('html', 'HTML'), ('csv', 'CSV'),
-                                      ('xls', 'XLS'), ('rtf', 'RTF'),
+                                      ('xls', 'XLS'), ('xlsx', 'XLSX'),
+                                      ('rtf', 'RTF'),
                                       ('odt', 'ODT'), ('ods', 'ODS'),
                                       ('txt', 'Text'), ('pdf', 'PDF')],
                                      'Jasper Output', default='pdf')
