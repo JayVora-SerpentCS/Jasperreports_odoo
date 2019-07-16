@@ -61,6 +61,7 @@ class ReportController(report.ReportController):
                 'html': 'text/html',
                 'csv': 'text/csv',
                 'xls': 'application/xls',
+                'xlsx': 'application/xlsx',
                 'rtf': 'application/octet-stream',
                 'odt': 'application/vnd.oasis.opendocument.text',
                 'ods': 'application/vnd.oasis.opendocument.spreadsheet',

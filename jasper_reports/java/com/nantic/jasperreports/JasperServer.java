@@ -56,6 +56,10 @@ import net.sf.jasperreports.engine.export.JRRtfExporter;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
 import net.sf.jasperreports.export.SimpleWriterExporterOutput;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
+
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
+
 // import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
@@ -275,6 +279,15 @@ public class JasperServer {
             configuration.setRemoveEmptySpaceBetweenRows(true);
             configuration.setRemoveEmptySpaceBetweenColumns(true);
             configuration.setMaxRowsPerSheet(new Integer(65000));
+            configuration.setDetectCellType(true);
+            exporter.setConfiguration(configuration);
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFile));
+        } else if ( output.equalsIgnoreCase( "xlsx" ) ) {
+            exporter = new JRXlsxExporter();
+            SimpleXlsxReportConfiguration configuration = new SimpleXlsxReportConfiguration();
+            configuration.setRemoveEmptySpaceBetweenRows(true);
+            configuration.setRemoveEmptySpaceBetweenColumns(true);
+            configuration.setMaxRowsPerSheet(new Integer(1000000));
             configuration.setDetectCellType(true);
             exporter.setConfiguration(configuration);
             exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFile));
