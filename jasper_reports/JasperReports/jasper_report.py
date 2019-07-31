@@ -177,7 +177,10 @@ class JasperReport:
             data_source_expression = tag.findtext(text1 % ns, '')
 
             if not data_source_expression:
-                continue
+                text2 = '{%s}connectionExpression'
+                data_source_expression = tag.findtext(text2 % ns, '')
+                if not data_source_expression:
+                    continue
 
             data_source_expression = data_source_expression.strip()
             m = DATA_SOURCE_EXPRESSION_REG_EXP.match(data_source_expression)
