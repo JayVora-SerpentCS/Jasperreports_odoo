@@ -5,7 +5,7 @@
 #                         Pexego Sistemas Informáticos http://www.pexego.es
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
-# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -38,6 +38,6 @@ class ResCompany(models.Model):
 
     _inherit = 'res.company'
 
-    java_path = fields.Char('Java Path',
-                            help="Your java path which was downloaded "
-                                 "from http://www.serpentcs.com/")
+    java_path = fields.Char(
+        help="Your java path which was downloaded "
+        "from http://www.serpentcs.com/")

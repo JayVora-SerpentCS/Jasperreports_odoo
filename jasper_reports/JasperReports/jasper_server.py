@@ -5,7 +5,7 @@
 #                         http://www.NaN-tic.com
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
-# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -63,7 +63,7 @@ class JasperServer:
         java_path = self.javapath
         if java_path is False:
             raise UserError(_('Java Path Not Found !\n'
-                            'Please add java path into the jasper '
+                              'Please add java path into the jasper '
                               'configuration page under the company form '
                               'view'))
         else:
@@ -72,7 +72,7 @@ class JasperServer:
                 self.javapath = java_path
             else:
                 raise UserError(_('libraries Not Found !\n'
-                                'There is No libraries found in Java'))
+                                  'No libraries found in Java'))
 
         env = {}
         env.update(os.environ)
@@ -82,8 +82,8 @@ class JasperServer:
             a = ':'
         libs = os.path.join(self.path(), '..', 'java', 'lib', '*.jar')
         env['CLASSPATH'] = os.path.join(self.path(), '..', 'java' + a) + \
-            a.join(glob.glob(libs)) + a + os.path.join(self.path(),
-                                                       '..', 'custom_reports')
+            a.join(glob.glob(libs)) + a + os.path.join(
+                self.path(), '..', 'custom_reports')
 
         cwd = os.path.join(self.path(), '..', 'java')
 
@@ -92,6 +92,11 @@ class JasperServer:
         # would start throwing exceptions. So we better avoid
         # using the session at all.
         command = ['java', '-Djava.awt.headless=true',
+                   '-XX:MaxHeapSize=512m',
+                   '-XX:InitialHeapSize=512m',
+                   '-XX:CompressedClassSpaceSize=64m',
+                   '-XX:MaxMetaspaceSize=128m',
+                   '-XX:+UseConcMarkSweepGC',
                    'com.nantic.jasperreports.JasperServer',
                    str(self.port)]
         process = subprocess.Popen(command, env=env, cwd=cwd)
@@ -116,6 +121,6 @@ class JasperServer:
                     self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
                     pass
                 except xmlrpclib.Fault as e:
-                    raise UserError(_('Report Error\n%s' % e))
+                    raise UserError(_('Report Error\n%s') % e)
         except xmlrpclib.Fault as e:
-            raise UserError(_('Report Error\n%s' % e))
+            raise UserError(_('Report Error\n%s') % e)

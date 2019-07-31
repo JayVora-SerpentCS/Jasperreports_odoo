@@ -27,7 +27,8 @@ class TestJasperReport(TransactionCase):
         self.report_data = self.JasperReport.create({
             'name': 'Jasper Test Report',
             'model': 'res.users',
-            'jasper_model_id': self.users_model and
+            'attachment_use': True,
+            'model_id': self.users_model and
             self.users_model.id or False,
             'jasper_output': 'pdf',
             'report_name': 'res_users_jasper',
@@ -45,7 +46,7 @@ class TestJasperReport(TransactionCase):
         report_object = self.env['ir.actions.report']
         report_name = self.report_data.report_name
         report = report_object._get_report_from_name(report_name)
-        docs = self.env['res.users'].search([])
+        docs = self.env['res.users'].search([], limit=1)
         self.assertEqual(report.report_type, 'qweb-pdf')
         # We are giving travis postgres cradentials for
         # db connectivity in order to make sure that test case

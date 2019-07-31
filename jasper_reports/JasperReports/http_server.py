@@ -5,7 +5,7 @@
 #                         http://www.NaN-tic.com
 # Copyright (c) 2012 Omar Castiñeira Saavedra <omar@pexego.es>
 #                         Pexego Sistemas Informáticos http://www.pexego.es
-# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -70,29 +70,28 @@ class JasperHandler(BaseHTTPRequestHandler):
             arguments[argument[0]] = argument[-1]
 
         use_cache = tools.config.get('jasper_cache', True)
-        database = arguments.get('database',
-                                 tools.config.get('jasper_database',
-                                                  'stable8'))
+        database = arguments.get(
+            'database', tools.config.get('jasper_database', 'stable8'))
         user = arguments.get('user', tools.config.get('jasper_user', 'admin'))
-        password = arguments.get('password',
-                                 tools.config.get('jasper_password', 'a'))
-        depth = int(arguments.get('depth', tools.config.get('jasper_depth',
-                                                            3)))
-        language = arguments.get('language',
-                                 tools.config.get('jasper_language', 'en'))
+        password = arguments.get(
+            'password', tools.config.get('jasper_password', 'a'))
+        depth = int(arguments.get('depth', tools.config.get(
+            'jasper_depth', 3)))
+        language = arguments.get(
+            'language', tools.config.get('jasper_language', 'en'))
         # Check if data is in cache already
         key = '%s|%s|%s|%s|%s' % (model, database, user, depth, language)
         if key in self.cache:
             return self.cache[key]
 
         context = {'lang': language}
-        uid = netsvc.dispatch_rpc('common', 'login', (database, user,
-                                                      password))
-        result = netsvc.dispatch_rpc('object',
-                                     'execute',
-                                     (database, uid, password,
-                                      'ir.actions.report',
-                                      'create_xml', model, depth, context))
+        uid = netsvc.dispatch_rpc(
+            'common', 'login', (database, user, password))
+        result = netsvc.dispatch_rpc(
+            'object', 'execute',
+            (database, uid, password,
+             'ir.actions.report',
+             'create_xml', model, depth, context))
 
         if use_cache:
             self.cache[key] = result

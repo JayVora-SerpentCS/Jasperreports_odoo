@@ -5,7 +5,7 @@
 #                         http://www.NaN-tic.com
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
-# Copyright (C) 2014-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -33,11 +33,8 @@
 
 {
     "name": "Jasper Reports",
-    "version": "11.0.0.1.1",
-    "summary": '''
-    This module integrates Jasper Reports with Odoo. V6 and v7 compatible"
-    version was made by NaN-tic.
-    Serpent Consulting Services Pvt. Ltd. has migrated it to v11. ''',
+    "version": "12.0.0.1.1",
+    "summary": '''This module integrates Jasper Reports with Odoo.''',
     "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd.",
     "website": "http://www.nan-tic.com, http://www.serpentcs.com",
     'images': [
@@ -49,17 +46,16 @@
     ],
     "category": "Generic Modules/Jasper Reports",
     "demo": [
-        #         'jasper_demo.xml',
+        'demo/jasper_report_demo.xml',
     ],
     "data": [
-        'views/webclient_templates.xml',
-        'jasper_report_menu.xml',
-        'wizard/jasper_create_data_template.xml',
-        'jasper_wizard.xml',
-        'report_xml_view.xml',
         'security/ir.model.access.csv',
         'data/jasper_data.xml',
-        'res_company_view.xml',
+        'wizard/jasper_create_data_template.xml',
+        'views/webclient_templates.xml',
+        'views/jasper_report_menu.xml',
+        'views/report_xml_view.xml',
+        'views/res_company_view.xml',
     ],
     "installable": True,
     "application": True,

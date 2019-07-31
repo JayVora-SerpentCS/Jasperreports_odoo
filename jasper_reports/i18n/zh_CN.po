@@ -161,7 +161,7 @@ msgid "PDF"
 msgstr "PDF"
 
 #. module: jasper_reports
-#: field:ir.actions.report.xml,jasper_model_id:0
+#: field:ir.actions.report.xml,model_id:0
 #: wizard_field:jasper_create_data_template,create,model:0
 #: wizard_field:jasper_create_data_template,init,model:0
 msgid "Model"
@@ -201,8 +201,8 @@ msgstr "接受"
 
 #. module: jasper_reports
 #: model:ir.module.module,description:jasper_reports.module_meta_information
-msgid "This module integrates Jasper Reports with OpenERP."
-msgstr "本模块将继承 Jasper 报表到 OpenERP 系统中。"
+msgid "This module integrates Jasper Reports with Odoo."
+msgstr "本模块将继承 Jasper 报表到 Odoo 系统中。"
 
 #. module: jasper_reports
 #: field:ir.actions.report.xml.file,file:0

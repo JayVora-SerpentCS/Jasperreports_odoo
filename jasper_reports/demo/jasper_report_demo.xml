@@ -10,7 +10,7 @@
         <field name="attachment_use">False</field>
         <field name="report_name">Jasper User Report</field>
         <field name="jasper_report">True</field>
-        <field name="jasper_model_id" ref="base.model_res_users"/>
+        <field name="model_id" ref="base.model_res_users"/>
         <field name="binding_model_id" ref="base.model_res_users"/>
         <field name="binding_type">report</field>
     </record>
@@ -32,7 +32,7 @@
         <field name="attachment_use">False</field>
         <field name="report_name">Jasper Sales Report</field>
         <field name="jasper_report">True</field>
-        <field name="jasper_model_id" ref="sale.model_sale_order"/>
+        <field name="model_id" ref="sale.model_sale_order"/>
         <field name="binding_model_id" ref="sale.model_sale_order"/>
         <field name="binding_type">report</field>
     </record>

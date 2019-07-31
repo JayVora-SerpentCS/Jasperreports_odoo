@@ -125,7 +125,7 @@ public class JasperServer {
         return bundlePath( jrxmlPath ) + ".jasper";
     }
 
-    public int execute( Hashtable connectionParameters, String jrxmlPath, String outputPath, Hashtable parameters) throws java.lang.Exception {
+    public int execute( Hashtable connectionParameters, String jrxmlPath, String outputPath, Hashtable<String, Object> parameters) throws java.lang.Exception {
         try {
             return privateExecute( connectionParameters, jrxmlPath, outputPath, parameters );
         } catch (Exception exception) {
@@ -134,7 +134,7 @@ public class JasperServer {
         }
     }
 
-    public int privateExecute( Hashtable connectionParameters, String jrxmlPath, String outputPath, Hashtable parameters) throws java.lang.Exception {
+    public int privateExecute( Hashtable connectionParameters, String jrxmlPath, String outputPath, Hashtable<String, Object> parameters) throws java.lang.Exception {
 
         JasperReport report = null;
         byte[] result = null;
@@ -200,7 +200,7 @@ public class JasperServer {
                 CsvMultiLanguageDataSource dataSource = new CsvMultiLanguageDataSource( (String)m.get("dataFile"), "utf-8", translator );
                 System.out.println( "JasperServer: Adding parameter '" + ( (String)m.get("parameter") ) + "' with datasource '" + ( (String)m.get("dataFile") ) + "'" );
 
-                parameters.put( m.get("parameter"), dataSource );
+                parameters.put( (String)m.get("parameter"), dataSource );
             }
         }
 
@@ -274,7 +274,7 @@ public class JasperServer {
             SimpleXlsReportConfiguration configuration = new SimpleXlsReportConfiguration();
             configuration.setRemoveEmptySpaceBetweenRows(true);
             configuration.setRemoveEmptySpaceBetweenColumns(true);
-            configuration.setMaxRowsPerSheet(new Integer(65000));
+            configuration.setMaxRowsPerSheet(Integer.valueOf(65000));
             configuration.setDetectCellType(true);
             exporter.setConfiguration(configuration);
             exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFile));
@@ -292,8 +292,8 @@ public class JasperServer {
             // exporter.setParameter(TextReportConfiguration.getPageHeightInChars(), new Integer(150));
             exporter = new JRTextExporter();
             SimpleTextReportConfiguration configuration = new SimpleTextReportConfiguration();
-            configuration.setPageWidthInChars(new Integer(80));
-            configuration.setPageHeightInChars(new Integer(150));
+            configuration.setPageWidthInChars(Integer.valueOf(80));
+            configuration.setPageHeightInChars(Integer.valueOf(150));
             exporter.setConfiguration(configuration);
             exporter.setExporterOutput(new SimpleWriterExporterOutput(outputFile));
         } else {

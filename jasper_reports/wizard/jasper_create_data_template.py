@@ -5,7 +5,7 @@
 #                         Pexego Sistemas Informáticos http://www.pexego.es
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
-# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -32,38 +32,30 @@
 ##############################################################################
 
 import base64
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class CreateDataTemplate(models.TransientModel):
 
     _name = 'jasper.create.data.template'
-    _description = 'create data template'
+    _description = 'Create Data Template'
 
-    @api.multi
-    def action_create_xml(self):
-        for rec in self:
-            for data in rec.read([]):
-                model = self.env['ir.model'].browse(data['model'][0])
-                xml = self.env['ir.actions.report'].create_xml(
-                    model.model, data['depth'])
-                base64_str = base64.encodestring(
-                    ('%s' % (xml)).encode()).decode().replace('\n', '')
-                rec.write({
-                    'data': base64_str,
-                    'filename': str(rec.model.name) + '_template.xml'
-                })
-        return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'jasper.create.data.template',
-            'view_mode': 'form',
-            'view_type': 'form',
-            'res_id': rec.id,
-            'views': [(False, 'form')],
-            'target': 'new',
-        }
-
-    model = fields.Many2one('ir.model', 'Model', required=True)
-    depth = fields.Integer("Depth", required=True, default=1)
+    model_id = fields.Many2one('ir.model', required=True)
+    depth = fields.Integer(required=True, default=1)
     filename = fields.Char('File Name', size=32)
     data = fields.Binary('XML')
+
+    def action_create_xml(self):
+        report_obj = self.env['ir.actions.report']
+        for data_template in self:
+            xml = report_obj.create_xml(
+                data_template.model_id.model, data_template.depth)
+            base64_str = base64.encodestring(
+                ('%s' % (xml)).encode()).decode().replace('\n', '')
+            data_template.write({
+                'data': base64_str,
+                'filename': str(data_template.model_id.name) + '_template.xml'})
+            [action] = self.env.ref(
+                'jasper_reports.action_jasper_create_date_template').read()
+            action.update({'res_id': data_template.id})
+            return action
