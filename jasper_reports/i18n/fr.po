@@ -1,12 +1,12 @@
-# Translation of OpenERP Server.
+# Translation of Odoo Server.
 # This file contains the translation of the following modules:
 #	* jasper_reports
 #
 # Christophe CRIER <christophe.crier@heonium.com>, 2011.
 msgid ""
 msgstr ""
-"Project-Id-Version: OpenERP Server 6.0.3\n"
-"Report-Msgid-Bugs-To: support@openerp.com\n"
+"Project-Id-Version: Odoo Server 6.0.3\n"
+"Report-Msgid-Bugs-To: support@odoo.com\n"
 "POT-Creation-Date: 2010-06-27 14:39+0000\n"
 "PO-Revision-Date: 2012-04-19 08:53+0000\n"
 "Last-Translator: Florent (LSc) <Unknown>\n"
@@ -163,7 +163,7 @@ msgid "PDF"
 msgstr "PDF"
 
 #. module: jasper_reports
-#: field:ir.actions.report.xml,jasper_model_id:0
+#: field:ir.actions.report.xml,model_id:0
 #: wizard_field:jasper_create_data_template,create,model:0
 #: wizard_field:jasper_create_data_template,init,model:0
 msgid "Model"
@@ -203,8 +203,8 @@ msgstr "Accepter"
 
 #. module: jasper_reports
 #: model:ir.module.module,description:jasper_reports.module_meta_information
-msgid "This module integrates Jasper Reports with OpenERP."
-msgstr "Ce module intégre Jasper Reports avec OpenERP"
+msgid "This module integrates Jasper Reports with Odoo."
+msgstr "Ce module intégre Jasper Reports avec Odoo"
 
 #. module: jasper_reports
 #: field:ir.actions.report.xml.file,file:0

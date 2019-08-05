@@ -4,7 +4,7 @@
 #                         http://www.NaN-tic.com
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
-# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -31,18 +31,15 @@
 ##############################################################################
 
 from . import controllers
-from . import res_company
-from . import jasper_report
-from . import report_xml
+from . import models
 from . import wizard
-from . import websrv_lib
 
 try:
     import release
     if release.major_version != '5.0':
-        from . import http_server
+        from .JasperReports import http_server
 except ImportError:
     import odoo
     from odoo import release
     if release.major_version != '5.0':
-        from . import http_server
+        from .JasperReports import http_server

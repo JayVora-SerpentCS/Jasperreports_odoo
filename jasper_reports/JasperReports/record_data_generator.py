@@ -3,7 +3,7 @@
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
 #                         http://www.NaN-tic.com
-# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -52,8 +52,8 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
             field_names = self.report.field_names
             # JasperReports CSV reader requires an extra colon
             # at the end of the line.
-            writer = csv.DictWriter(f, field_names + [''], delimiter=',',
-                                    quotechar='"')
+            writer = csv.DictWriter(
+                f, field_names + [''], delimiter=',', quotechar='"')
             header = {}
 
             for field in field_names + ['']:
@@ -96,8 +96,8 @@ class XmlRecordDataGenerator(AbstractDataGenerator):
     def generate(self, file_name):
 
         # Once all records have been calculated, create the XML structure
-        self.document = getDOMImplementation().createDocument(None, 'data',
-                                                              None)
+        self.document = getDOMImplementation().createDocument(
+            None, 'data', None)
         top_node = self.document.documentElement
 
         for record in self.data['records']:

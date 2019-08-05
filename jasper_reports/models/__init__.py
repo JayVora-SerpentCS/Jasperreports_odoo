@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
+# Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
+#                         http://www.NaN-tic.com
+# Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
+#                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
 # Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
@@ -27,4 +31,5 @@
 #
 ##############################################################################
 
-from . import main
+from . import report_xml
+from . import res_company

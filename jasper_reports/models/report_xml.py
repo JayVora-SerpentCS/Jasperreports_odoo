@@ -5,7 +5,7 @@
 #                         http://www.NaN-tic.com
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
-# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -42,7 +42,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import UserError, AccessError
 from odoo.tools.safe_eval import safe_eval
 
-from . jasper_report import Report
+from ..JasperReports.jasper_report_config import Report
 
 _logger = logging.getLogger(__name__)
 
@@ -54,31 +54,26 @@ dst_chars = str.encode(dst_chars, 'iso-8859-1')
 
 class ReportXmlFile(models.Model):
     _name = 'ir.actions.report.xml.file'
+    _description = 'Jasper Report File'
 
-    file = fields.Binary('File', required=True,
-                         filters="*.jrxml,*.properties,*.ttf", )
+    file = fields.Binary(required=True)
     filename = fields.Char('File Name')
-    report_id = fields.Many2one('ir.actions.report', 'Report',
-                                ondelete='cascade')
-    default = fields.Boolean('Default', default=True)
+    report_id = fields.Many2one(
+        'ir.actions.report', 'Report', ondelete='cascade')
+    default = fields.Boolean(default=True)
 
     @api.model
     def create(self, values):
         result = super(ReportXmlFile, self).create(values)
-        ir_actions_report_obj = \
-            self.env['ir.actions.report'].browse(values['report_id'])
         # Removed the update method for the call the create_action() of
         # ir.actions.report object
-        ir_actions_report_obj.update()
+        result.report_id.update()
         return result
 
-    @api.multi
     def write(self, values):
         result = super(ReportXmlFile, self).write(values)
         for attachment in self:
-            ir_actions_report_obj = self.env['ir.actions.report'].browse(
-                [attachment.report_id.id])
-            ir_actions_report_obj.update()
+            attachment.report_id.update()
         return result
 
 
@@ -90,20 +85,19 @@ class ReportXmlFile(models.Model):
 class ReportXml(models.Model):
     _inherit = 'ir.actions.report'
 
-    jasper_output = fields.Selection([('html', 'HTML'), ('csv', 'CSV'),
-                                      ('xls', 'XLS'), ('rtf', 'RTF'),
-                                      ('odt', 'ODT'), ('ods', 'ODS'),
-                                      ('txt', 'Text'), ('pdf', 'PDF')],
-                                     'Jasper Output', default='pdf')
-    jasper_file_ids = fields.One2many('ir.actions.report.xml.file',
-                                      'report_id', 'Files', help='')
+    jasper_output = fields.Selection(
+        [('html', 'HTML'), ('csv', 'CSV'),
+         ('xls', 'XLS'), ('rtf', 'RTF'),
+         ('odt', 'ODT'), ('ods', 'ODS'),
+         ('txt', 'Text'), ('pdf', 'PDF')],
+        default='pdf')
+    jasper_file_ids = fields.One2many(
+        'ir.actions.report.xml.file', 'report_id', 'Files')
     # To get the model name from current models in database,we add a new field
     # and it will give us model name at create and update time.
-    jasper_model_id = fields.Many2one('ir.model', 'Model', help='Select Model')
     jasper_report = fields.Boolean('Is Jasper Report?')
     report_type = fields.Selection(selection_add=[("jasper", "Jasper")])
 
-    @api.multi
     def retrieve_jasper_attachment(self, record):
         '''Retrieve an attachment for a specific record.
 
@@ -111,18 +105,18 @@ class ReportXml(models.Model):
         :param attachment_name: The optional name of the attachment.
         :return: A recordset of length <=1 or None
         '''
-        if self.attachment:
-            attachment_name = safe_eval(
-                self.attachment, {'object': record, 'time': time})
-        else:
-            attachment_name = str(self.name) + '.' + self.jasper_output
-        return self.env['ir.attachment'].search([
-            ('datas_fname', '=', attachment_name),
-            ('res_model', '=', self.model),
-            ('res_id', '=', record.id)
-        ], limit=1)
+        attachment_obj = self.env['ir.attachment']
+        for report in self:
+            attachment_name = str(report.name) + '.' + report.jasper_output
+            if report.attachment:
+                attachment_name = safe_eval(
+                    report.attachment, {'object': record, 'time': time})
+            return attachment_obj.search([
+                ('datas_fname', '=', attachment_name),
+                ('res_model', '=', report.model),
+                ('res_id', 'in', record.ids)
+            ], limit=1)
 
-    @api.multi
     def postprocess_jasper_report(self, record, buffer):
         '''Hook to handle post processing during the jasper report generation.
         The basic behavior consists to create a new attachment containing the
@@ -133,40 +127,42 @@ class ReportXml(models.Model):
                             reading both times.
         :return: The newly generated attachment if no AccessError, else None.
         '''
-        if self.attachment:
-            attachment_name = safe_eval(
-                self.attachment, {'object': record, 'time': time})
-        else:
-            attachment_name = str(self.name) + '.' + self.jasper_output
-        attachment_vals = {
-            'name': attachment_name,
-            'datas': base64.encodestring(buffer.getvalue()),
-            'datas_fname': attachment_name,
-            'res_model': self.model,
-            'res_id': record.id,
-        }
-        attachment = None
-        try:
-            attachment = self.env['ir.attachment'].create(attachment_vals)
-        except AccessError:
-            _logger.info(
-                "Cannot save %s report %r as attachment",
-                self.jasper_output, attachment_vals['name'])
-        else:
-            _logger.info('The %s document %s is now saved in the database',
-                         self.jasper_output, attachment_vals['name'])
-        return attachment
+        attachment_obj = self.env['ir.attachment']
+        for report in self:
+            attachment_name = str(report.name) + '.' + report.jasper_output
+            if report.attachment:
+                attachment_name = safe_eval(
+                    report.attachment, {'object': record, 'time': time})
+            attachment_vals = {
+                'name': attachment_name,
+                'datas': base64.encodestring(buffer.getvalue()),
+                'datas_fname': attachment_name,
+                'res_model': report.model,
+                'res_id': record.id,
+            }
+            try:
+                return attachment_obj.create(attachment_vals)
+            except AccessError:
+                _logger.warn(
+                    "Cannot save %s report %r as attachment",
+                    report.jasper_output, attachment_vals['name'])
+            else:
+                _logger.info('The %s document %s is now saved in the database',
+                             report.jasper_output, attachment_vals['name'])
+            return None
 
     @api.model
     def render_jasper(self, docids, data):
         cr, uid, context = self.env.args
-        doc_record = self.jasper_model_id.browse(docids)
+        if not data:
+            data = {}
+        doc_record = self.model_id.browse(docids)
         if self.attachment_use:
             save_in_attachment = {}
             attachment_id = self.retrieve_jasper_attachment(doc_record)
             if attachment_id:
                 save_in_attachment[doc_record.id] = attachment_id
-                return self._post_pdf(save_in_attachment)
+                return self._post_pdf(save_in_attachment), self.jasper_output
         report_model_name = 'report.%s' % self.report_name
         self.env.cr.execute('SELECT id, model FROM '
                             'ir_act_report_xml WHERE '
@@ -175,7 +171,7 @@ class ReportXml(models.Model):
         record = self.env.cr.dictfetchone()
         report_model = self.search([('report_name', '=', report_model_name)])
         if report_model is None:
-            raise UserError(_('%s model was not found' % report_model_name))
+            raise UserError(_('%s model not found.') % report_model_name)
         data.update({'env': self.env, 'model': record.get('model')})
         r = Report(report_model_name, cr, uid, docids, data, context)
         jasper = r.execute()
@@ -183,7 +179,7 @@ class ReportXml(models.Model):
             jasper_content_stream = io.BytesIO(jasper)
             self.postprocess_jasper_report(
                 doc_record, jasper_content_stream)
-        return jasper
+        return jasper, self.jasper_output
 
     @api.model
     def _get_report_from_name(self, report_name):
@@ -191,36 +187,33 @@ class ReportXml(models.Model):
         if res:
             return res
         report_obj = self.env['ir.actions.report']
-        qwebtypes = ['jasper']
-        conditions = [('report_type', 'in', qwebtypes),
+        domain = [('report_type', '=', 'jasper'),
                       ('report_name', '=', report_name)]
         context = self.env['res.users'].context_get()
-        return report_obj.with_context(context).search(conditions, limit=1)
+        return report_obj.with_context(context).search(domain, limit=1)
 
     @api.model
     def create(self, values):
         if self._context and self._context.get('jasper_report'):
             values['model'] = \
-                self.env['ir.model'].browse(values['jasper_model_id']).model
+                self.env['ir.model'].browse(values['model_id']).model
             values['type'] = 'ir.actions.report'
             values['report_type'] = 'jasper'
             values['jasper_report'] = True
         return super(ReportXml, self).create(values)
 
-    @api.multi
     def write(self, values):
         if self._context and self._context.get('jasper_report'):
-            if 'jasper_model_id' in values:
+            if 'model_id' in values:
                 values['model'] = \
                     self.env['ir.model'].browse(
-                        values['jasper_model_id']).model
+                        values['model_id']).model
 
             values['type'] = 'ir.actions.report'
             values['report_type'] = 'jasper'
             values['jasper_report'] = True
         return super(ReportXml, self).write(values)
 
-    @api.multi
     def update(self):
         if self._context is None:
             self._context = {}
@@ -235,6 +228,10 @@ class ReportXml(models.Model):
                 file_name = attachment.filename
                 if not file_name or not content:
                     continue
+                if not file_name.endswith('.jrxml') and \
+                        not file_name.endswith('.jasper'):
+                    raise UserError(_('%s is not supported file. Please\
+                     Upload .jrxml or .jasper files only.') % (file_name))
                 path = self.save_file(file_name, content)
                 if '.jrxml' in file_name and attachment.default:
                     if has_default:
@@ -243,17 +240,16 @@ class ReportXml(models.Model):
                     has_default = True
                     report.write({'report_file': path})
                     report.create_action()
-                if not has_default:
-                    raise UserError(_('No report has been marked as default! \
-                                     You need atleast one jrxml report!'))
+            if not has_default:
+                raise UserError(_('No report has been marked as default! \
+                                 You need atleast one jrxml report!'))
             # Ensure the report is registered so it can be used immediately
             # register_jasper_report(report.report_name, report.model)
         return True
 
     def save_file(self, name, value):
         path = os.path.abspath(os.path.dirname(__file__))
-        path += '/custom_reports/%s' % name
-
+        path += '/../custom_reports/%s' % name
         with open(path, 'wb+') as f:
             f.write(base64.decodestring(value))
         path = 'jasper_reports/custom_reports/%s' % name
@@ -329,8 +325,8 @@ class ReportXml(models.Model):
                 if depth <= 1:
                     continue
                 comodel_name = model_fields[field].comodel_name
-                self.generate_xml(pool, comodel_name, field_node, document,
-                                  depth - 1, False)
+                self.generate_xml(
+                    pool, comodel_name, field_node, document, depth - 1, False)
                 continue
 
             value = field
@@ -344,7 +340,6 @@ class ReportXml(models.Model):
                 value = '12:34:56'
             elif field_type == 'datetime':
                 value = '2009-12-31 12:34:56'
-
             value_node = document.createTextNode(value)
             field_node.appendChild(value_node)
 
@@ -352,15 +347,15 @@ class ReportXml(models.Model):
             # Create relation with attachments
             field_node = document.createElement('Attachments-Attachments')
             parent_node.appendChild(field_node)
-            self.generate_xml(pool, 'ir.attachment', field_node, document,
-                              depth - 1, False)
+            self.generate_xml(
+                pool, 'ir.attachment', field_node, document, depth - 1, False)
 
         if first_call:
             # Create relation with user
             field_node = document.createElement('User-User')
             parent_node.appendChild(field_node)
-            self.generate_xml(pool, 'res.users', field_node, document,
-                              depth - 1, False)
+            self.generate_xml(
+                pool, 'res.users', field_node, document, depth - 1, False)
 
             # Create special entries
             field_node = document.createElement('Special-Special')

@@ -25,6 +25,6 @@ rm -f i18n.jar
 jar cvf i18n.jar com
 mv i18n.jar lib
 
-javac com/nantic/jasperreports/JasperServer.java -Xlint:deprecation
+javac com/nantic/jasperreports/JasperServer.java -Xlint:deprecation -Xlint:unchecked
 # javac com/nantic/jasperreports/JasperServer.java
 java com.nantic.jasperreports.JasperServer

@@ -27,7 +27,7 @@
 
 """ Framework for generic http servers
 
-    This library contains *no* OpenERP-specific functionality. It should be
+    This library contains *no* Odoo-specific functionality. It should be
     usable in other projects, too.
 """
 
@@ -69,8 +69,8 @@ class AuthProvider:
 
 class HTTPHandler(SimpleHTTPRequestHandler):
     def __init__(self, request, client_address, server):
-        SimpleHTTPRequestHandler.__init__(self, request, client_address,
-                                          server)
+        SimpleHTTPRequestHandler.__init__(
+            self, request, client_address, server)
         self.protocol_version = 'HTTP/1.1'
         self.connection = DummyConn()
 

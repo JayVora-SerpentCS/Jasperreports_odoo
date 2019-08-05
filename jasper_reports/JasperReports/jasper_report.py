@@ -5,7 +5,7 @@
 #                         http://www.NaN-tic.com
 # Copyright (C) 2013 Tadeus Prastowo <tadeus.prastowo@infi-nity.com>
 #                         Vikasa Infinity Anugrah <http://www.infi-nity.com>
-# Copyright (C) 2011-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -76,8 +76,8 @@ class JasperReport:
                 return jasperdir
             else:
                 return os.path.join(jasperdir, '')
-        return os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                            '..', 'report', '')
+        return os.path.join(
+            os.path.abspath(os.path.dirname(__file__)), '..', 'report', '')
 
     def extract_fields(self, field_tags, ns):
         # fields and fieldNames
@@ -117,42 +117,41 @@ class JasperReport:
 
         # Language
         # is XPath.
-        lang_tags = doc.xpath('/jr:jasperReport/jr:queryString',
-                              namespaces=nss)
+        lang_tags = doc.xpath(
+            '/jr:jasperReport/jr:queryString', namespaces=nss)
         if lang_tags:
             if lang_tags[0].get('language'):
                 self.language = lang_tags[0].get('language').lower()
 
         # Relations
-        ex_path = '/jr:jasperReport/jr:property[@name="OPENERP_RELATIONS"]'
+        ex_path = '/jr:jasperReport/jr:property[@name="ODOO_RELATIONS"]'
         relation_tags = doc.xpath(ex_path, namespaces=nss)
 
         if relation_tags and 'value' in relation_tags[0].keys():
             relation = relation_tags[0].get('value').strip()
+            self.relations = [x.strip() for x in relation.split(',')]
             if relation.startswith('['):
                 self.relations = safe_eval(relation_tags[0].get('value'), {})
-            else:
-                self.relations = [x.strip() for x in relation.split(',')]
             self.relations = [self.path_prefix + x for x in self.relations]
 
         if not self.relations and self.path_prefix:
             self.relations = [self.path_prefix[:-1]]
 
         # Repeat field
-        path1 = '/jr:jasperReport/jr:property[@name="OPENERP_COPIES_FIELD"]'
+        path1 = '/jr:jasperReport/jr:property[@name="ODOO_COPIES_FIELD"]'
         copies_field_tags = doc.xpath(path1, namespaces=nss)
         if copies_field_tags and 'value' in copies_field_tags[0].keys():
             self.copies_field = (
                 self.path_prefix + copies_field_tags[0].get('value'))
 
         # Repeat
-        path2 = '/jr:jasperReport/jr:property[@name="OPENERP_COPIES"]'
+        path2 = '/jr:jasperReport/jr:property[@name="ODOO_COPIES"]'
         copies_tags = doc.xpath(path2, namespaces=nss)
         if copies_tags and 'value' in copies_tags[0].keys():
             self.copies = int(copies_tags[0].get('value'))
 
         self.is_header = False
-        path3 = '/jr:jasperReport/jr:property[@name="OPENERP_HEADER"]'
+        path3 = '/jr:jasperReport/jr:property[@name="ODOO_HEADER"]'
         header_tags = doc.xpath(path3, namespaces=nss)
         if header_tags and 'value' in header_tags[0].keys():
             self.is_header = True
@@ -189,17 +188,17 @@ class JasperReport:
             if data_source_expression == 'REPORT_DATA_SOURCE':
                 continue
 
-            subreport_expression = tag.findtext('{%s}subreportExpression' % ns,
-                                                '')
+            subreport_expression = tag.findtext(
+                '{%s}subreportExpression' % ns, '')
             if not subreport_expression:
                 continue
             subreport_expression = subreport_expression.strip()
-            subreport_expression = (subreport_expression.replace
-                                    ('$P{STANDARD_DIR}',
-                                     '"%s"' % self.standard_directory()))
-            subreport_expression = (subreport_expression.replace
-                                    ('$P{SUBREPORT_DIR}',
-                                     '"%s"' % self.subreport_directory()))
+            subreport_expression = (
+                subreport_expression.replace
+                ('$P{STANDARD_DIR}', '"%s"' % self.standard_directory()))
+            subreport_expression = (
+                subreport_expression.replace
+                ('$P{SUBREPORT_DIR}', '"%s"' % self.subreport_directory()))
             try:
                 subreport_expression = safe_eval(subreport_expression, {})
             except Exception:
@@ -209,19 +208,19 @@ class JasperReport:
 
             # Model
             model = ''
-            path4 = '//jr:reportElement/jr:property[@name="OPENERP_MODEL"]'
+            path4 = '//jr:reportElement/jr:property[@name="ODOO_MODEL"]'
             model_tags = tag.xpath(path4, namespaces=nss)
             if model_tags and 'value' in model_tags[0].keys():
                 model = model_tags[0].get('value')
 
             path_prefix = ''
-            pat = '//jr:reportElement/jr:property[@name="OPENERP_PATH_PREFIX"]'
+            pat = '//jr:reportElement/jr:property[@name="ODOO_PATH_PREFIX"]'
             path_prefix_tags = tag.xpath(pat, namespaces=nss)
             if path_prefix_tags and 'value' in path_prefix_tags[0].keys():
                 path_prefix = path_prefix_tags[0].get('value')
 
             self.is_header = False
-            path5 = '//jr:reportElement/jr:property[@name="OPENERP_HEADER"]'
+            path5 = '//jr:reportElement/jr:property[@name="ODOO_HEADER"]'
             header_tags = tag.xpath(path5, namespaces=nss)
 
             if header_tags and 'value' in header_tags[0].keys():
@@ -245,8 +244,7 @@ class JasperReport:
                 'model': model,
                 'pathPrefix': path_prefix,
                 'report': subreport,
-                'depth': 1,
-            })
+                'depth': 1})
             for subsub_info in subreport.subreports:
                 subsub_info['depth'] += 1
                 # Note hat 'parameter' (the one used to pass report's
@@ -280,8 +278,8 @@ class JasperReport:
 
             # Relations
             relations = []
-            path8 = '../../jr:reportElement/jr:property \
-            [@name="OPENERP_RELATIONS"]'
+            path8 = \
+                '../../jr:reportElement/jr:property[@name="ODOO_RELATIONS"]'
             relation_tags = tag.xpath(path8, namespaces=nss)
 
             if relation_tags and 'value' in relation_tags[0].keys():
@@ -299,8 +297,8 @@ class JasperReport:
 
             # Repeat field
             copies_field = None
-            path9 = '../../jr:reportElement/jr:property \
-            [@name="OPENERP_COPIES_FIELD"]'
+            path9 = ('../../jr:reportElement/jr:property'
+                     '[@name="ODOO_COPIES_FIELD"]')
             copies_field_tags = tag.xpath(path9, namespaces=nss)
             if copies_field_tags and 'value' in copies_field_tags[0].keys():
                 copies_field = \
@@ -308,23 +306,23 @@ class JasperReport:
 
             # Repeat
             copies = None
-            path11 = '../../jr:reportElement/jr:property \
-            [@name="OPENERP_COPIES"]'
+            path11 = \
+                '../../jr:reportElement/jr:property[@name="ODOO_COPIES"]'
             copies_tags = tag.xpath(path11, namespaces=nss)
             if copies_tags and 'value' in copies_tags[0].keys():
                 copies = int(copies_tags[0].get('value'))
 
             # Model
             model = ''
-            path12 = '../../jr:reportElement/jr:property \
-            [@name="OPENERP_MODEL"]'
+            path12 = \
+                '../../jr:reportElement/jr:property[@name="ODOO_MODEL"]'
             model_tags = tag.xpath(path12, namespaces=nss)
             if model_tags and 'value' in model_tags[0].keys():
                 model = model_tags[0].get('value')
 
             path_prefix = ''
-            path13 = '../../jr:reportElement/jr:property \
-            [@name="OPENERP_PATH_PREFIX"]'
+            path13 = ('../../jr:reportElement/jr:property'
+                      '[@name="ODOO_PATH_PREFIX"]')
             path_prefix_tags = tag.xpath(path13, namespaces=nss)
 
             if path_prefix_tags and 'value' in path_prefix_tags[0].keys():
@@ -333,8 +331,8 @@ class JasperReport:
             # We need to find the appropriate subDataset definition
             # for this dataset run.
             path14 = '//jr:subDataset[@name="%s"]'
-            sub_dataset = doc.xpath(path14 % sub_dataset_name,
-                                    namespaces=nss)[0]
+            sub_dataset = doc.xpath(
+                path14 % sub_dataset_name, namespaces=nss)[0]
             field_tags = sub_dataset.xpath('jr:field', namespaces=nss)
             fields, field_names = self.extract_fields(field_tags, ns)
 

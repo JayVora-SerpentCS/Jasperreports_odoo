@@ -4,7 +4,7 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="OPENERP_RELATIONS" value="[&apos;order_line&apos;]"/>
+	<property name="ODOO_RELATIONS" value="[&apos;order_line&apos;]"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Jasper Quotation XML"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>

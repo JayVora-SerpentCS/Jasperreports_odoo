@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (C) 2018-Today Serpent Consulting Services Pvt. Ltd.
+# Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
 #                         (<http://www.serpentcs.com>)
 #
 # WARNING: This program as such is intended to be used by professional
@@ -26,13 +26,15 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 ##############################################################################
+
 import json
 
 from odoo.addons.web.controllers import main as report
-from odoo.http import route, request
+from odoo.http import content_disposition, route, request
 
 
 class ReportController(report.ReportController):
+
     @route()
     def report_routes(self, reportname, docids=None, converter=None, **data):
         if converter == 'jasper':
@@ -51,14 +53,13 @@ class ReportController(report.ReportController):
                 if data['context'].get('lang'):
                     del data['context']['lang']
                 context.update(data['context'])
-            jasper = report_jas.with_context(
+            # Get the report and output type
+            jasper, output_type = report_jas.with_context(
                 context).render_jasper(docids, data=data)
-            # Get the report output type
-            output_type = report_jas.jasper_output
             report_name = str(report_jas.name) + '.' + output_type
             content_dict = {
                 'pdf': 'application/pdf',
-                'html': 'text/html',
+                'html': 'application/html',
                 'csv': 'text/csv',
                 'xls': 'application/xls',
                 'rtf': 'application/octet-stream',
@@ -71,10 +72,9 @@ class ReportController(report.ReportController):
                 ('Content-Length', len(jasper)),
                 (
                     'Content-Disposition',
-                    'attachment; filename=' + report_name
+                    content_disposition(report_name)
                 )
             ]
             return request.make_response(jasper, headers=pdfhttpheaders)
         return super(ReportController, self).report_routes(
-            reportname, docids, converter, **data
-        )
+            reportname, docids, converter, **data)
