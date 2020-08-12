@@ -84,10 +84,10 @@ class BrowseDataGenerator(AbstractDataGenerator):
             values[language] = model.browse(id).mapped(field)
             if model._fields[field].type == 'selection' and \
                     model._fields[field].selection:
-                field_data = model.fields_get(
-                    self, allfields=[field], context=context)
+                field_data = model.with_context(context).\
+                    fields_get(allfields=[field])
                 values[language] = dict(field_data[field]['selection']).get(
-                    values[language], values[language])
+                    values[language][0], values[language][0])
         result = []
         for key, value in values.items():
             result.append('%s~%s' % (key, value))
@@ -433,7 +433,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
 
             # Show all translations for a field
             type = self.report.fields[current_path]['type']
-            if type == 'java.lang.Object':
+            if type == 'java.lang.Object' and record.id:
                 value = self.value_in_all_languages(
                     record._name, record.id, root)
 
