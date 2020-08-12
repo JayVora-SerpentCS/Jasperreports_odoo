@@ -79,7 +79,6 @@ class Report:
         the number of pages of the generated report.
         """
         logger = logging.getLogger(__name__)
-
         # * Get report path *
         # Not only do we search the report by name but also ensure that
         # 'report_rml' field has the '.jrxml' postfix. This is needed because
@@ -98,9 +97,7 @@ class Report:
             if data.jasper_output:
                 self.output_format = data.jasper_output
 
-            self.report_path = data.report_file
-            self.report_path = os.path.join(
-                self.addons_path(), self.report_path)
+            self.report_path = self.addons_path(data.report_file)
 
             if not os.path.lexists(self.report_path):
                 self.report_path = self.addons_path(path=data.report_file)
