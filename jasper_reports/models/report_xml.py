@@ -156,13 +156,7 @@ class ReportXml(models.Model):
         cr, uid, context = self.env.args
         if not data:
             data = {}
-        doc_record = self.model_id.browse(docids)
-        if self.attachment_use:
-            save_in_attachment = {}
-            attachment_id = self.retrieve_jasper_attachment(doc_record)
-            if attachment_id:
-                save_in_attachment[doc_record.id] = attachment_id
-                return self._post_pdf(save_in_attachment), self.jasper_output
+        doc_records = self.model_id.browse(docids)
         report_model_name = 'report.%s' % self.report_name
         self.env.cr.execute('SELECT id, model FROM '
                             'ir_act_report_xml WHERE '
@@ -173,12 +167,23 @@ class ReportXml(models.Model):
         if report_model is None:
             raise UserError(_('%s model not found.') % report_model_name)
         data.update({'env': self.env, 'model': record.get('model')})
+        if self.attachment_use:
+            save_in_attachment = {}
+            for doc_record in doc_records:
+                attachment_id = self.retrieve_jasper_attachment(doc_record)
+                if attachment_id:
+                    save_in_attachment[doc_record.id] = attachment_id
+                else:
+                    r = Report(report_model_name, cr, uid, [doc_record.id],
+                               data, context)
+                    jasper = r.execute()
+                    jasper_content_stream = io.BytesIO(jasper)
+                    attachment_id = self.postprocess_jasper_report(
+                        doc_record, jasper_content_stream)
+                    save_in_attachment[doc_record.id] = attachment_id
+            return self._post_pdf(save_in_attachment), self.jasper_output
         r = Report(report_model_name, cr, uid, docids, data, context)
         jasper = r.execute()
-        if self.attachment_use:
-            jasper_content_stream = io.BytesIO(jasper)
-            self.postprocess_jasper_report(
-                doc_record, jasper_content_stream)
         return jasper, self.jasper_output
 
     @api.model
@@ -188,7 +193,7 @@ class ReportXml(models.Model):
             return res
         report_obj = self.env['ir.actions.report']
         domain = [('report_type', '=', 'jasper'),
-                      ('report_name', '=', report_name)]
+                  ('report_name', '=', report_name)]
         context = self.env['res.users'].context_get()
         return report_obj.with_context(context).search(domain, limit=1)
 
