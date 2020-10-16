@@ -12,7 +12,7 @@
 # programmers who take the whole responsability of assessing all potential
 # consequences resulting from its eventual inadequacies and bugs
 # End users who are looking for a ready-to-use solution with commercial
-# garantees and support are strongly adviced to contract a Free Software
+# guarantees and support are strongly adviced to contract a Free Software
 # Service Company
 #
 # This program is Free Software; you can redistribute it and/or
@@ -33,7 +33,7 @@
 
 {
     "name": "Jasper Reports",
-    "version": "12.0.0.1.1",
+    "version": "13.0.0.1.1",
     "summary": '''This module integrates Jasper Reports with Odoo.''',
     "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd.",
     "website": "http://www.nan-tic.com, http://www.serpentcs.com",

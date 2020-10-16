@@ -163,7 +163,8 @@ class NoConnection(object):
         pass
 
     def getsockname(self):
-        """ We need to return info about the real socket that is used for the request
+        """ We need to return info about the real
+            socket that is used for the request
         """
         if not self.__hidden_socket:
             raise AttributeError("No-connection class cannot tell real socket")
