@@ -156,7 +156,7 @@ class ReportXml(models.Model):
         cr, uid, context = self.env.args
         if not data:
             data = {}
-        doc_records = self.model_id.browse(docids)
+        doc_records = self.env[self.model_id.model].browse(docids)
         report_model_name = 'report.%s' % self.report_name
         self.env.cr.execute('SELECT id, model FROM '
                             'ir_act_report_xml WHERE '
