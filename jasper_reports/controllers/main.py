@@ -8,7 +8,7 @@
 # programmers who take the whole responsability of assessing all potential
 # consequences resulting from its eventual inadequacies and bugs
 # End users who are looking for a ready-to-use solution with commercial
-# garantees and support are strongly adviced to contract a Free Software
+# guarantees and support are strongly adviced to contract a Free Software
 # Service Company
 #
 # This program is Free Software; you can redistribute it and/or
@@ -30,8 +30,10 @@
 import json
 
 from odoo.addons.web.controllers import main as report
-from odoo.http import content_disposition, route, request
-
+from odoo.http import content_disposition, route, request, serialize_exception as _serialize_exception
+from werkzeug.urls import url_decode
+from odoo.tools import html_escape
+from odoo.tools.safe_eval import safe_eval, time
 
 class ReportController(report.ReportController):
 
@@ -69,12 +71,67 @@ class ReportController(report.ReportController):
             }
             pdfhttpheaders = [
                 ('Content-Type', content_dict.get(output_type)),
-                ('Content-Length', len(jasper)),
-                (
-                    'Content-Disposition',
-                    content_disposition(report_name)
-                )
+                ('Content-Length', len(jasper))
             ]
             return request.make_response(jasper, headers=pdfhttpheaders)
         return super(ReportController, self).report_routes(
             reportname, docids, converter, **data)
+
+
+    @route()
+    def report_download(self, data, token, context=None):
+        """This function is used by 'action_manager_report.js' in order to trigger the download of
+        a pdf/controller report.
+
+        :param data: a javascript array JSON.stringified containg report internal url ([0]) and
+        type [1]
+        :returns: Response with a filetoken cookie and an attachment header
+        """
+        requestcontent = json.loads(data)
+        url, type = requestcontent[0], requestcontent[1]
+        if type == 'jasper':
+            try:
+                converter = 'jasper'
+                extension = 'pdf'
+                pattern = '/report/jasper/'
+                    
+                reportname = url.split(pattern)[1].split('?')[0]
+
+                docids = None
+                if '/' in reportname:
+                    reportname, docids = reportname.split('/')
+
+                if docids:
+                    # Generic report:
+                    response = self.report_routes(reportname, docids=docids, converter=converter, context=context)
+                else:
+                    # Particular report:
+                    data = dict(url_decode(url.split('?')[1]).items())  # decoding the args represented in JSON
+                    if 'context' in data:
+                        context, data_context = json.loads(context or '{}'), json.loads(data.pop('context'))
+                        context = json.dumps({**context, **data_context})
+                    response = self.report_routes(reportname, converter=converter, context=context, **data)
+
+                report = request.env['ir.actions.report']._get_report_from_name(reportname)
+                filename = "%s.%s" % (report.name, extension)
+
+                if docids:
+                    ids = [int(x) for x in docids.split(",")]
+                    obj = request.env[report.model].browse(ids)
+                    if report.print_report_name and not len(obj) > 1:
+                        report_name = safe_eval(report.print_report_name, {'object': obj, 'time': time})
+                        filename = "%s.%s" % (report_name, extension)
+                response.headers.add('Content-Disposition', content_disposition(filename))
+                response.set_cookie('fileToken', token)
+                return response
+            except Exception as e:
+                se = _serialize_exception(e)
+                error = {
+                    'code': 200,
+                    'message': "Odoo Server Error",
+                    'data': se
+                }
+                return request.make_response(html_escape(json.dumps(error)))
+        else:
+            return super(ReportController, self).report_download(data, token, context)
+

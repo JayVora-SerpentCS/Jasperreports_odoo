@@ -14,7 +14,7 @@
 # programmers who take the whole responsability of assessing all potential
 # consequences resulting from its eventual inadequacies and bugs
 # End users who are looking for a ready-to-use solution with commercial
-# garantees and support are strongly adviced to contract a Free Software
+# guarantees and support are strongly adviced to contract a Free Software
 # Service Company
 #
 # This program is Free Software; you can redistribute it and/or
@@ -40,8 +40,6 @@ import tempfile
 import codecs
 import logging
 from xml.dom.minidom import getDOMImplementation
-
-from odoo.osv import orm
 
 from .abstract_data_generator import AbstractDataGenerator
 
@@ -96,6 +94,7 @@ class BrowseDataGenerator(AbstractDataGenerator):
     def generate_ids(self, record, relations, path, current_records):
         unrepeated = set([field.partition('/')[0] for field in relations])
         for relation in unrepeated:
+            value_type = None
             root = relation.partition('/')[0]
             if path:
                 current_path = '%s/%s' % (path, root)
@@ -112,14 +111,24 @@ class BrowseDataGenerator(AbstractDataGenerator):
             else:
                 if root == 'id':
                     value = record.id
+                    value_metadata = record.fields_get([root])
+                    if root in value_metadata.keys():
+                        value_metadata2 = value_metadata[root]
+                        if 'type' in value_metadata2.keys():
+                            value_type = value_metadata2['type']
                 elif hasattr(record, root):
                     value = getattr(record, root)
+                    value_metadata = record.fields_get([root])
+                    if root in value_metadata.keys():
+                        value_metadata2 = value_metadata[root]
+                        if 'type' in value_metadata2.keys():
+                            value_type = value_metadata2['type']
                 else:
                     warning = "Field '%s' does not exist in model '%s'."
                     self.warning(warning % (root, record._name))
                     continue
 
-                if isinstance(value, orm.browse_record):
+                if value_type == 'many2one':
                     relations2 = [
                         field.partition('/')[2] for field in relations
                         if field.partition('/')[0] == root and
@@ -127,7 +136,7 @@ class BrowseDataGenerator(AbstractDataGenerator):
                     return self.generate_ids(
                         value, relations2, current_path, current_records)
 
-                if not isinstance(value, orm.browse_record_list):
+                if value_type == 'one2many' or value_type == 'many2many':
                     wrng2 = "Field '%s' in model '%s' is not a relation field."
                     self.warning(wrng2 % (root, self.model))
                     return current_records
@@ -168,7 +177,7 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
     # By default (if no ODOO_RELATIONS property exists in the report)
     # a record will be created for each model id we've been asked to show.
     # If there are any elements in the ODOO_RELATIONS list,
-    # they will imply a LEFT JOIN like behaviour on the rows to be shown.
+    # they will imply a LEFT JOIN like behavior on the rows to be shown.
     def generate(self, file_name):
         self.all_records = []
         relations = self.report.relations
@@ -226,15 +235,25 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
             else:
                 if root == 'id':
                     value = record.id
+                    value_metadata = record.fields_get([root])
+                    if root in value_metadata.keys():
+                        value_metadata2 = value_metadata[root]
+                        if 'type' in value_metadata2.keys():
+                            value_type = value_metadata2['type']
                 elif hasattr(record, root):
                     value = getattr(record, root)
+                    value_metadata = record.fields_get([root])
+                    if root in value_metadata.keys():
+                        value_metadata2 = value_metadata[root]
+                        if 'type' in value_metadata2.keys():
+                            value_type = value_metadata2['type']
                 else:
                     value = None
                     wrng4 = "Field '%s' does not exist in model '%s'."
                     self.warning(wrng4 % (root, record._name))
 
             # Check if it's a many2one
-            if isinstance(value, orm.browse_record):
+            if value_type == 'many2one':
                 fields2 = [f.partition('/')[2] for f in fields
                            if f.partition('/')[0] == root]
                 self.generate_xml_record(
@@ -242,7 +261,7 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                 continue
 
             # Check if it's a one2many or many2many
-            if isinstance(value, orm.browse_record_list):
+            if value_type == 'one2many' or value_type == 'many2many':
                 if not value:
                     continue
 
@@ -301,7 +320,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
     # By default (if no ODOO_RELATIONS property exists in the report)
     # a record will be created for each model id we've been asked to show.
     # If there are any elements in the ODOO_RELATIONS list,
-    # they will imply a LEFT JOIN like behaviour on the rows to be shown.
+    # they will imply a LEFT JOIN like behavior on the rows to be shown.
     def generate(self, file_name):
         self.all_records = []
         relations = self.report.relations
@@ -356,6 +375,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
         unrepeated = set([field.partition('/')[0] for field in fields])
 
         for field in unrepeated:
+            value_type = None
             root = field.partition('/')[0]
             current_path = root
             if path:
@@ -384,8 +404,18 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             else:
                 if root == 'id':
                     value = record.id
+                    value_metadata = record.fields_get([root])
+                    if root in value_metadata.keys():
+                        value_metadata2 = value_metadata[root]
+                        if 'type' in value_metadata2.keys():
+                            value_type = value_metadata2['type']
                 elif hasattr(record, root):
                     value = getattr(record, root)
+                    value_metadata = record.fields_get([root])
+                    if root in value_metadata.keys():
+                        value_metadata2 = value_metadata[root]
+                        if 'type' in value_metadata2.keys():
+                            value_type = value_metadata2['type']
                 else:
                     value = None
                     if root:
@@ -395,7 +425,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                             wrng6 % (root, current_path, record._name))
 
             # Check if it's a many2one
-            if isinstance(value, orm.browse_record):
+            if value_type == 'many2one':
                 fields2 = [f.partition('/')[2] for f in fields
                            if f.partition('/')[0] == root]
                 self.generateCsvRecord(
@@ -404,7 +434,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 continue
 
             # Check if it's a one2many or many2many
-            if isinstance(value, orm.browse_record_list):
+            if value_type == 'one2many' or value_type == 'many2many':
                 if not value:
                     continue
                 fields2 = [f.partition('/')[2] for f in fields
