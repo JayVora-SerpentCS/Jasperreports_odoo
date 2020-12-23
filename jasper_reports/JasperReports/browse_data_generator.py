@@ -91,6 +91,13 @@ class BrowseDataGenerator(AbstractDataGenerator):
             result.append('%s~%s' % (key, value))
         return '|'.join(result)
 
+    def find_value_type(self, root, value_metadata):
+        if root in value_metadata.keys():
+            value_metadata2 = value_metadata[root]
+            if 'type' in value_metadata2.keys():
+                return value_metadata2['type']
+        return None
+
     def generate_ids(self, record, relations, path, current_records):
         unrepeated = set([field.partition('/')[0] for field in relations])
         for relation in unrepeated:
@@ -112,17 +119,11 @@ class BrowseDataGenerator(AbstractDataGenerator):
                 if root == 'id':
                     value = record.id
                     value_metadata = record.fields_get([root])
-                    if root in value_metadata.keys():
-                        value_metadata2 = value_metadata[root]
-                        if 'type' in value_metadata2.keys():
-                            value_type = value_metadata2['type']
+                    value_type = self.find_value_type(root, value_metadata)
                 elif hasattr(record, root):
                     value = getattr(record, root)
                     value_metadata = record.fields_get([root])
-                    if root in value_metadata.keys():
-                        value_metadata2 = value_metadata[root]
-                        if 'type' in value_metadata2.keys():
-                            value_type = value_metadata2['type']
+                    value_type = self.find_value_type(root, value_metadata)
                 else:
                     warning = "Field '%s' does not exist in model '%s'."
                     self.warning(warning % (root, record._name))
@@ -136,7 +137,7 @@ class BrowseDataGenerator(AbstractDataGenerator):
                     return self.generate_ids(
                         value, relations2, current_path, current_records)
 
-                if value_type == 'one2many' or value_type == 'many2many':
+                if not (value_type == 'one2many' or value_type == 'many2many'):
                     wrng2 = "Field '%s' in model '%s' is not a relation field."
                     self.warning(wrng2 % (root, self.model))
                     return current_records
@@ -236,17 +237,11 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                 if root == 'id':
                     value = record.id
                     value_metadata = record.fields_get([root])
-                    if root in value_metadata.keys():
-                        value_metadata2 = value_metadata[root]
-                        if 'type' in value_metadata2.keys():
-                            value_type = value_metadata2['type']
+                    value_type = self.find_value_type(root, value_metadata)
                 elif hasattr(record, root):
                     value = getattr(record, root)
                     value_metadata = record.fields_get([root])
-                    if root in value_metadata.keys():
-                        value_metadata2 = value_metadata[root]
-                        if 'type' in value_metadata2.keys():
-                            value_type = value_metadata2['type']
+                    value_type = self.find_value_type(root, value_metadata)
                 else:
                     value = None
                     wrng4 = "Field '%s' does not exist in model '%s'."
@@ -405,17 +400,11 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 if root == 'id':
                     value = record.id
                     value_metadata = record.fields_get([root])
-                    if root in value_metadata.keys():
-                        value_metadata2 = value_metadata[root]
-                        if 'type' in value_metadata2.keys():
-                            value_type = value_metadata2['type']
+                    value_type = self.find_value_type(root, value_metadata)
                 elif hasattr(record, root):
                     value = getattr(record, root)
                     value_metadata = record.fields_get([root])
-                    if root in value_metadata.keys():
-                        value_metadata2 = value_metadata[root]
-                        if 'type' in value_metadata2.keys():
-                            value_type = value_metadata2['type']
+                    value_type = self.find_value_type(root, value_metadata)
                 else:
                     value = None
                     if root:
