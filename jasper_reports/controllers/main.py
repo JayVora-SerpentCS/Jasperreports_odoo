@@ -31,6 +31,8 @@ import json
 
 from odoo.addons.web.controllers import main as report
 from odoo.http import content_disposition, route, request
+from odoo.tools.safe_eval import safe_eval
+
 
 
 class ReportController(report.ReportController):
@@ -56,7 +58,13 @@ class ReportController(report.ReportController):
             # Get the report and output type
             jasper, output_type = report_jas.with_context(
                 context).render_jasper(docids, data=data)
-            report_name = str(report_jas.name) + '.' + output_type
+            print_report_name = report_jas.print_report_name
+            if print_report_name and not len(docids)>1:
+                model = report_jas.model_id.model
+                obj = request.env[model].search([('id', '=', docids[0])])
+                report_name = safe_eval(print_report_name, {'object': obj}) + '.' + output_type
+            else:
+                report_name = str(report_jas.name) + '.' + output_type
             content_dict = {
                 'pdf': 'application/pdf',
                 'html': 'application/html',
