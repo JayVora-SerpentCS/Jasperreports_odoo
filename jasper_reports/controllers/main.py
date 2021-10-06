@@ -113,6 +113,7 @@ class ReportController(report.ReportController):
                     response = self.report_routes(reportname, converter=converter, context=context, **data)
 
                 report = request.env['ir.actions.report']._get_report_from_name(reportname)
+                extension = report.jasper_output or "pdf"
                 filename = "%s.%s" % (report.name, extension)
 
                 if docids:
