@@ -12,7 +12,7 @@
 # programmers who take the whole responsability of assessing all potential
 # consequences resulting from its eventual inadequacies and bugs
 # End users who are looking for a ready-to-use solution with commercial
-# garantees and support are strongly adviced to contract a Free Software
+# guarantees and support are strongly adviced to contract a Free Software
 # Service Company
 #
 # This program is Free Software; you can redistribute it and/or
@@ -86,7 +86,7 @@ class Report:
         # report record if the id already existed (ie. we're trying to
         # override the 'purchase.order' report in a new module).
         # As the previous record is not removed, we end up with two records
-        # named 'purchase.order' so we need to destinguish
+        # named 'purchase.order' so we need to distinguish
         # between the two by searching '.jrxml' in report_rml.
         rep_xml_set = self.env['ir.actions.report'].search(
             [('report_name', '=', self.name[7:]),

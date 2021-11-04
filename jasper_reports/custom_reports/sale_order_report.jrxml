@@ -62,7 +62,7 @@
 			</textField>
 			<image>
 				<reportElement x="1" y="1" width="135" height="47"/>
-				<imageExpression class="java.lang.String"><![CDATA["http://serpentcs.com/logo.png"]]></imageExpression>
+				<imageExpression class="java.lang.String">"logo-serpents.png"</imageExpression>
 			</image>
 		</band>
 	</title>

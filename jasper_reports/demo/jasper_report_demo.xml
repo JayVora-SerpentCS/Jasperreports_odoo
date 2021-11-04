@@ -4,7 +4,6 @@
     <record id="jasper_user_report_demo" model="ir.actions.report">
         <field name="name">Jasper User Report</field>
         <field name="model">res.users</field>
-        <field name="string">Jasper User Report</field>
         <field name="report_type">jasper</field>
         <field name="file">jasper_reports/demo/user.jrxml</field>
         <field name="attachment_use">False</field>
@@ -26,7 +25,6 @@
     <record id="jasper_sale_report_demo" model="ir.actions.report">
         <field name="name">Jasper Sales Report</field>
         <field name="model">sale.order</field>
-        <field name="string">Jasper Sales Report</field>
         <field name="report_type">jasper</field>
         <field name="file">jasper_reports/demo/sale_order_report.jrxml</field>
         <field name="attachment_use">False</field>

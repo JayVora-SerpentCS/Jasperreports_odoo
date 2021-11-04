@@ -12,7 +12,7 @@
 # programmers who take the whole responsability of assessing all potential
 # consequences resulting from its eventual inadequacies and bugs
 # End users who are looking for a ready-to-use solution with commercial
-# garantees and support are strongly adviced to contract a Free Software
+# guarantees and support are strongly adviced to contract a Free Software
 # Service Company
 #
 # This program is Free Software; you can redistribute it and/or
@@ -96,7 +96,7 @@ class JasperServer:
                    '-XX:InitialHeapSize=512m',
                    '-XX:CompressedClassSpaceSize=64m',
                    '-XX:MaxMetaspaceSize=128m',
-                   '-XX:+UseConcMarkSweepGC',
+                #    '-XX:+UseConcMarkSweepGC',   ### OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
                    'com.nantic.jasperreports.JasperServer',
                    str(self.port)]
         process = subprocess.Popen(command, env=env, cwd=cwd)

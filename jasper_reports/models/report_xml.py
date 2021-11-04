@@ -12,7 +12,7 @@
 # programmers who take the whole responsability of assessing all potential
 # consequences resulting from its eventual inadequacies and bugs
 # End users who are looking for a ready-to-use solution with commercial
-# garantees and support are strongly adviced to contract a Free Software
+# guarantees and support are strongly adviced to contract a Free Software
 # Service Company
 #
 # This program is Free Software; you can redistribute it and/or
@@ -96,7 +96,8 @@ class ReportXml(models.Model):
     # To get the model name from current models in database,we add a new field
     # and it will give us model name at create and update time.
     jasper_report = fields.Boolean('Is Jasper Report?')
-    report_type = fields.Selection(selection_add=[("jasper", "Jasper")])
+    report_type = fields.Selection(selection_add=[("jasper", "Jasper")], ondelete={'jasper': 'cascade'})
+    file = fields.Char('File')
 
     def retrieve_jasper_attachment(self, record):
         '''Retrieve an attachment for a specific record.
@@ -153,7 +154,9 @@ class ReportXml(models.Model):
 
     @api.model
     def render_jasper(self, docids, data):
-        cr, uid, context = self.env.args
+        context = self.env.context
+        uid = self.env.uid
+        cr = self.env.cr
         if not data:
             data = {}
         doc_records = self.model_id.browse(docids)
@@ -256,7 +259,7 @@ class ReportXml(models.Model):
         path = os.path.abspath(os.path.dirname(__file__))
         path += '/../custom_reports/%s' % name
         with open(path, 'wb+') as f:
-            f.write(base64.decodestring(value))
+            f.write(base64.decodebytes(value))
         path = 'jasper_reports/custom_reports/%s' % name
         return path
 
