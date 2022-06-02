@@ -68,11 +68,13 @@ class JasperServer:
                               'view'))
         else:
             libraries = str(java_path) + '/lib'
-            if os.path.exists(str(libraries)):
-                self.javapath = java_path
-            else:
-                raise UserError(_('libraries Not Found !\n'
-                                  'No libraries found in Java'))
+            print(libraries)
+            self.javapath = java_path
+           # if os.path.exists(str(libraries)):
+           #     self.javapath = java_path
+           # else:
+           #     raise UserError(_('libraries Not Found !\n'
+           #                       'No libraries found in Java'))
 
         env = {}
         env.update(os.environ)
@@ -86,6 +88,7 @@ class JasperServer:
                 self.path(), '..', 'custom_reports')
 
         cwd = os.path.join(self.path(), '..', 'java')
+        print(cwd)
 
         # Set headless = True because otherwise, java may use
         # existing X session and if session is closed JasperServer

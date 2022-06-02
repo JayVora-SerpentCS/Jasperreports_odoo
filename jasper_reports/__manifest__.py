@@ -49,7 +49,7 @@
         'security/ir.model.access.csv',
         'data/jasper_data.xml',
         'wizard/jasper_create_data_template.xml',
-        'views/webclient_templates.xml',
+#        'views/webclient_templates.xml',
         'views/jasper_report_menu.xml',
         'views/report_xml_view.xml',
         'views/res_company_view.xml',
@@ -57,6 +57,11 @@
     "demo": [
         'demo/jasper_report_demo.xml',
     ],
+    "assets": {
+        "web.assets_backend": [
+            "jasper_reports/static/src/js/report/jasperactionmanager.js",
+        ],
+    },
     "installable": True,
     "application": True,
     "license": "AGPL-3",
