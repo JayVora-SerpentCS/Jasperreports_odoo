@@ -48,3 +48,6 @@ docs/_build/
 # Backup files
 *~
 *.swp
+
+# Java logs
+jasper_reports/java/jasperserver.log
