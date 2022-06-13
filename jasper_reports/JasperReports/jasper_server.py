@@ -87,7 +87,6 @@ class JasperServer:
                 self.path(), '..', 'custom_reports')
 
         cwd = os.path.join(self.path(), '..', 'java')
-        print(cwd)
 
         # Set headless = True because otherwise, java may use
         # existing X session and if session is closed JasperServer
