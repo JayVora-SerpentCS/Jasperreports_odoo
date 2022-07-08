@@ -69,11 +69,11 @@ class JasperServer:
         else:
             libraries = str(java_path) + '/lib'
             self.javapath = java_path
-           if os.path.exists(str(libraries)):
-               self.javapath = java_path
-           else:
-               raise UserError(_('libraries Not Found !\n'
-                                 'No libraries found in Java'))
+            if os.path.exists(str(libraries)):
+                self.javapath = java_path
+            else:
+                raise UserError(_('libraries Not Found !\n'
+                                  'No libraries found in Java'))
 
         env = {}
         env.update(os.environ)
