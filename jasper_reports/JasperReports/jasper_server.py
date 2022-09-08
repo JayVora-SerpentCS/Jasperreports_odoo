@@ -96,7 +96,7 @@ class JasperServer:
                    '-XX:MaxHeapSize=512m',
                    '-XX:InitialHeapSize=512m',
                    '-XX:CompressedClassSpaceSize=64m',
-                   '-XX:MaxMetaspaceSize=128m',
+                   '-XX:MaxMetaspaceSize=256m',
                 #    '-XX:+UseConcMarkSweepGC',   ### OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
                    'com.nantic.jasperreports.JasperServer',
                    str(self.port)]
