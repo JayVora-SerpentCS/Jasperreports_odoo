@@ -36,6 +36,7 @@ import io
 import logging
 import os
 import time
+import hashlib
 from xml.dom.minidom import getDOMImplementation
 
 from odoo import api, fields, models, _
@@ -154,6 +155,7 @@ class ReportXml(models.Model):
 
     @api.model
     def render_jasper(self, docids, data):
+        self.update()
         context = self.env.context
         uid = self.env.uid
         cr = self.env.cr
@@ -258,6 +260,19 @@ class ReportXml(models.Model):
     def save_file(self, name, value):
         path = os.path.abspath(os.path.dirname(__file__))
         path += '/../custom_reports/%s' % name
+        
+        if os.path.isfile(path): # check contents to be sure if need to be overwriten
+            hash_of_value = hashlib.sha256(base64.decodestring(value)).hexdigest()
+            with open(path, 'rb') as f:
+                text = f.read()
+            hash_of_file = hashlib.sha256(text).hexdigest()
+            if hash_of_value == hash_of_file:
+                _logger.warning('The hashes for %s are equal, omit saving.' % name)
+                path = 'jasper_reports/custom_reports/%s' % name
+                return path
+
+        _logger.info('The hashes for %s are non-equal or the file is non-existent. saving.' % name)
+        
         with open(path, 'wb+') as f:
             f.write(base64.decodebytes(value))
         path = 'jasper_reports/custom_reports/%s' % name
