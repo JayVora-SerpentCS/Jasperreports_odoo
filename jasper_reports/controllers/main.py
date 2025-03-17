@@ -29,13 +29,13 @@
 
 import json
 
-from odoo.addons.web.controllers import report
+from odoo.addons.web.controllers import main
 from odoo.http import content_disposition, route, request, serialize_exception as _serialize_exception
 from werkzeug.urls import url_decode
 from odoo.tools import html_escape
 from odoo.tools.safe_eval import safe_eval, time
 
-class ReportController(report.ReportController):
+class ReportController(main.ReportController):
 
     @route()
     def report_routes(self, reportname, docids=None, converter=None, **data):
@@ -79,7 +79,7 @@ class ReportController(report.ReportController):
 
 
     @route()
-    def report_download(self, data, token, context=None):
+    def report_download(self, data, context=None):
         """This function is used by 'action_manager_report.js' in order to trigger the download of
         a pdf/controller report.
 
@@ -123,7 +123,6 @@ class ReportController(report.ReportController):
                         report_name = safe_eval(report.print_report_name, {'object': obj, 'time': time})
                         filename = "%s.%s" % (report_name, extension)
                 response.headers.add('Content-Disposition', content_disposition(filename))
-                response.set_cookie('fileToken', token)
                 return response
             except Exception as e:
                 se = _serialize_exception(e)
@@ -134,5 +133,5 @@ class ReportController(report.ReportController):
                 }
                 return request.make_response(html_escape(json.dumps(error)))
         else:
-            return super(ReportController, self).report_download(data, token, context)
+            return super(ReportController, self).report_download(data, context)
 
