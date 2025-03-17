@@ -205,8 +205,9 @@ class ReportXml(models.Model):
     @api.model
     def create(self, values):
         if self._context and self._context.get('jasper_report'):
-            values['model'] = \
-                self.env['ir.model'].browse(values['model_id']).model
+            if 'model_id' in values:
+                values['model'] = \
+                    self.env['ir.model'].browse(values['model_id']).model
             values['type'] = 'ir.actions.report'
             values['report_type'] = 'jasper'
             values['jasper_report'] = True
