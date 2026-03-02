@@ -23,7 +23,7 @@ if [[ -z "$1" ]]; then
 	help
 fi
 
-po=$1	
+po=$1
 
 if [[ -z "$2" ]]; then
 	properties=$(dirname "$1")/$(basename "$1" .po).properties

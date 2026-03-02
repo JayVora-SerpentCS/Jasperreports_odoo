@@ -41,26 +41,26 @@ import net.sf.jasperreports.engine.JRReport;
 import java.util.List;
 
 public class I18nGroovyCompiler extends JRGroovyCompiler {
-    static public List sourceCodeList = null; 
+    static public List sourceCodeList = null;
     static private String newImport = "import com.nantic.jasperreports.Translator;\nimport com.nantic.jasperreports.CsvMultiLanguageDataSource;\nimport net.sf.jasperreports.engine.JRDataSource;";
     static private String newVariable = "public Translator translator = null;\n";
-    static private String returnTranslator = 
-        "if (translator == null) {\n" + 
+    static private String returnTranslator =
+        "if (translator == null) {\n" +
         "    // For some reason parameter_REPORT_DATA_SOURCE may become of type\n" +
         "    // net.sf.jasperreports.engine.data.ListOfArrayDataSource\n" +
         "    // even if the value in the parameters map is actually a CsvMultiLanguageDataSource.\n" +
         "    // So we use the map instead of parameter_REPORT_DATA_SOURCE.\n" +
-        "    JRDataSource dataSource = (JRDataSource)parameter_REPORT_PARAMETERS_MAP.getValue().get(\"REPORT_DATA_SOURCE\");\n" + 
-        "    if (dataSource.class == CsvMultiLanguageDataSource) {\n" + 
+        "    JRDataSource dataSource = (JRDataSource)parameter_REPORT_PARAMETERS_MAP.getValue().get(\"REPORT_DATA_SOURCE\");\n" +
+        "    if (dataSource.class == CsvMultiLanguageDataSource) {\n" +
         "        translator = ((CsvMultiLanguageDataSource)dataSource).getTranslator();\n" +
         "    } else if (translator == parameter_REPORT_PARAMETERS_MAP.getValue().containsKey(\"TRANSLATOR\")){\n"+
-        "        translator = (CsvMultiLanguageDataSource)parameter_TRANSLATOR.getValue();\n" + 
+        "        translator = (CsvMultiLanguageDataSource)parameter_TRANSLATOR.getValue();\n" +
         "    } else {\n" +
         "        translator = new Translator(null, null);\n" +
         "    }\n" +
-        "}\n" + 
+        "}\n" +
         "return translator";
-    static private String newFunction = 
+    static private String newFunction =
         "public String tr(Locale locale, String text) {\n" +
             "TRANSLATOR.tr(locale, text);\n" +
         "}\n" +
@@ -201,10 +201,10 @@ public class I18nGroovyCompiler extends JRGroovyCompiler {
     }
 
     protected void checkLanguage(String language) throws JRException {
-        if ( 
+        if (
             !JRReport.LANGUAGE_GROOVY.equals(language)
-            && !JRReport.LANGUAGE_JAVA.equals(language) 
-            && !language.equals("i18ngroovy") 
+            && !JRReport.LANGUAGE_JAVA.equals(language)
+            && !language.equals("i18ngroovy")
             )
         {
             throw new JRException(

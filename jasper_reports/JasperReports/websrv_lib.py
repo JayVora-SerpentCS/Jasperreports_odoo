@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright P. Christeas <p_christ@hol.gr> 2008-2010
 #
@@ -61,23 +60,18 @@ class AuthProvider:
     def log(self, msg):
         _logger.info(msg)
 
-    def check_request(self, handler, path='/'):
-        """ Check if we are allowed to process that request
-        """
-        pass
+    def check_request(self, handler, path="/"):
+        """Check if we are allowed to process that request"""
 
 
 class HTTPHandler(SimpleHTTPRequestHandler):
     def __init__(self, request, client_address, server):
-        SimpleHTTPRequestHandler.__init__(
-            self, request, client_address, server)
-        self.protocol_version = 'HTTP/1.1'
+        SimpleHTTPRequestHandler.__init__(self, request, client_address, server)
+        self.protocol_version = "HTTP/1.1"
         self.connection = DummyConn()
 
     def handle(self):
-        """ Classes here should NOT handle inside their constructor
-        """
-        pass
+        """Classes here should NOT handle inside their constructor"""
 
     def finish(self):
         pass
@@ -87,8 +81,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
 
 class HTTPDir:
-    """ A dispatcher class, like a virtual folder in httpd
-    """
+    """A dispatcher class, like a virtual folder in httpd"""
 
     def __init__(self, path, handler, auth_provider=None, secure_only=False):
         self.path = path
@@ -97,8 +90,8 @@ class HTTPDir:
         self.secure_only = secure_only
 
     def matches(self, request):
-        """ Test if some request matches us. If so, return
-            the matched path. """
+        """Test if some request matches us. If so, return
+        the matched path."""
         if request.startswith(self.path):
             return self.path
         return False
@@ -111,7 +104,7 @@ class HTTPDir:
 
 
 def reg_http_service(path, handler, auth_provider=None, secure_only=False):
-    """ Register a HTTP handler at a given path.
+    """Register a HTTP handler at a given path.
 
     The auth_provider will be instanciated and set on the handler instances.
     """
@@ -133,7 +126,7 @@ def list_http_services(protocol=None):
     global handlers
     ret = []
     for svc in handlers:
-        if protocol is None or protocol == 'http' or svc.secure_only:
+        if protocol is None or protocol == "http" or svc.secure_only:
             ret.append((svc.path, str(svc.handler)))
 
     return ret
@@ -150,8 +143,7 @@ def find_http_service(path, secure=False):
 
 
 class NoConnection(object):
-    """ a class to use instead of the real connection
-    """
+    """a class to use instead of the real connection"""
 
     def __init__(self, realsocket=None):
         self.__hidden_socket = realsocket
@@ -163,8 +155,7 @@ class NoConnection(object):
         pass
 
     def getsockname(self):
-        """ We need to return info about the real socket that is used for the request
-        """
+        """We need to return info about the real socket that is used for the request"""
         if not self.__hidden_socket:
             raise AttributeError("No-connection class cannot tell real socket")
         return self.__hidden_socket.getsockname()
@@ -185,33 +176,33 @@ class FixSendError:
         try:
             short, long = self.responses[code]
         except KeyError:
-            short, long = '???', '???'
+            short, long = "???", "???"
         if message is None:
             message = short
         explain = long
         _logger.error("code %d, message %s", code, message)
-        content = (self.error_message_format % {
-            'code': code,
-            'message': _quote_html(message),
-            'explain': explain
-        })
+        content = self.error_message_format % {
+            "code": code,
+            "message": _quote_html(message),
+            "explain": explain,
+        }
         self.send_response(code, message)
         self.send_header("Content-Type", self.error_content_type)
-        self.send_header('Connection', 'close')
-        self.send_header('Content-Length', len(content) or 0)
+        self.send_header("Connection", "close")
+        self.send_header("Content-Length", len(content) or 0)
         self.end_headers()
-        if hasattr(self, '_flush'):
+        if hasattr(self, "_flush"):
             self._flush()
-        if self.command != 'HEAD' and code >= 200 and code not in (204, 304):
+        if self.command != "HEAD" and code >= 200 and code not in (204, 304):
             self.wfile.write(content)
 
 
 class HttpOptions:
 
-    _HTTP_OPTIONS = {'Allow': ['OPTIONS']}
+    _HTTP_OPTIONS = {"Allow": ["OPTIONS"]}
 
     def do_OPTIONS(self):
-        """return the list of capabilities """
+        """return the list of capabilities"""
 
         opts = self._HTTP_OPTIONS
         nopts = self._prep_OPTIONS(opts)
@@ -220,8 +211,8 @@ class HttpOptions:
 
         self.send_response(200)
         self.send_header("Content-Length", 0)
-        if 'Microsoft' in self.headers.get('User-Agent', ''):
-            self.send_header('MS-Author-Via', 'DAV')
+        if "Microsoft" in self.headers.get("User-Agent", ""):
+            self.send_header("MS-Author-Via", "DAV")
             # Microsoft's webdav lib ass-umes that the server would
             # be a FrontPage(tm) one, unless we send a non-standard
             # header that we are not an elephant.
@@ -231,11 +222,11 @@ class HttpOptions:
             if isinstance(value, str):
                 self.send_header(key, value)
             elif isinstance(value, (tuple, list)):
-                self.send_header(key, ', '.join(value))
+                self.send_header(key, ", ".join(value))
         self.end_headers()
 
     def _prep_OPTIONS(self, opts):
-        """ Prepare the OPTIONS response, if needed.
+        """Prepare the OPTIONS response, if needed.
             Sometimes, like in special DAV folders, the OPTIONS may
             contain extra keywords, perhaps also dependant on the
             request url.

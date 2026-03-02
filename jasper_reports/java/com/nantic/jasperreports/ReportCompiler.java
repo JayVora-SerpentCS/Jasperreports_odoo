@@ -40,7 +40,7 @@ public class ReportCompiler {
         }
     }
 
-    public static void main( String[] args ) 
+    public static void main( String[] args )
     {
         if ( args.length == 2 )
             compile( args[0], args[1] );
@@ -48,4 +48,3 @@ public class ReportCompiler {
             System.out.println( "Two arguments needed. Example: java ReportCompiler src.jrxml dst.jasper" );
     }
 }
-
