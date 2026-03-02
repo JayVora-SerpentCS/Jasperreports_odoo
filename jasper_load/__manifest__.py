@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
@@ -29,12 +28,12 @@
 
 {
     "name": "Jasper Reports - Load initially",
-    "version": "14.0.0.0.1",
-    "summary": '''
+    "version": "17.0.1.0.0",
+    "summary": """
     This module integrates Jasper Reports with Odoo. V6 and v7 compatible"
     version was made by NaN-tic.
     Serpent Consulting Services Pvt. Ltd.
-    has migrated it to v10, v11, v12, and V14. ''',
+    has migrated it to v10, v11, v12, V14 and v17.""",
     "author": "Serpent Consulting Services Pvt. Ltd.",
     "website": "http://www.serpentcs.com",
     "depends": ["base"],

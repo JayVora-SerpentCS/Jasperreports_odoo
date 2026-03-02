@@ -28,7 +28,7 @@ package com.nantic.jasperreports;
 import java.util.Hashtable;
 
 /*
-This class overrides Hashtable's get() function to return 
+This class overrides Hashtable's get() function to return
 the default language when the language (key) doesn't exist.
 */
 public class LanguageTable extends Hashtable {
@@ -45,5 +45,3 @@ public class LanguageTable extends Hashtable {
             return super.get(defaultLanguage);
     }
 }
-
-

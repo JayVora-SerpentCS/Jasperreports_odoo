@@ -27,16 +27,16 @@
 	public.product_template.name,
 	public.product_product.id
 FROM public.sale_order_line
-	INNER JOIN public.sale_order ON 
-	 public.sale_order_line.order_id = public.sale_order.id 
-	INNER JOIN public.res_partner ON 
-	 public.sale_order.partner_id = public.res_partner.id 
-	 AND public.sale_order.partner_shipping_id = public.res_partner.id 
-	 AND public.sale_order.partner_invoice_id = public.res_partner.id 
-	 AND public.sale_order_line.order_partner_id = public.res_partner.id 
-	INNER JOIN public.product_product ON 
-	 public.sale_order_line.product_id = public.product_product.id 
-	INNER JOIN public.product_template ON 
+	INNER JOIN public.sale_order ON
+	 public.sale_order_line.order_id = public.sale_order.id
+	INNER JOIN public.res_partner ON
+	 public.sale_order.partner_id = public.res_partner.id
+	 AND public.sale_order.partner_shipping_id = public.res_partner.id
+	 AND public.sale_order.partner_invoice_id = public.res_partner.id
+	 AND public.sale_order_line.order_partner_id = public.res_partner.id
+	INNER JOIN public.product_product ON
+	 public.sale_order_line.product_id = public.product_product.id
+	INNER JOIN public.product_template ON
 	 public.product_product.product_tmpl_id = public.product_template.id LIMIT 10]]>
 	</queryString>
 	<field name="name" class="java.lang.String">

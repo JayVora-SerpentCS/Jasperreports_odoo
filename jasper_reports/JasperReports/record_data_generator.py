@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
@@ -29,15 +28,14 @@
 #
 ##############################################################################
 
-import csv
 import codecs
+import csv
 from xml.dom.minidom import getDOMImplementation
 
 from .abstract_data_generator import AbstractDataGenerator
 
 
 class CsvRecordDataGenerator(AbstractDataGenerator):
-
     def __init__(self, report, records):
         self.report = report
         self.records = records
@@ -47,16 +45,15 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
     # the parser function.
     def generate(self, file_name):
 
-        with open(file_name, 'wb+') as f:
+        with open(file_name, "wb+") as f:
             csv.QUOTE_ALL = True
             field_names = self.report.field_names
             # JasperReports CSV reader requires an extra colon
             # at the end of the line.
-            writer = csv.DictWriter(
-                f, field_names + [''], delimiter=',', quotechar='"')
+            writer = csv.DictWriter(f, field_names + [""], delimiter=",", quotechar='"')
             header = {}
 
-            for field in field_names + ['']:
+            for field in field_names + [""]:
                 header[field] = field
 
             writer.writerow(header)
@@ -73,20 +70,19 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
 
                     value = record.get(field, False)
                     if value is False:
-                        value = ''
+                        value = ""
                     elif isinstance(value, str):
-                        value = value.encode('utf-8')
+                        value = value.encode("utf-8")
                     elif isinstance(value, float):
-                        value = '%.10f' % value
+                        value = "%.10f" % value
                     elif not isinstance(value, str):
                         value = str(value)
-                    row[self.report.fields[field]['name']] = value
+                    row[self.report.fields[field]["name"]] = value
 
                 writer.writerow(row)
 
 
 class XmlRecordDataGenerator(AbstractDataGenerator):
-
     def __init__(self):
         super(XmlRecordDataGenerator, self).__init__()
         self.document = None
@@ -96,12 +92,11 @@ class XmlRecordDataGenerator(AbstractDataGenerator):
     def generate(self, file_name):
 
         # Once all records have been calculated, create the XML structure
-        self.document = getDOMImplementation().createDocument(
-            None, 'data', None)
+        self.document = getDOMImplementation().createDocument(None, "data", None)
         top_node = self.document.documentElement
 
-        for record in self.data['records']:
-            record_node = self.document.createElement('record')
+        for record in self.data["records"]:
+            record_node = self.document.createElement("record")
             top_node.appendChild(record_node)
 
             for field, value in record.iteritems():
@@ -109,11 +104,11 @@ class XmlRecordDataGenerator(AbstractDataGenerator):
                 record_node.appendChild(field_node)
                 # The rest of field types must be converted into str
                 if value is False:
-                    value = ''
+                    value = ""
                 elif isinstance(value, str):
-                    value = str(value, 'utf-8')
+                    value = str(value, "utf-8")
                 elif isinstance(value, float):
-                    value = '%.10f' % value
+                    value = "%.10f" % value
                 elif not isinstance(value, str):
                     value = str(value)
 
@@ -121,5 +116,5 @@ class XmlRecordDataGenerator(AbstractDataGenerator):
                 field_node.appendChild(value_node)
 
         # Once created, the only missing step is to store the XML into a file
-        with codecs.open(file_name, 'wb+', 'utf-8') as f:
+        with codecs.open(file_name, "wb+", "utf-8") as f:
             top_node.writexml(f)

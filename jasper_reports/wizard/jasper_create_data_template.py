@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2012 Omar Castiñeira Saavedra <omar@pexego.es>
@@ -32,30 +31,37 @@
 ##############################################################################
 
 import base64
+
 from odoo import fields, models
 
 
 class CreateDataTemplate(models.TransientModel):
 
-    _name = 'jasper.create.data.template'
-    _description = 'Create Data Template'
+    _name = "jasper.create.data.template"
+    _description = "Create Data Template"
 
-    model_id = fields.Many2one('ir.model', required=True)
+    model_id = fields.Many2one("ir.model", required=True)
     depth = fields.Integer(required=True, default=1)
-    filename = fields.Char('File Name', size=32)
-    data = fields.Binary('XML')
+    filename = fields.Char("File Name", size=32)
+    data = fields.Binary("XML")
 
     def action_create_xml(self):
-        report_obj = self.env['ir.actions.report']
+        report_obj = self.env["ir.actions.report"]
         for data_template in self:
             xml = report_obj.create_xml(
-                data_template.model_id.model, data_template.depth)
-            base64_str = base64.encodestring(
-                ('%s' % (xml)).encode()).decode().replace('\n', '')
-            data_template.write({
-                'data': base64_str,
-                'filename': str(data_template.model_id.name) + '_template.xml'})
+                data_template.model_id.model, data_template.depth
+            )
+            base64_str = (
+                base64.encodebytes(("%s" % (xml)).encode()).decode().replace("\n", "")
+            )
+            data_template.write(
+                {
+                    "data": base64_str,
+                    "filename": str(data_template.model_id.name) + "_template.xml",
+                }
+            )
             [action] = self.env.ref(
-                'jasper_reports.action_jasper_create_date_template').read()
-            action.update({'res_id': data_template.id})
+                "jasper_reports.action_jasper_create_date_template"
+            ).read()
+            action.update({"res_id": data_template.id})
             return action

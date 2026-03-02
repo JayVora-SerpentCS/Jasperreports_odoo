@@ -36,7 +36,7 @@ import net.sf.jasperreports.engine.JRRewindableDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.design.JRDesignField;
 import net.sf.jasperreports.engine.util.JRLoader;
-import net.sf.jasperreports.engine.JasperFillManager; 
+import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReport;
@@ -83,7 +83,7 @@ import java.util.Locale;
 
 
 
-public class JasperServer { 
+public class JasperServer {
     /* Compiles the given .jrxml (inputFile) */
     public Boolean compile( String jrxmlPath ) throws java.lang.Exception {
         File jrxmlFile;
@@ -149,13 +149,13 @@ public class JasperServer {
         // Fill in report parameters
         JRParameter[] reportParameters = report.getParameters();
         for( int j=0; j < reportParameters.length; j++ ){
-            JRParameter jparam = reportParameters[j];    
+            JRParameter jparam = reportParameters[j];
             if ( jparam.getValueClassName().equals( "java.util.Locale" ) ) {
                 // REPORT_LOCALE
                 if ( ! parameters.containsKey( jparam.getName() ) )
                     continue;
                 String[] locales = ((String)parameters.get( jparam.getName() )).split( "_" );
-                
+
                 Locale locale;
                 if ( locales.length == 1 )
                     locale = new Locale( locales[0] );
@@ -166,7 +166,7 @@ public class JasperServer {
 
                 // Initialize translation system
                 // SQL reports will need to declare the TRANSLATOR paramter for translations to work.
-                // CSV/XML based ones will not need that because we will integrate the translator 
+                // CSV/XML based ones will not need that because we will integrate the translator
                 // with the CsvMultiLanguageDataSource.
                 translator = new Translator( bundlePath(jrxmlPath), locale );
                 parameters.put( "TRANSLATOR", translator );
@@ -268,16 +268,16 @@ public class JasperServer {
         exporter.setParameter(JRExporterParameter.OUTPUT_FILE, outputFile);
         exporter.exportReport();
         System.out.println( "JasperServer: Exported." );
-        return jasperPrint.getPages().size(); 
+        return jasperPrint.getPages().size();
     }
 
-    public static Connection getConnection( Hashtable datasource ) throws java.lang.ClassNotFoundException, java.sql.SQLException { 
-        Connection connection; 
-        Class.forName("org.postgresql.Driver"); 
-        connection = DriverManager.getConnection( (String)datasource.get("dsn"), (String)datasource.get("user"), 
-        (String)datasource.get("password") ); 
-        connection.setAutoCommit(true); 
-        return connection; 
+    public static Connection getConnection( Hashtable datasource ) throws java.lang.ClassNotFoundException, java.sql.SQLException {
+        Connection connection;
+        Class.forName("org.postgresql.Driver");
+        connection = DriverManager.getConnection( (String)datasource.get("dsn"), (String)datasource.get("user"),
+        (String)datasource.get("password") );
+        connection.setAutoCommit(true);
+        return connection;
     }
 
     public static void main (String [] args) {

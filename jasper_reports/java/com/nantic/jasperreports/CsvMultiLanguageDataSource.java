@@ -91,7 +91,7 @@ public class CsvMultiLanguageDataSource implements JRRewindableDataSource {
             String[] p = v.split( "\\|" );
             for( int j=0; j < p.length ; j++ ) {
                 String[] map = p[j].split( "~" );
-                if ( map.length == 2 ) 
+                if ( map.length == 2 )
                     values.put( map[0], map[1] );
             }
             value = (Object)values;
@@ -109,7 +109,5 @@ public class CsvMultiLanguageDataSource implements JRRewindableDataSource {
     public Translator getTranslator() {
         return translator;
     }
-    
+
 }
-
-

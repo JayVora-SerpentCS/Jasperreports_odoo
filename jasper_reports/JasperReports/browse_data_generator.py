@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
@@ -33,12 +32,12 @@
 #
 ##############################################################################
 
-import os
-import csv
 import base64
-import tempfile
 import codecs
+import csv
 import logging
+import os
+import tempfile
 from xml.dom.minidom import getDOMImplementation
 
 from .abstract_data_generator import AbstractDataGenerator
@@ -65,8 +64,8 @@ class BrowseDataGenerator(AbstractDataGenerator):
     def languages(self):
         if self._languages:
             return self._languages
-        languages = self.env['res.lang'].search([('translatable', '=', '1')])
-        self._languages = languages.mapped('code')
+        languages = self.env["res.lang"].search([("translatable", "=", "1")])
+        self._languages = languages.mapped("code")
         return self._languages
 
     def value_in_all_languages(self, model, id, field):
@@ -75,48 +74,50 @@ class BrowseDataGenerator(AbstractDataGenerator):
         values = {}
 
         for language in self.languages():
-            if language == 'en_US':
-                context.update({'lang': False})
+            if language == "en_US":
+                context.update({"lang": False})
             else:
-                context.update({'lang': language})
+                context.update({"lang": language})
             values[language] = model.browse(id).mapped(field)
-            if model._fields[field].type == 'selection' and \
-                    model._fields[field].selection:
-                field_data = model.with_context(context).\
-                    fields_get(allfields=[field])
-                values[language] = dict(field_data[field]['selection']).get(
-                    values[language][0], values[language][0])
+            if (
+                model._fields[field].type == "selection"
+                and model._fields[field].selection
+            ):
+                field_data = model.with_context(context).fields_get(allfields=[field])
+                values[language] = dict(field_data[field]["selection"]).get(
+                    values[language][0], values[language][0]
+                )
         result = []
         for key, value in values.items():
-            result.append('%s~%s' % (key, value))
-        return '|'.join(result)
+            result.append("%s~%s" % (key, value))
+        return "|".join(result)
 
     def find_value_type(self, root, value_metadata):
         if root in value_metadata.keys():
             value_metadata2 = value_metadata[root]
-            if 'type' in value_metadata2.keys():
-                return value_metadata2['type']
+            if "type" in value_metadata2.keys():
+                return value_metadata2["type"]
         return None
 
     def generate_ids(self, record, relations, path, current_records):
-        unrepeated = set([field.partition('/')[0] for field in relations])
+        unrepeated = {field.partition("/")[0] for field in relations}
         for relation in unrepeated:
             value_type = None
-            root = relation.partition('/')[0]
+            root = relation.partition("/")[0]
             if path:
-                current_path = '%s/%s' % (path, root)
+                current_path = "%s/%s" % (path, root)
             else:
                 current_path = root
 
-            if root == 'Attachments':
-                value = self.env['ir.attachment'].search([
-                    ('res_model', '=', record._name),
-                    ('res_id', '=', record.id)])
+            if root == "Attachments":
+                value = self.env["ir.attachment"].search(
+                    [("res_model", "=", record._name), ("res_id", "=", record.id)]
+                )
 
-            elif root == 'User':
-                value = self.env['res.users'].browse([self.uid])
+            elif root == "User":
+                value = self.env["res.users"].browse([self.uid])
             else:
-                if root == 'id':
+                if root == "id":
                     value = record.id
                     value_metadata = record.fields_get([root])
                     value_type = self.find_value_type(root, value_metadata)
@@ -129,15 +130,17 @@ class BrowseDataGenerator(AbstractDataGenerator):
                     self.warning(warning % (root, record._name))
                     continue
 
-                if value_type == 'many2one':
+                if value_type == "many2one":
                     relations2 = [
-                        field.partition('/')[2] for field in relations
-                        if field.partition('/')[0] == root and
-                        field.partition('/')[2]]
+                        field.partition("/")[2]
+                        for field in relations
+                        if field.partition("/")[0] == root and field.partition("/")[2]
+                    ]
                     return self.generate_ids(
-                        value, relations2, current_path, current_records)
+                        value, relations2, current_path, current_records
+                    )
 
-                if not (value_type == 'one2many' or value_type == 'many2many'):
+                if not (value_type == "one2many" or value_type == "many2many"):
                     wrng2 = "Field '%s' in model '%s' is not a relation field."
                     self.warning(wrng2 % (root, self.model))
                     return current_records
@@ -157,11 +160,13 @@ class BrowseDataGenerator(AbstractDataGenerator):
                         current_new_records.append(new)
 
                     relations2 = [
-                        field.partition('/')[2] for field in relations
-                        if field.partition('/')[0] == root and
-                        field.partition('/')[2]]
+                        field.partition("/")[2]
+                        for field in relations
+                        if field.partition("/")[0] == root and field.partition("/")[2]
+                    ]
                     new_records += self.generate_ids(
-                        v, relations2, current_path, current_new_records)
+                        v, relations2, current_path, current_new_records
+                    )
 
                 current_records = new_records
         return current_records
@@ -170,7 +175,8 @@ class BrowseDataGenerator(AbstractDataGenerator):
 class XmlBrowseDataGenerator(BrowseDataGenerator):
     def __init__(self, report, model, env, cr, uid, ids, context):
         super(XmlBrowseDataGenerator, self).__init__(
-            report, model, env, cr, uid, ids, context)
+            report, model, env, cr, uid, ids, context
+        )
         self.all_records = []
         self.document = None
 
@@ -187,11 +193,11 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
         # it acts like a LEFT JOIN against the main model/table.
         for record in self.env[self.model].browse(self.ids):
 
-            new_records = self.generate_ids(
-                record, relations, '', [{'root': record}])
+            new_records = self.generate_ids(record, relations, "", [{"root": record}])
             copies = 1
-            if self.report.copies_field and \
-                    record.__hasattr__(self.report.copies_field):
+            if self.report.copies_field and record.__hasattr__(
+                self.report.copies_field
+            ):
                 copies = int(record.__getattr__(self.report.copies_field))
             for new in new_records:
                 for x in range(copies):
@@ -199,42 +205,42 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
 
         # Once all records have been calculated, create the
         # XML structure itself
-        self.document = getDOMImplementation().createDocument(
-            None, 'data', None)
+        self.document = getDOMImplementation().createDocument(None, "data", None)
         top_node = self.document.documentElement
         for records in self.all_records:
-            record_node = self.document.createElement('record')
+            record_node = self.document.createElement("record")
             top_node.appendChild(record_node)
             self.generate_xml_record(
-                records['root'], records, record_node, '', self.report.fields)
+                records["root"], records, record_node, "", self.report.fields
+            )
 
         # Once created, the only missing step is to store the XML into a file
-        with codecs.open(file_name, 'wb+', 'utf-8') as f:
+        with codecs.open(file_name, "wb+", "utf-8") as f:
             top_node.writexml(f)
 
     def generate_xml_record(self, record, records, record_node, path, fields):
         # One field (many2one, many2many or one2many) can appear several times.
         # Process each "root" field only once by using a set.
-        unrepeated = set([field.partition('/')[0] for field in fields])
+        unrepeated = {field.partition("/")[0] for field in fields}
 
         for field in unrepeated:
-            root = field.partition('/')[0]
+            root = field.partition("/")[0]
             if path:
-                current_path = '%s/%s' % (path, root)
+                current_path = "%s/%s" % (path, root)
             else:
                 current_path = root
             field_node = self.document.createElement(root)
             record_node.appendChild(field_node)
 
-            if root == 'Attachments':
-                value = self.env['ir.attachment'].search(
-                    [('res_model', '=', record._name),
-                     ('res_id', '=', record.id)])
+            if root == "Attachments":
+                value = self.env["ir.attachment"].search(
+                    [("res_model", "=", record._name), ("res_id", "=", record.id)]
+                )
 
-            elif root == 'User':
+            elif root == "User":
                 value = self.env.user
             else:
-                if root == 'id':
+                if root == "id":
                     value = record.id
                     value_metadata = record.fields_get([root])
                     value_type = self.find_value_type(root, value_metadata)
@@ -248,51 +254,59 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                     self.warning(wrng4 % (root, record._name))
 
             # Check if it's a many2one
-            if value_type == 'many2one':
-                fields2 = [f.partition('/')[2] for f in fields
-                           if f.partition('/')[0] == root]
+            if value_type == "many2one":
+                fields2 = [
+                    f.partition("/")[2] for f in fields if f.partition("/")[0] == root
+                ]
                 self.generate_xml_record(
-                    value, records, field_node, current_path, fields2)
+                    value, records, field_node, current_path, fields2
+                )
                 continue
 
             # Check if it's a one2many or many2many
-            if value_type == 'one2many' or value_type == 'many2many':
+            if value_type == "one2many" or value_type == "many2many":
                 if not value:
                     continue
 
-                fields2 = [f.partition('/')[2] for f in fields
-                           if f.partition('/')[0] == root]
+                fields2 = [
+                    f.partition("/")[2] for f in fields if f.partition("/")[0] == root
+                ]
                 if current_path in records:
                     self.generate_xml_record(
-                        records[current_path], records,
-                        field_node, current_path, fields2)
+                        records[current_path],
+                        records,
+                        field_node,
+                        current_path,
+                        fields2,
+                    )
                 else:
                     # If the field is not marked to be iterated use
                     # the first record only
                     self.generate_xml_record(
-                        value[0], records, field_node, current_path, fields2)
+                        value[0], records, field_node, current_path, fields2
+                    )
                 continue
 
             if field in record._fields:
                 field_type = record._fields[field].type
 
             # The rest of field types must be converted into str
-            if field == 'id':
+            if field == "id":
                 # Check for field 'id' because we can't find it's
                 # type in _columns
                 value = str(value)
             elif value is False:
-                value = ''
-            elif field_type == 'date':
-                value = '%s 00:00:00' % str(value)
-            elif field_type == 'binary':
+                value = ""
+            elif field_type == "date":
+                value = "%s 00:00:00" % str(value)
+            elif field_type == "binary":
                 image_id = (record.id, field)
                 if image_id in self.image_files:
                     file_name = self.image_files[image_id]
                 else:
                     fd, file_name = tempfile.mkstemp()
                     try:
-                        os.write(fd, base64.decodestring(value))
+                        os.write(fd, base64.decodebytes(value))
                     finally:
                         os.close(fd)
                     self.temporary_files.append(file_name)
@@ -300,9 +314,9 @@ class XmlBrowseDataGenerator(BrowseDataGenerator):
                 value = file_name
 
             elif isinstance(value, str):
-                value = str(value, 'utf-8')
+                value = str(value, "utf-8")
             elif isinstance(value, float):
-                value = '%.10f' % value
+                value = "%.10f" % value
             elif not isinstance(value, str):
                 value = str(value)
 
@@ -327,26 +341,25 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
         sequence = 0
         copiesField = self.report.copies_field
         for record in self.env[self.model].browse(self.ids):
-            newRecords = self.generate_ids(
-                record, relations, '', [{'root': record}])
+            newRecords = self.generate_ids(record, relations, "", [{"root": record}])
             copies = reportCopies
             if copiesField and record.__hasattr__(copiesField):
                 copies = copies * int(record.__getattr__(copiesField))
             sequence += 1
             subsequence = 0
             for new in newRecords:
-                new['sequence'] = sequence
-                new['subsequence'] = subsequence
+                new["sequence"] = sequence
+                new["subsequence"] = subsequence
                 subsequence += 1
                 for x in range(copies):
-                    new['copy'] = x
+                    new["copy"] = x
                     self.all_records.append(new.copy())
-        with open(file_name, 'w') as csvfile:
-            fieldnames = self.report.field_names + ['']
+        with open(file_name, "w") as csvfile:
+            fieldnames = self.report.field_names + [""]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             # writer.writeheader() #header should only printed from jrxml file.
             header = {}
-            for field in self.report.field_names + ['']:
+            for field in self.report.field_names + [""]:
                 header[field] = field
             writer.writerow(header)
 
@@ -355,49 +368,55 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             for records in self.all_records:
                 row = {}
                 self.generateCsvRecord(
-                    records['root'], records, row, '',
+                    records["root"],
+                    records,
+                    row,
+                    "",
                     self.report.fields,
-                    records['sequence'],
-                    records['subsequence'],
-                    records['copy'])
+                    records["sequence"],
+                    records["subsequence"],
+                    records["copy"],
+                )
 
                 writer.writerow(row)
 
-    def generateCsvRecord(self, record, records, row, path, fields, sequence,
-                          subsequence, copy):
+    def generateCsvRecord(
+        self, record, records, row, path, fields, sequence, subsequence, copy
+    ):
         # One field (many2one, many2many or one2many) can appear several times
         # Process each "root" field only once by using a set.
-        unrepeated = set([field.partition('/')[0] for field in fields])
+        unrepeated = {field.partition("/")[0] for field in fields}
 
         for field in unrepeated:
             value_type = None
-            root = field.partition('/')[0]
+            root = field.partition("/")[0]
             current_path = root
             if path:
-                current_path = '%s/%s' % (path, root)
+                current_path = "%s/%s" % (path, root)
 
-            if root == 'Attachments':
-                value = self.env['ir.attachment'].search(
-                    [('res_model', '=', record._name),
-                     ('res_id', '=', record.id)])
+            if root == "Attachments":
+                value = self.env["ir.attachment"].search(
+                    [("res_model", "=", record._name), ("res_id", "=", record.id)]
+                )
 
-            elif root == 'User':
-                value = self.env['res.users'].browse(self.uid)
-            elif root == 'Special':
-                fields2 = [f.partition('/')[2] for f in fields
-                           if f.partition('/')[0] == root]
+            elif root == "User":
+                value = self.env["res.users"].browse(self.uid)
+            elif root == "Special":
+                fields2 = [
+                    f.partition("/")[2] for f in fields if f.partition("/")[0] == root
+                ]
 
                 for f in fields2:
-                    p = '%s/%s' % (current_path, f)
-                    if f == 'sequence':
-                        row[self.report.fields[p]['name']] = sequence
-                    elif f == 'subsequence':
-                        row[self.report.fields[p]['name']] = subsequence
-                    elif f == 'copy':
-                        row[self.report.fields[p]['name']] = copy
+                    p = "%s/%s" % (current_path, f)
+                    if f == "sequence":
+                        row[self.report.fields[p]["name"]] = sequence
+                    elif f == "subsequence":
+                        row[self.report.fields[p]["name"]] = subsequence
+                    elif f == "copy":
+                        row[self.report.fields[p]["name"]] = copy
                 continue
             else:
-                if root == 'id':
+                if root == "id":
                     value = record.id
                     value_metadata = record.fields_get([root])
                     value_type = self.find_value_type(root, value_metadata)
@@ -408,36 +427,57 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 else:
                     value = None
                     if root:
-                        wrng6 = ("Field '%s' (path: %s) does"
-                                 "not exist in model '%s'.")
-                        self.warning(
-                            wrng6 % (root, current_path, record._name))
+                        wrng6 = "Field '%s' (path: %s) does" "not exist in model '%s'."
+                        self.warning(wrng6 % (root, current_path, record._name))
 
             # Check if it's a many2one
-            if value_type == 'many2one':
-                fields2 = [f.partition('/')[2] for f in fields
-                           if f.partition('/')[0] == root]
+            if value_type == "many2one":
+                fields2 = [
+                    f.partition("/")[2] for f in fields if f.partition("/")[0] == root
+                ]
                 self.generateCsvRecord(
-                    value, records, row, current_path,
-                    fields2, sequence, subsequence, copy)
+                    value,
+                    records,
+                    row,
+                    current_path,
+                    fields2,
+                    sequence,
+                    subsequence,
+                    copy,
+                )
                 continue
 
             # Check if it's a one2many or many2many
-            if value_type == 'one2many' or value_type == 'many2many':
+            if value_type == "one2many" or value_type == "many2many":
                 if not value:
                     continue
-                fields2 = [f.partition('/')[2] for f in fields
-                           if f.partition('/')[0] == root]
+                fields2 = [
+                    f.partition("/")[2] for f in fields if f.partition("/")[0] == root
+                ]
                 if current_path in records:
                     self.generateCsvRecord(
-                        records[current_path], records, row,
-                        current_path, fields2, sequence, subsequence, copy)
+                        records[current_path],
+                        records,
+                        row,
+                        current_path,
+                        fields2,
+                        sequence,
+                        subsequence,
+                        copy,
+                    )
                 else:
                     # If the field is not marked to be iterated
                     # use the first record only
                     self.generateCsvRecord(
-                        value[0], records, row,
-                        current_path, fields2, sequence, subsequence, copy)
+                        value[0],
+                        records,
+                        row,
+                        current_path,
+                        fields2,
+                        sequence,
+                        subsequence,
+                        copy,
+                    )
                 continue
 
             # The field might not appear in the self.report.fields
@@ -451,24 +491,23 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 continue
 
             # Show all translations for a field
-            type = self.report.fields[current_path]['type']
-            if type == 'java.lang.Object' and record.id:
-                value = self.value_in_all_languages(
-                    record._name, record.id, root)
+            type = self.report.fields[current_path]["type"]
+            if type == "java.lang.Object" and record.id:
+                value = self.value_in_all_languages(record._name, record.id, root)
 
             if field in record._fields:
                 field_type = record._fields[field].type
 
             # The rest of field types must be converted into str
-            if field == 'id':
+            if field == "id":
                 # Check for field 'id' because we can't find it's
                 # type in _columns
                 value = str(value)
             elif value in (False, None):
-                value = ''
-            elif field_type == 'date':
-                value = '%s 00:00:00' % str(value)
-            elif field_type == 'binary':
+                value = ""
+            elif field_type == "date":
+                value = "%s 00:00:00" % str(value)
+            elif field_type == "binary":
 
                 image_id = (record.id, field)
 
@@ -477,7 +516,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 else:
                     fd, file_name = tempfile.mkstemp()
                     try:
-                        os.write(fd, base64.decodestring(value))
+                        os.write(fd, base64.decodebytes(value))
                     finally:
                         os.close(fd)
                     self.temporary_files.append(file_name)
@@ -486,7 +525,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             elif isinstance(value, str):
                 value = value
             elif isinstance(value, float):
-                value = '%.10f' % value
+                value = "%.10f" % value
             elif not isinstance(value, str):
                 value = str(value)
-            row[self.report.fields[current_path]['name']] = value
+            row[self.report.fields[current_path]["name"]] = value

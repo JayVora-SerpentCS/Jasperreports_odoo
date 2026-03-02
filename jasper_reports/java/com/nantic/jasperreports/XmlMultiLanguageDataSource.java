@@ -64,7 +64,7 @@ public class XmlMultiLanguageDataSource extends JRXmlDataSource {
             for( int j=0; j < p.length ; j++ ) {
                 //System.out.println( p[j] );
                 String[] map = p[j].split( "~" );
-                if ( map.length == 2 ) 
+                if ( map.length == 2 )
                     values.put( map[0], map[1] );
             }
             value = (Object)values;
@@ -74,5 +74,3 @@ public class XmlMultiLanguageDataSource extends JRXmlDataSource {
         return value;
     }
 }
-
-

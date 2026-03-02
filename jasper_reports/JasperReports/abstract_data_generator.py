@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
@@ -31,7 +30,6 @@
 
 
 class AbstractDataGenerator:
-
     def __init__(self):
         pass
 

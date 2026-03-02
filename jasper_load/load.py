@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
@@ -28,9 +27,10 @@
 ##############################################################################
 
 
+import logging
 import os
 import signal
-import logging
+
 import odoo
 import odoo.tools.config as Config
 from odoo.tools import dumpstacks, log_ormcache_stats
@@ -39,14 +39,14 @@ _logger = logging.getLogger(__name__)
 
 
 def gevent_server_init(self, app):
-    """"To overwrite the openerp gevent server __init__ method and changed
-    xmlrpc port no instead of the longpolling port  """
+    """ "To overwrite the openerp gevent server __init__ method and changed
+    xmlrpc port no instead of the longpolling port"""
 
-    self.port = Config['http_port']
+    self.port = Config["http_port"]
     self.httpd = None
     self.app = app
     # config
-    self.interface = Config['http_interface'] or '0.0.0.0'
+    self.interface = Config["http_interface"] or "0.0.0.0"
     # runtime
     self.pid = os.getpid()
 
@@ -55,15 +55,17 @@ odoo.service.server.GeventServer.__init__ = gevent_server_init
 
 
 def prefork_server_init(self, app):
-    """"To overwrite the openerp prefork server __init__ method and changed
-    longpolling port no instead of the xmlrpc port  """
+    """ "To overwrite the openerp prefork server __init__ method and changed
+    longpolling port no instead of the xmlrpc port"""
 
-    self.address = Config['http_enable'] and \
-        (Config['http_interface'] or '0.0.0.0', Config['longpolling_port'])
-    self.population = Config['workers']
-    self.timeout = Config['limit_time_real']
-    self.limit_request = Config['limit_request']
-    self.cron_timeout = Config['limit_time_real_cron'] or None
+    self.address = Config["http_enable"] and (
+        Config["http_interface"] or "0.0.0.0",
+        Config["longpolling_port"],
+    )
+    self.population = Config["workers"]
+    self.timeout = Config["limit_time_real"]
+    self.limit_request = Config["limit_request"]
+    self.cron_timeout = Config["limit_time_real_cron"] or None
     if self.cron_timeout == -1:
         self.cron_timeout = self.timeout
     # working vars
@@ -86,19 +88,22 @@ def gevent_server_start(self):
     import gevent
     from gevent.wsgi import WSGIServer
 
-    if os.name == 'posix':
+    if os.name == "posix":
         signal.signal(signal.SIGQUIT, dumpstacks)
         signal.signal(signal.SIGUSR1, log_ormcache_stats)
 
     gevent.spawn(self.watchdog)
     self.httpd = WSGIServer((self.interface, self.port), self.app)
-    _logger.info('Evented Service (longpolling) running on %s:%s',
-                 self.interface, self.port)
+    _logger.info(
+        "Evented Service (longpolling) running on %s:%s", self.interface, self.port
+    )
     try:
         self.httpd.serve_forever()
     except BaseException:
-        _logger.exception("Evented Service (longpolling): uncaught error\
-        during main loop")
+        _logger.exception(
+            "Evented Service (longpolling): uncaught error\
+        during main loop"
+        )
         raise
 
 

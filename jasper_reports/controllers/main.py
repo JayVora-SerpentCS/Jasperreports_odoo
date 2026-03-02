@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.
@@ -29,57 +28,66 @@
 
 import json
 
-from odoo.addons.web.controllers import main as report
-from odoo.http import content_disposition, route, request, serialize_exception as _serialize_exception
 from werkzeug.urls import url_decode
+
+from odoo.http import (
+    content_disposition,
+    request,
+    route,
+    serialize_exception as _serialize_exception,
+)
 from odoo.tools import html_escape
 from odoo.tools.safe_eval import safe_eval, time
 
-class ReportController(report.ReportController):
+from odoo.addons.web.controllers import report
 
+
+class ReportController(report.ReportController):
     @route()
     def report_routes(self, reportname, docids=None, converter=None, **data):
-        if converter == 'jasper':
-            report_jas = request.env[
-                'ir.actions.report']._get_report_from_name(reportname)
+        if converter == "jasper":
+            report_jas = request.env["ir.actions.report"]._get_report_from_name(
+                reportname
+            )
             context = dict(request.env.context)
             if docids:
-                docids = [int(i) for i in docids.split(',')]
-            if data.get('options'):
-                data.update(json.loads(data.pop('options')))
-            if data.get('context'):
+                docids = [int(i) for i in docids.split(",")]
+            if data.get("options"):
+                data.update(json.loads(data.pop("options")))
+            if data.get("context"):
                 # Ignore 'lang' here, because the context in data is the one
                 # from the webclient *but* if the user explicitely wants to
                 # change the lang, this mechanism overwrites it.
-                data['context'] = json.loads(data['context'])
-                if data['context'].get('lang'):
-                    del data['context']['lang']
-                context.update(data['context'])
+                data["context"] = json.loads(data["context"])
+                if data["context"].get("lang"):
+                    del data["context"]["lang"]
+                context.update(data["context"])
             # Get the report and output type
-            jasper, output_type = report_jas.with_context(
-                context).render_jasper(docids, data=data)
-            report_name = str(report_jas.name) + '.' + output_type
+            jasper, output_type = report_jas.with_context(context).render_jasper(
+                docids, data=data
+            )
+            str(report_jas.name) + "." + output_type
             content_dict = {
-                'pdf': 'application/pdf',
-                'html': 'application/html',
-                'csv': 'text/csv',
-                'xls': 'application/xls',
-                'rtf': 'application/octet-stream',
-                'odt': 'application/vnd.oasis.opendocument.text',
-                'ods': 'application/vnd.oasis.opendocument.spreadsheet',
-                'txt': 'text/plain',
+                "pdf": "application/pdf",
+                "html": "application/html",
+                "csv": "text/csv",
+                "xls": "application/xls",
+                "rtf": "application/octet-stream",
+                "odt": "application/vnd.oasis.opendocument.text",
+                "ods": "application/vnd.oasis.opendocument.spreadsheet",
+                "txt": "text/plain",
             }
             pdfhttpheaders = [
-                ('Content-Type', content_dict.get(output_type)),
-                ('Content-Length', len(jasper))
+                ("Content-Type", content_dict.get(output_type)),
+                ("Content-Length", len(jasper)),
             ]
             return request.make_response(jasper, headers=pdfhttpheaders)
         return super(ReportController, self).report_routes(
-            reportname, docids, converter, **data)
-
+            reportname, docids, converter, **data
+        )
 
     @route()
-    def report_download(self, data, token, context=None):
+    def report_download(self, data, context=None, token=None):
         """This function is used by 'action_manager_report.js' in order to trigger the download of
         a pdf/controller report.
 
@@ -89,30 +97,40 @@ class ReportController(report.ReportController):
         """
         requestcontent = json.loads(data)
         url, type = requestcontent[0], requestcontent[1]
-        if type == 'jasper':
+        if type == "jasper":
             try:
-                converter = 'jasper'
-                extension = 'pdf'
-                pattern = '/report/jasper/'
-                    
-                reportname = url.split(pattern)[1].split('?')[0]
+                converter = "jasper"
+                extension = "pdf"
+                pattern = "/report/jasper/"
+
+                reportname = url.split(pattern)[1].split("?")[0]
 
                 docids = None
-                if '/' in reportname:
-                    reportname, docids = reportname.split('/')
+                if "/" in reportname:
+                    reportname, docids = reportname.split("/")
 
                 if docids:
                     # Generic report:
-                    response = self.report_routes(reportname, docids=docids, converter=converter, context=context)
+                    response = self.report_routes(
+                        reportname, docids=docids, converter=converter, context=context
+                    )
                 else:
                     # Particular report:
-                    data = dict(url_decode(url.split('?')[1]).items())  # decoding the args represented in JSON
-                    if 'context' in data:
-                        context, data_context = json.loads(context or '{}'), json.loads(data.pop('context'))
+                    data = dict(
+                        url_decode(url.split("?")[1]).items()
+                    )  # decoding the args represented in JSON
+                    if "context" in data:
+                        context, data_context = json.loads(context or "{}"), json.loads(
+                            data.pop("context")
+                        )
                         context = json.dumps({**context, **data_context})
-                    response = self.report_routes(reportname, converter=converter, context=context, **data)
+                    response = self.report_routes(
+                        reportname, converter=converter, context=context, **data
+                    )
 
-                report = request.env['ir.actions.report']._get_report_from_name(reportname)
+                report = request.env["ir.actions.report"]._get_report_from_name(
+                    reportname
+                )
                 extension = report.jasper_output or "pdf"
                 filename = "%s.%s" % (report.name, extension)
 
@@ -120,19 +138,17 @@ class ReportController(report.ReportController):
                     ids = [int(x) for x in docids.split(",")]
                     obj = request.env[report.model].browse(ids)
                     if report.print_report_name and not len(obj) > 1:
-                        report_name = safe_eval(report.print_report_name, {'object': obj, 'time': time})
+                        report_name = safe_eval(
+                            report.print_report_name, {"object": obj, "time": time}
+                        )
                         filename = "%s.%s" % (report_name, extension)
-                response.headers.add('Content-Disposition', content_disposition(filename))
-                response.set_cookie('fileToken', token)
+                response.headers.add(
+                    "Content-Disposition", content_disposition(filename)
+                )
                 return response
             except Exception as e:
                 se = _serialize_exception(e)
-                error = {
-                    'code': 200,
-                    'message': "Odoo Server Error",
-                    'data': se
-                }
+                error = {"code": 200, "message": "Odoo Server Error", "data": se}
                 return request.make_response(html_escape(json.dumps(error)))
         else:
-            return super(ReportController, self).report_download(data, token, context)
-
+            return super(ReportController, self).report_download(data, context, token)

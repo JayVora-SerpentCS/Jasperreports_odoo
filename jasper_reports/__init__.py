@@ -36,10 +36,12 @@ from . import wizard
 
 try:
     import release
-    if release.major_version != '5.0':
+
+    if release.major_version != "5.0":
         from .JasperReports import http_server
 except ImportError:
     import odoo
     from odoo import release
-    if release.major_version != '5.0':
+
+    if release.major_version != "5.0":
         from .JasperReports import http_server
