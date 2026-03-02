@@ -67,4 +67,3 @@ echo "Creating report..."
 java ReportCreator "$serverdir/$report.jasper" "$xml" "$output" "$dsn" "$user" "$password" "$params"
 
 popd
-

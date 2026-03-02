@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (C) 2019-Today Serpent Consulting Services Pvt. Ltd.

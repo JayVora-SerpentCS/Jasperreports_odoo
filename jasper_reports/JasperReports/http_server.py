@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
@@ -32,8 +31,9 @@
 ##############################################################################
 
 from http.server import BaseHTTPRequestHandler
-from odoo import netsvc
-from odoo import tools
+
+from odoo import netsvc, tools
+
 from .websrv_lib import reg_http_service
 
 
@@ -52,46 +52,52 @@ class JasperHandler(BaseHTTPRequestHandler):
         pass
 
     def parse_request(self, *args, **kwargs):
-        path = self.raw_requestline.replace('GET', '').strip().split(' ')[0]
+        path = self.raw_requestline.replace("GET", "").strip().split(" ")[0]
         try:
             result = self.execute(path)
         except Exception as e:
-            result = '<error><exception>%s</exception></error>' % (e.args,)
+            result = "<error><exception>%s</exception></error>" % (e.args,)
         self.wfile.write(result)
         return True
 
     def execute(self, path):
-        path = path.strip('/')
-        path = path.split('?')
+        path = path.strip("/")
+        path = path.split("?")
         model = path[0]
         arguments = {}
-        for argument in path[-1].split('&'):
-            argument = argument.split('=')
+        for argument in path[-1].split("&"):
+            argument = argument.split("=")
             arguments[argument[0]] = argument[-1]
 
-        use_cache = tools.config.get('jasper_cache', True)
+        use_cache = tools.config.get("jasper_cache", True)
         database = arguments.get(
-            'database', tools.config.get('jasper_database', 'stable8'))
-        user = arguments.get('user', tools.config.get('jasper_user', 'admin'))
-        password = arguments.get(
-            'password', tools.config.get('jasper_password', 'a'))
-        depth = int(arguments.get('depth', tools.config.get(
-            'jasper_depth', 3)))
-        language = arguments.get(
-            'language', tools.config.get('jasper_language', 'en'))
+            "database", tools.config.get("jasper_database", "stable8")
+        )
+        user = arguments.get("user", tools.config.get("jasper_user", "admin"))
+        password = arguments.get("password", tools.config.get("jasper_password", "a"))
+        depth = int(arguments.get("depth", tools.config.get("jasper_depth", 3)))
+        language = arguments.get("language", tools.config.get("jasper_language", "en"))
         # Check if data is in cache already
-        key = '%s|%s|%s|%s|%s' % (model, database, user, depth, language)
+        key = "%s|%s|%s|%s|%s" % (model, database, user, depth, language)
         if key in self.cache:
             return self.cache[key]
 
-        context = {'lang': language}
-        uid = netsvc.dispatch_rpc(
-            'common', 'login', (database, user, password))
+        context = {"lang": language}
+        uid = netsvc.dispatch_rpc("common", "login", (database, user, password))
         result = netsvc.dispatch_rpc(
-            'object', 'execute',
-            (database, uid, password,
-             'ir.actions.report',
-             'create_xml', model, depth, context))
+            "object",
+            "execute",
+            (
+                database,
+                uid,
+                password,
+                "ir.actions.report",
+                "create_xml",
+                model,
+                depth,
+                context,
+            ),
+        )
 
         if use_cache:
             self.cache[key] = result
@@ -99,4 +105,4 @@ class JasperHandler(BaseHTTPRequestHandler):
         return result
 
 
-reg_http_service('/jasper/', JasperHandler)
+reg_http_service("/jasper/", JasperHandler)

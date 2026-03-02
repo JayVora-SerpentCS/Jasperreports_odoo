@@ -55,9 +55,9 @@ public class Translator {
         if ( unavailableResources.containsKey( locale ) )
             return false;
         if ( ! resources.containsKey( locale ) ) {
-            
+
             String fileName = baseName + "_" + locale.toString() + ".properties";
-            ResourceBundle bundle; 
+            ResourceBundle bundle;
             try {
                 FileInputStream fis = new FileInputStream( fileName );
                 bundle = new PropertyResourceBundle(fis);
@@ -203,4 +203,3 @@ public class Translator {
         return trn(defaultLocale, text, pluralText, n, objects);
     }
 }
-

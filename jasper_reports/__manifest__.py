@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
@@ -33,29 +32,23 @@
 
 {
     "name": "Jasper Reports",
-    "version": "14.0.0.1.1",
-    "summary": '''This module integrates Jasper Reports with Odoo.''',
+    "version": "17.0.1.0.0",
+    "summary": """This module integrates Jasper Reports with Odoo.""",
     "author": "NaN·tic, Serpent Consulting Services Pvt. Ltd.",
-    "website": "http://www.nan-tic.com, http://www.serpentcs.com",
-    'images': [
-        'images/jasper_reports-hover.png',
-        'images/jasper_reports.png'
-    ],
-    "depends": [
-        "sale", "jasper_load"
-    ],
+    "website": "https://www.nan-tic.com, https://www.serpentcs.com",
+    "images": ["images/jasper_reports-hover.png", "images/jasper_reports.png"],
+    "depends": ["sale", "jasper_load"],
     "category": "Generic Modules/Jasper Reports",
     "data": [
-        'security/ir.model.access.csv',
-        'data/jasper_data.xml',
-        'wizard/jasper_create_data_template.xml',
-#        'views/webclient_templates.xml',
-        'views/jasper_report_menu.xml',
-        'views/report_xml_view.xml',
-        'views/res_company_view.xml',
+        "security/ir.model.access.csv",
+        "data/jasper_data.xml",
+        "wizard/jasper_create_data_template.xml",
+        "views/jasper_report_menu.xml",
+        "views/report_xml_view.xml",
+        "views/res_company_view.xml",
     ],
     "demo": [
-        'demo/jasper_report_demo.xml',
+        "demo/jasper_report_demo.xml",
     ],
     "assets": {
         "web.assets_backend": [

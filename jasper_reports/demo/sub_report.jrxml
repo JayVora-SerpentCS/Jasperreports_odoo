@@ -25,9 +25,9 @@
 	public.sale_order_line.discount
 FROM public.product_template,
 	public.res_partner
-	INNER JOIN public.sale_order ON 
-	 public.sale_order.partner_id = public.res_partner.id 
-	INNER JOIN public.sale_order_line ON 
+	INNER JOIN public.sale_order ON
+	 public.sale_order.partner_id = public.res_partner.id
+	INNER JOIN public.sale_order_line ON
 	 public.sale_order_line.order_id = public.sale_order.id LIMIT 1]]>
 	</queryString>
 	<field name="name" class="java.lang.String">

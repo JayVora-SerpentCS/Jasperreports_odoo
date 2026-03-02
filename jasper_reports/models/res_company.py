@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2012 Omar Castiñeira Saavedra <omar@pexego.es>
@@ -31,13 +30,13 @@
 #
 ##############################################################################
 
-from odoo import models, fields
+from odoo import fields, models
 
 
 class ResCompany(models.Model):
 
-    _inherit = 'res.company'
+    _inherit = "res.company"
 
     java_path = fields.Char(
-        help="Your java path which was downloaded "
-        "from http://www.serpentcs.com/")
+        help="Your java path which was downloaded " "from http://www.serpentcs.com/"
+    )

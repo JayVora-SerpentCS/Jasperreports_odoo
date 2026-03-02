@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2012 NaN Projectes de Programari Lliure, S.L.
@@ -30,25 +29,24 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 ##############################################################################
-import os
 import glob
-import time
+import logging
+import os
 import socket
 import subprocess
+import time
 from xmlrpc import client as xmlrpclib
-import logging
 
 from odoo.exceptions import UserError
 from odoo.tools.translate import _
 
 
 class JasperServer:
-
     def __init__(self, port=8090):
         self.port = port
         self.pidfile = None
         self.javapath = None
-        url = 'http://localhost:%d' % port
+        url = "http://localhost:%d" % port
         self.proxy = xmlrpclib.ServerProxy(url, allow_none=True)
         self.logger = logging.getLogger(__name__)
 
@@ -62,48 +60,59 @@ class JasperServer:
     def start(self):
         java_path = self.javapath
         if java_path is False:
-            raise UserError(_('Java Path Not Found !\n'
-                              'Please add java path into the jasper '
-                              'configuration page under the company form '
-                              'view'))
+            raise UserError(
+                _(
+                    "Java Path Not Found !\n"
+                    "Please add java path into the jasper "
+                    "configuration page under the company form "
+                    "view"
+                )
+            )
         else:
-            libraries = str(java_path) + '/lib'
+            libraries = str(java_path) + "/lib"
             self.javapath = java_path
             if os.path.exists(str(libraries)):
                 self.javapath = java_path
             else:
-                raise UserError(_('libraries Not Found !\n'
-                                  'No libraries found in Java'))
+                raise UserError(
+                    _("libraries Not Found !\n" "No libraries found in Java")
+                )
 
         env = {}
         env.update(os.environ)
-        if os.name == 'nt':
-            a = ';'
+        if os.name == "nt":
+            a = ";"
         else:
-            a = ':'
-        libs = os.path.join(self.path(), '..', 'java', 'lib', '*.jar')
-        env['CLASSPATH'] = os.path.join(self.path(), '..', 'java' + a) + \
-            a.join(glob.glob(libs)) + a + os.path.join(
-                self.path(), '..', 'custom_reports')
+            a = ":"
+        libs = os.path.join(self.path(), "..", "java", "lib", "*.jar")
+        env["CLASSPATH"] = (
+            os.path.join(self.path(), "..", "java" + a)
+            + a.join(glob.glob(libs))
+            + a
+            + os.path.join(self.path(), "..", "custom_reports")
+        )
 
-        cwd = os.path.join(self.path(), '..', 'java')
+        cwd = os.path.join(self.path(), "..", "java")
 
         # Set headless = True because otherwise, java may use
         # existing X session and if session is closed JasperServer
         # would start throwing exceptions. So we better avoid
         # using the session at all.
-        command = ['java', '-Djava.awt.headless=true',
-                   '-XX:MaxHeapSize=512m',
-                   '-XX:InitialHeapSize=512m',
-                   '-XX:CompressedClassSpaceSize=64m',
-                   '-XX:MaxMetaspaceSize=256m',
-                #    '-XX:+UseConcMarkSweepGC',   ### OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
-                   'com.nantic.jasperreports.JasperServer',
-                   str(self.port)]
+        command = [
+            "java",
+            "-Djava.awt.headless=true",
+            "-XX:MaxHeapSize=512m",
+            "-XX:InitialHeapSize=512m",
+            "-XX:CompressedClassSpaceSize=64m",
+            "-XX:MaxMetaspaceSize=256m",
+            #    '-XX:+UseConcMarkSweepGC',   ### OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
+            "com.nantic.jasperreports.JasperServer",
+            str(self.port),
+        ]
         process = subprocess.Popen(command, env=env, cwd=cwd)
 
         if self.pidfile:
-            with open(self.pidfile, 'w') as f:
+            with open(self.pidfile, "w") as f:
                 f.write(str(process.pid))
 
     def execute(self, *args):
@@ -120,8 +129,7 @@ class JasperServer:
                     return self.proxy.Report.execute(*args)
                 except socket.error as e:
                     self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
-                    pass
                 except xmlrpclib.Fault as e:
-                    raise UserError(_('Report Error\n%s') % e)
+                    raise UserError(_("Report Error\n%s") % e)
         except xmlrpclib.Fault as e:
-            raise UserError(_('Report Error\n%s') % e)
+            raise UserError(_("Report Error\n%s") % e)
