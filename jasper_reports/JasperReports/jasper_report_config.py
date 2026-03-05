@@ -33,6 +33,7 @@
 import json
 import logging
 import os
+import shutil
 import tempfile
 import time
 
@@ -70,6 +71,7 @@ class Report:
         self.report_path = None
         self.report = None
         self.temporary_files = []
+        self.temporary_dirs = []
         self.output_format = "pdf"
 
     def execute(self):
@@ -100,6 +102,12 @@ class Report:
 
             if not os.path.lexists(self.report_path):
                 self.report_path = self.addons_path(path=data.report_file)
+
+            self.report_path, temp_dir = JasperReport.prepare_compatible_report_path(
+                self.report_path
+            )
+            if temp_dir:
+                self.temporary_dirs.append(temp_dir)
 
             # Get report information from the jrxml file
             logger.info("Requested report: '%s'" % self.report_path)
@@ -208,7 +216,14 @@ class Report:
                     except os.error:
                         logger.warning("Could not remove file '%s'." % f)
 
+                for d in self.temporary_dirs:
+                    try:
+                        shutil.rmtree(d)
+                    except os.error:
+                        logger.warning("Could not remove directory '%s'." % d)
+
             self.temporary_files = []
+            self.temporary_dirs = []
 
             if self.context.get("return_pages"):
                 return data, self.output_format, pages
