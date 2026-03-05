@@ -35,6 +35,7 @@ import hashlib
 import io
 import logging
 import os
+import re
 import time
 from xml.dom.minidom import getDOMImplementation
 
@@ -115,21 +116,19 @@ class ReportXml(models.Model):
         :param attachment_name: The optional name of the attachment.
         :return: A recordset of length <=1 or None
         """
+        self.ensure_one()
         attachment_obj = self.env["ir.attachment"]
-        for report in self:
-            attachment_name = str(report.name) + "." + report.jasper_output
-            if report.attachment:
-                attachment_name = safe_eval(
-                    report.attachment, {"object": record, "time": time}
-                )
-            return attachment_obj.search(
-                [
-                    ("datas_fname", "=", attachment_name),
-                    ("res_model", "=", report.model),
-                    ("res_id", "in", record.ids),
-                ],
-                limit=1,
-            )
+        attachment_name = str(self.name) + "." + self.jasper_output
+        if self.attachment:
+            attachment_name = safe_eval(self.attachment, {"object": record, "time": time})
+        return attachment_obj.search(
+            [
+                ("name", "=", attachment_name),
+                ("res_model", "=", self.model),
+                ("res_id", "=", record.id),
+            ],
+            limit=1,
+        )
 
     def postprocess_jasper_report(self, record, buffer):
         """Hook to handle post processing during the jasper report generation.
@@ -141,64 +140,47 @@ class ReportXml(models.Model):
                             reading both times.
         :return: The newly generated attachment if no AccessError, else None.
         """
+        self.ensure_one()
         attachment_obj = self.env["ir.attachment"]
-        for report in self:
-            attachment_name = str(report.name) + "." + report.jasper_output
-            if report.attachment:
-                attachment_name = safe_eval(
-                    report.attachment, {"object": record, "time": time}
-                )
-            attachment_vals = {
-                "name": attachment_name,
-                "datas": base64.encodebytes(buffer.getvalue()),
-                "datas_fname": attachment_name,
-                "res_model": report.model,
-                "res_id": record.id,
-            }
-            try:
-                return attachment_obj.create(attachment_vals)
-            except AccessError:
-                _logger.warn(
-                    "Cannot save %s report %r as attachment",
-                    report.jasper_output,
-                    attachment_vals["name"],
-                )
-            else:
-                _logger.info(
-                    "The %s document %s is now saved in the database",
-                    report.jasper_output,
-                    attachment_vals["name"],
-                )
-            return None
+        attachment_name = str(self.name) + "." + self.jasper_output
+        if self.attachment:
+            attachment_name = safe_eval(self.attachment, {"object": record, "time": time})
+        attachment_vals = {
+            "name": attachment_name,
+            "datas": base64.b64encode(buffer.getvalue()),
+            "datas_fname": attachment_name,
+            "res_model": self.model,
+            "res_id": record.id,
+        }
+        try:
+            return attachment_obj.create(attachment_vals)
+        except AccessError:
+            _logger.warning(
+                "Cannot save %s report %r as attachment",
+                self.jasper_output,
+                attachment_vals["name"],
+            )
+        return None
 
     @api.model
     def render_jasper(self, docids, data):
+        self.ensure_one()
         self.update()
         context = self.env.context
         uid = self.env.uid
         cr = self.env.cr
-        if not data:
-            data = {}
-        doc_records = self.model_id.browse(docids)
+        if isinstance(docids, int):
+            docids = [docids]
+        docids = docids or []
+        data = dict(data or {})
+        doc_records = self.env[self.model].browse(docids)
         report_model_name = "report.%s" % self.report_name
-        self.env.cr.execute(
-            "SELECT id, model FROM "
-            "ir_act_report_xml WHERE "
-            "report_name = %s LIMIT 1",
-            (self.report_name,),
-        )
-        record = self.env.cr.dictfetchone()
-        report_model = self.search([("report_name", "=", report_model_name)])
-        if report_model is None:
-            raise UserError(_("%s model not found.") % report_model_name)
-        data.update({"env": self.env, "model": record.get("model")})
+        data.update({"env": self.env, "model": self.model})
         if self.attachment_use:
-            save_in_attachment = {}
+            streams = []
             for doc_record in doc_records:
                 attachment_id = self.retrieve_jasper_attachment(doc_record)
-                if attachment_id:
-                    save_in_attachment[doc_record.id] = attachment_id
-                else:
+                if not attachment_id:
                     r = Report(
                         report_model_name, cr, uid, [doc_record.id], data, context
                     )
@@ -207,8 +189,20 @@ class ReportXml(models.Model):
                     attachment_id = self.postprocess_jasper_report(
                         doc_record, jasper_content_stream
                     )
-                    save_in_attachment[doc_record.id] = attachment_id
-            return self._post_pdf(save_in_attachment), self.jasper_output
+                if attachment_id:
+                    streams.append(io.BytesIO(attachment_id.raw))
+            if not streams:
+                return b"", self.jasper_output
+            try:
+                if self.jasper_output == "pdf" and len(streams) > 1:
+                    with self._merge_pdfs(streams) as merged_stream:
+                        return merged_stream.getvalue(), self.jasper_output
+                if len(streams) == 1:
+                    return streams[0].getvalue(), self.jasper_output
+                return b"".join(stream.getvalue() for stream in streams), self.jasper_output
+            finally:
+                for stream in streams:
+                    stream.close()
         r = Report(report_model_name, cr, uid, docids, data, context)
         jasper = r.execute()
         return jasper, self.jasper_output
@@ -218,16 +212,16 @@ class ReportXml(models.Model):
         res = super(ReportXml, self)._get_report_from_name(report_name)
         if res:
             return res
-        report_obj = self.env["ir.actions.report"]
         domain = [("report_type", "=", "jasper"), ("report_name", "=", report_name)]
-        context = self.env["res.users"].context_get()
-        return report_obj.with_context(context).search(domain, limit=1)
+        return self.env["ir.actions.report"].search(domain, limit=1)
 
     @api.model_create_multi
     def create(self, values):
         if self.env.context and self.env.context.get("jasper_report"):
             for value in values:
-                value["model"] = self.env["ir.model"].browse(value["model_id"]).model
+                model_id = value.get("model_id")
+                if model_id:
+                    value["model"] = self.env["ir.model"].browse(model_id).model
                 value["type"] = "ir.actions.report"
                 value["report_type"] = "jasper"
                 value["jasper_report"] = True
@@ -236,7 +230,10 @@ class ReportXml(models.Model):
     def write(self, values):
         if self.env.context and self.env.context.get("jasper_report"):
             if "model_id" in values:
-                values["model"] = self.env["ir.model"].browse(values["model_id"]).model
+                model_id = values.get("model_id")
+                values["model"] = (
+                    self.env["ir.model"].browse(model_id).model if model_id else False
+                )
 
             values["type"] = "ir.actions.report"
             values["report_type"] = "jasper"
@@ -244,8 +241,6 @@ class ReportXml(models.Model):
         return super(ReportXml, self).write(values)
 
     def update(self):
-        if self.env.context is None:
-            self.env.context = {}
         for report in self:
             has_default = False
             # Browse attachments and store .jrxml and .properties
@@ -294,8 +289,9 @@ class ReportXml(models.Model):
         path = os.path.abspath(os.path.dirname(__file__))
         path += "/../custom_reports/%s" % name
 
+        content = self._binary_to_bytes(value)
         if os.path.isfile(path):  # check contents to be sure if need to be overwriten
-            hash_of_value = hashlib.sha256(base64.decodebytes(value)).hexdigest()
+            hash_of_value = hashlib.sha256(content).hexdigest()
             with open(path, "rb") as f:
                 text = f.read()
             hash_of_file = hashlib.sha256(text).hexdigest()
@@ -310,7 +306,7 @@ class ReportXml(models.Model):
         )
 
         with open(path, "wb+") as f:
-            f.write(base64.decodebytes(value))
+            f.write(content)
         path = "jasper_reports/custom_reports/%s" % name
         return path
 
@@ -364,95 +360,108 @@ class ReportXml(models.Model):
             "0": "Zero",
         }
         if isinstance(text, str):
-            if text[0] in num_char_dict:
-                text = text.replace(text[0], num_char_dict.get(text[0]))
+            if text and text[0] in num_char_dict:
+                text = "%s%s" % (num_char_dict.get(text[0]), text[1:])
             for src in src_chars_list:
                 text = text.replace(src, "_")
         return text
 
     @api.model
-    def generate_xml(self, pool, model_name, parent_node, document, depth, first_call):
-        if self.env.context is None:
-            self.env.context = {}
+    def _binary_to_bytes(self, value):
+        if not value:
+            return b""
+        if isinstance(value, str):
+            value = value.encode()
+        return base64.b64decode(value)
+
+    @api.model
+    def _sanitize_xml_tag(self, name):
+        name = self.unaccent(name or "")
+        name = name.replace(" ", "_")
+        name = re.sub(r"[^A-Za-z0-9_.-]", "_", name)
+        name = re.sub(r"_+", "_", name).strip("_")
+        if not name:
+            return "field"
+        if not re.match(r"[A-Za-z_]", name[0]):
+            return "n_%s" % name
+        return name
+
+    @api.model
+    def _get_example_value(self, field_name, field_type):
+        if field_type in ("float", "monetary"):
+            return "12345.67"
+        if field_type == "integer":
+            return "12345"
+        if field_type == "date":
+            return "2009-12-31"
+        if field_type == "datetime":
+            return "2009-12-31 12:34:56"
+        if field_type == "boolean":
+            return "True"
+        return field_name
+
+    @api.model
+    def generate_xml(self, env, model_name, parent_node, document, depth, first_call):
+        try:
+            model = env[model_name]
+        except KeyError:
+            return
 
         # First of all add "id" field
         field_node = document.createElement("id")
         parent_node.appendChild(field_node)
         value_node = document.createTextNode("1")
         field_node.appendChild(value_node)
-        language = self.env.context.get("lang")
-        if language == "en_US":
-            language = False
 
         # Then add all fields in alphabetical order
-        model_fields = pool[model_name]._fields
-        keys_list = model_fields.keys()
+        model_fields = model._fields
+        keys_list = sorted(model_fields.keys())
 
-        # Remove duplicates because model may have fields with the
-        # same name as it's parent
-        keys_list = sorted(keys_list)
+        language = self.env.context.get("lang")
+        fields_with_labels = {}
+        if language and language != "en_US":
+            fields_with_labels = model.with_context(lang=language).fields_get(
+                allfields=keys_list, attributes=["string"]
+            )
 
-        for field in keys_list:
-            name = False
-            if language:
-                # Obtain field string for user's language.
-                name = self.env["ir.translation"]._get_source(
-                    "{model},{field}".format(model=model_name, field=field),
-                    "field",
-                    language,
-                )
-            if not name:
-                # If there's not description in user's language,
-                # use default (english) one.
-                name = model_fields[field].string
-            if name:
-                self.unaccent(name)
-            # After unaccent the name might result in an empty string
-            if name:
-                name = "%s-%s" % (self.unaccent(name), field)
-            else:
-                name = field
-            field_node = document.createElement(name.replace(" ", "_"))
-
+        for field_name in keys_list:
+            label = fields_with_labels.get(field_name, {}).get("string")
+            if not label:
+                label = model_fields[field_name].string or field_name
+            field_node = document.createElement(
+                self._sanitize_xml_tag("%s-%s" % (label, field_name))
+            )
             parent_node.appendChild(field_node)
-            field_type = model_fields[field].type
+            field_type = model_fields[field_name].type
 
             if field_type in ("many2one", "one2many", "many2many"):
                 if depth <= 1:
                     continue
-                comodel_name = model_fields[field].comodel_name
+                comodel_name = model_fields[field_name].comodel_name
+                if not comodel_name:
+                    continue
                 self.generate_xml(
-                    pool, comodel_name, field_node, document, depth - 1, False
+                    env, comodel_name, field_node, document, depth - 1, False
                 )
                 continue
 
-            value = field
-            if field_type == "float":
-                value = "12345.67"
-            elif field_type == "integer":
-                value = "12345"
-            elif field_type == "date":
-                value = "2009-12-31 00:00:00"
-            elif field_type == "time":
-                value = "12:34:56"
-            elif field_type == "datetime":
-                value = "2009-12-31 12:34:56"
+            value = self._get_example_value(field_name, field_type)
             value_node = document.createTextNode(value)
             field_node.appendChild(value_node)
 
-        if depth > 1 and model_name != "Attachments":
+        if depth > 1 and model_name != "ir.attachment":
             # Create relation with attachments
             field_node = document.createElement("Attachments-Attachments")
             parent_node.appendChild(field_node)
             self.generate_xml(
-                pool, "ir.attachment", field_node, document, depth - 1, False
+                env, "ir.attachment", field_node, document, depth - 1, False
             )
 
         if first_call:
             # Create relation with user
             field_node = document.createElement("User-User")
             parent_node.appendChild(field_node)
-            self.generate_xml(pool, "res.users", field_node, document, depth - 1, False)
+            self.generate_xml(env, "res.users", field_node, document, depth - 1, False)
 
             # Create special entries
             field_node = document.createElement("Special-Special")
@@ -475,8 +484,17 @@ class ReportXml(models.Model):
 
     @api.model
     def create_xml(self, model, depth):
-        if self.env.context is None:
-            self.env.context = {}
+        try:
+            depth = int(depth)
+        except (TypeError, ValueError):
+            depth = 1
+        depth = max(depth, 1)
+
+        try:
+            self.env[model]
+        except KeyError as error:
+            raise UserError(_("Model %s is not available.") % model) from error
+
         document = getDOMImplementation().createDocument(None, "data", None)
         top_node = document.documentElement
         record_node = document.createElement("record")
